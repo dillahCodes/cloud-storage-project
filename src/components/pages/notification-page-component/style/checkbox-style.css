@@ -1,0 +1,13 @@
+.message-checkbox {
+  transform: scale(1.3);
+  margin: 0 0 0 auto;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #ff5277;
+  border-color: #ffb6c1;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: #fff;
+}
