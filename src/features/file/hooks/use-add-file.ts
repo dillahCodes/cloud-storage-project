@@ -1,11 +1,12 @@
-import { SubFolderGetData } from "@/features/folder/folder";
-import { auth, db, storage } from "@/firebase/firebase-serices";
+import { ParentFolderData, SubFolderGetData } from "@/features/folder/folder";
+import { auth, db, storage } from "@/firebase/firebase-services";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { ref, StorageError, uploadBytesResumable, UploadMetadata, UploadTask, UploadTaskSnapshot } from "firebase/storage";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useUploadTaskManager } from "../slice/upload-task-manager";
 import useFileUploading from "./use-file-uploading";
+import useAddActivityCreatedFile from "@/features/folder/hooks/use-add-activity-created-file";
 
 /** Props required for handleUploadProgress function */
 interface HandleUploadProgressProps {
@@ -82,7 +83,7 @@ const handleUploadError = ({ error, updateFileUploadingStatus, fileId }: HandleU
 
 /** Props for useAddFile hook */
 interface UseAddFileProps {
-  parent_folder_id?: string;
+  parentFolderData: ParentFolderData;
 }
 
 /**
@@ -90,7 +91,9 @@ interface UseAddFileProps {
  * @param parent_folder_id - Optional parent folder ID if uploading to a sub-folder.
  * @returns Object with handleSetAndUploadFile function and upload status.
  */
-const useAddFile = ({ parent_folder_id }: UseAddFileProps) => {
+const useAddFile = ({ parentFolderData }: UseAddFileProps) => {
+  const { handleAddActivityCreatedFile } = useAddActivityCreatedFile();
+
   const { addUploadTask } = useUploadTaskManager();
   const { addFileUploading, updateFileUploadingProgress, updateFileUploadingStatus } = useFileUploading();
   const [addFileStatus, setAddFileStatus] = useState<FileResponseStatus>({
@@ -98,6 +101,8 @@ const useAddFile = ({ parent_folder_id }: UseAddFileProps) => {
     status: "idle",
     type: null,
   });
+
+  const parent_folder_id = useMemo(() => parentFolderData.parentFolderData?.folder_id, [parentFolderData]);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -221,6 +226,25 @@ const useAddFile = ({ parent_folder_id }: UseAddFileProps) => {
       });
       if (isUploaded) {
         await setDoc(doc(db, "files", fileId), fileData);
+        handleAddActivityCreatedFile({
+          type: "create-folder-activity",
+          activityId: uuidv4(),
+
+          fileName: selectedFile.name,
+          fileType: selectedFile.type,
+
+          folderId: "",
+          folderName: "",
+
+          parentFolderId: parentFolderData.folder_id,
+          parentFolderName: parentFolderData.folder_name,
+
+          rootFolderId: parentFolderData.root_folder_id,
+          rootFolderOwnerUserId: parentFolderData.root_folder_user_id,
+
+          activityByUserId: currentUser.uid,
+          activityDate: serverTimestamp(),
+        });
         setAddFileStatus({ status: "succeeded", message: "File uploaded successfully!", type: "success" });
       }
     } catch (error) {

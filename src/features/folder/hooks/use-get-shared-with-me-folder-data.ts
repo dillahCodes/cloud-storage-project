@@ -1,16 +1,5 @@
-import { auth, db } from "@/firebase/firebase-serices";
-import {
-  collection,
-  deleteDoc,
-  doc,
-  DocumentData,
-  getDoc,
-  getDocs,
-  orderBy,
-  query,
-  QueryDocumentSnapshot,
-  where,
-} from "firebase/firestore";
+import { auth, db } from "@/firebase/firebase-services";
+import { collection, deleteDoc, doc, DocumentData, getDoc, getDocs, orderBy, query, QueryDocumentSnapshot, where } from "firebase/firestore";
 import { useCallback, useEffect } from "react";
 import { RootFolderGetData, SharedWithMeData, SubFolderGetData } from "../folder";
 import useCurrentFolderSetState from "./use-current-folder-setstate";

@@ -1,4 +1,4 @@
-import { auth, db } from "@/firebase/firebase-serices";
+import { auth, db } from "@/firebase/firebase-services";
 import { collection, deleteDoc, getDocs, query, where } from "firebase/firestore";
 import { useCallback, useEffect } from "react";
 

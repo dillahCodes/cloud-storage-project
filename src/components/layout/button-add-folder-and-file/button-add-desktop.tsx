@@ -25,7 +25,7 @@ const ButtonAddDesktop: React.FC<ButtonWithModalProps> = ({ showText }) => {
   const { folderName, handleSetFolderName, handleConfirmAddFolder, addFolderStatus } = useAddFolder();
   const { floatingNotificationContext } = useShowFloatingNotification(addFolderStatus, "bottomRight", true);
 
-  const { handleSetAndUploadFile } = useAddFile({ parent_folder_id: folderId });
+  const { handleSetAndUploadFile } = useAddFile({ parentFolderData: parentFolderState });
 
   const [modalStatus, setModalStatus] = useState<ModalStatus>(null);
   const [modalOpen, setModalOpen] = useState(false);

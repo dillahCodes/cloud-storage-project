@@ -1,4 +1,4 @@
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { User } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { UserDataDb } from "./auth";

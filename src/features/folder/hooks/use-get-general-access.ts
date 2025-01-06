@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { GeneralAccessData, GeneralAccessDataSerialized } from "../folder-collaborator";
 import { doc, DocumentData, DocumentReference, onSnapshot } from "firebase/firestore";
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 
 interface UserGetGeneralAccessParams {
   folderId: string | undefined;
@@ -11,20 +11,14 @@ interface UserGetGeneralAccessParams {
 export type GenerealAccessStatusFetch = "loading" | "succeeded" | "failed" | "idle";
 
 const useGetGeneralAccess = ({ folderId, shouldFetch }: UserGetGeneralAccessParams) => {
-  const [generalAccessDataState, setGeneralAccessDataState] = useState<GeneralAccessDataSerialized | null>(
-    null
-  );
+  const [generalAccessDataState, setGeneralAccessDataState] = useState<GeneralAccessDataSerialized | null>(null);
   const [fetchStatus, setFetchStatus] = useState<GenerealAccessStatusFetch>("idle");
 
   useEffect(() => {
     if (!folderId || !shouldFetch) return;
 
     const generalAccessDataRef = handleBuildQuery(folderId);
-    const unsubscribe = handleSubscribeToGeneralAccess(
-      generalAccessDataRef,
-      setGeneralAccessDataState,
-      setFetchStatus
-    );
+    const unsubscribe = handleSubscribeToGeneralAccess(generalAccessDataRef, setGeneralAccessDataState, setFetchStatus);
     return () => unsubscribe();
   }, [folderId, shouldFetch]);
 
@@ -62,10 +56,7 @@ const handleSubscribeToGeneralAccess = (
       setFetchStatus("succeeded");
     },
     (err) => {
-      console.error(
-        "Error getting general access data:",
-        err instanceof Error ? err.message : "An unknown error occurred."
-      );
+      console.error("Error getting general access data:", err instanceof Error ? err.message : "An unknown error occurred.");
       setFetchStatus("failed");
     },
     () => setFetchStatus("idle")
@@ -74,9 +65,7 @@ const handleSubscribeToGeneralAccess = (
   return unsubscribe;
 };
 
-const handleSerializeGeneralAccessData = (
-  generalAccessData: GeneralAccessData
-): GeneralAccessDataSerialized => {
+const handleSerializeGeneralAccessData = (generalAccessData: GeneralAccessData): GeneralAccessDataSerialized => {
   const generalAccessDataSerialized: GeneralAccessDataSerialized = {
     ...generalAccessData,
     createAt: JSON.parse(JSON.stringify(generalAccessData.createAt)),

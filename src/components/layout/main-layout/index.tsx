@@ -1,21 +1,31 @@
-import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
-import React, { useMemo } from "react";
-import MobileMainLayout from "./mobile-main-layout";
-import DesktopMainLayout from "./desktop-main-layout";
 import useFolderPermissionState from "@/features/folder/hooks/use-folder-permission-state";
 import useHandleFolderAccessModal from "@/features/folder/hooks/use-handle-folder-access-modal";
-import { Modal, Typography } from "antd";
+import { dekstopMoveSelector } from "@/features/move-folder-or-file/slice/dekstop-move-slice";
+import { mobileMoveSelector } from "@/features/move-folder-or-file/slice/mobile-move-slice";
+import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
 import Alert from "@components/ui/alert";
+import { Modal, Typography } from "antd";
+import React, { useMemo } from "react";
+import { useSelector } from "react-redux";
+import { DektopMainLayoutWithOverlayLoading } from "./desktop-main-layout";
+import { MobileMainLayoutWithOverlayLoading } from "./mobile-main-layout";
 
 export interface MainLayoutProps {
   children: React.ReactNode;
   showAddButton: boolean;
+  showPasteButton: boolean;
   withFooter?: boolean;
   withBreadcrumb?: boolean;
 }
 
 const { Text } = Typography;
-const MainLayout: React.FC<MainLayoutProps> = ({ children, showAddButton, withFooter, withBreadcrumb = true }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children, showAddButton, withFooter, withBreadcrumb = true, showPasteButton }) => {
+  const moveMobileSelector = useSelector(mobileMoveSelector);
+  const isMobileMoveLoading = useMemo(() => moveMobileSelector.moveStatus === "loading", [moveMobileSelector.moveStatus]);
+
+  const moveDektopSelector = useSelector(dekstopMoveSelector);
+  const isDektopMoveLoading = useMemo(() => moveDektopSelector.dekstopMoveStatus === "loading", [moveDektopSelector.dekstopMoveStatus]);
+
   const { statusFetch } = useFolderPermissionState();
   const isGetPermissionSuccess = useMemo(() => {
     return statusFetch.CollaboratorsFetchStatus === "succeeded" && statusFetch.GeneralAccessFetchStatus === "succeeded";
@@ -25,7 +35,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, showAddButton, withFo
 
   const { isMobileDevice } = useGetClientScreenWidth();
   return isMobileDevice ? (
-    <MobileMainLayout showAddButton={showAddButton} withBreadcrumb={withBreadcrumb} withFooter={withFooter}>
+    <MobileMainLayoutWithOverlayLoading
+      opacity={0.7}
+      showLoading={isMobileMoveLoading}
+      zIndex={40}
+      showAddButton={showAddButton}
+      withBreadcrumb={withBreadcrumb}
+      withFooter={withFooter}
+      showPasteButton={showPasteButton}
+    >
       <Modal
         footer={null}
         closeIcon={null}
@@ -48,9 +66,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, showAddButton, withFo
       </Modal>
 
       {children}
-    </MobileMainLayout>
+    </MobileMainLayoutWithOverlayLoading>
   ) : (
-    <DesktopMainLayout withBreadcrumb={withBreadcrumb} withFooter={withFooter}>
+    <DektopMainLayoutWithOverlayLoading
+      opacity={0.7}
+      showLoading={isDektopMoveLoading}
+      zIndex={40}
+      withBreadcrumb={withBreadcrumb}
+      withFooter={withFooter}
+    >
       <Modal
         footer={null}
         closeIcon={null}
@@ -73,7 +97,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, showAddButton, withFo
       </Modal>
 
       {children}
-    </DesktopMainLayout>
+    </DektopMainLayoutWithOverlayLoading>
   );
 };
 

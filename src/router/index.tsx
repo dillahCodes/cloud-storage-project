@@ -16,6 +16,8 @@ import { history } from "@/store/store";
 import { Route, Routes } from "react-router-dom";
 import { HistoryRouter as Router } from "redux-first-history/rr6";
 import Error404Page from "./error404-page";
+import ActivityFolderPage from "@/pages/activity-folder-page";
+import MoveFolderOrFilePage from "@/pages/move-folder-or-file-page";
 
 const ErrorBoundary: React.FC = () => {
   return <div>Something went wrong. Please try again later.</div>;
@@ -37,6 +39,8 @@ const Routers: React.FC = () => {
           <Route path="starred" element={<StarredPage />} />
           <Route path="folders/:folderId" element={<NestedFolderPage />} />
           <Route path="folder/details/:folderId" element={<DetailsFolderPage />} />
+          <Route path="folder/activity/:folderId" element={<ActivityFolderPage />} />
+          <Route path="folder/move" element={<MoveFolderOrFilePage />} />
         </Route>
 
         <Route path="/login" element={<LoginPage />} />

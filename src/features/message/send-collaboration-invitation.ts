@@ -1,4 +1,4 @@
-import { auth, db } from "@/firebase/firebase-serices";
+import { auth, db } from "@/firebase/firebase-services";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import { CreateUserMessage } from "./message";

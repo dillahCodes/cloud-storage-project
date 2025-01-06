@@ -1,6 +1,6 @@
 import { User } from "firebase/auth";
 import filteredUserData from "./filtered-user-data";
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { doc, setDoc } from "firebase/firestore";
 
 const createUserDataDb = async (currentUser: User) => {

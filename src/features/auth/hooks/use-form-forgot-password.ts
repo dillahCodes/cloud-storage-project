@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AuthResponse } from "../auth";
 import createAuthResponse from "../create-auth-res";
 import handleAuthError from "../handle-auth-error";
-import { auth } from "@/firebase/firebase-serices";
+import { auth } from "@/firebase/firebase-services";
 import { sendPasswordResetEmail } from "firebase/auth";
 
 interface ForgotPassword extends AuthResponse {

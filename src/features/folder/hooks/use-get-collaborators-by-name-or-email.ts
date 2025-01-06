@@ -1,5 +1,5 @@
 import { UserDataDb } from "@/features/auth/auth";
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
 import { debounce } from "lodash";
 import { useCallback, useEffect, useState } from "react";

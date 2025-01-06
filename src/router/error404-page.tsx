@@ -6,9 +6,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 const Error404Page: React.FC = () => {
   const location = useLocation();
   const message = location.state?.message || "An unknown error occurred.";
+
   const navigate = useNavigate();
 
   const handleGoBack = () => navigate(-1);
+  const handleBackToHome = () => navigate("/storage/my-storage");
 
   return (
     <Layout className="min-h-screen flex items-center justify-center p-3">
@@ -18,9 +20,15 @@ const Error404Page: React.FC = () => {
           The Request Url The requested URL <span className="font-bold">{message}</span> was not found on this server.
           <span className="font-bold"> That’s all we know.</span>
         </Typography.Text>
-        <Button type="primary" size="large" className="text-black font-archivo capitalize" onClick={handleGoBack}>
-          Back to Previous
-        </Button>
+        <Flex align="center" gap="middle">
+          <Button type="primary" size="large" className="text-black font-archivo capitalize" onClick={handleGoBack}>
+            Back to Previous
+          </Button>
+
+          <Button type="primary" size="large" className="text-black font-archivo capitalize" onClick={handleBackToHome}>
+            Back to Home
+          </Button>
+        </Flex>
       </Flex>
     </Layout>
   );

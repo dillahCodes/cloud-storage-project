@@ -1,4 +1,4 @@
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { doc, DocumentData, DocumentSnapshot, getDoc } from "firebase/firestore";
 import { RootFolderGetData, SubFolderGetData } from "../folder";
 import { useCallback } from "react";

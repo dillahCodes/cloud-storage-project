@@ -1,4 +1,4 @@
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { Collaborator } from "./folder-collaborator";
 import { doc, setDoc } from "firebase/firestore";
 

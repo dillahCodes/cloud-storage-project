@@ -1,4 +1,4 @@
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { collection, doc, DocumentData, getDocs, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { CollaboratorRole, CollaboratorSerialized } from "./folder-collaborator";
 
@@ -7,10 +7,7 @@ interface HandleTransferCollaboratorFolderOwnerParams {
   collaboratorId: string;
 }
 
-const handleTransferCollaboratorFolderOwner = async ({
-  collaboratorId,
-  folderId,
-}: HandleTransferCollaboratorFolderOwnerParams): Promise<void> => {
+const handleTransferCollaboratorFolderOwner = async ({ collaboratorId, folderId }: HandleTransferCollaboratorFolderOwnerParams): Promise<void> => {
   try {
     const currFolderOwner = (await handleGetFolderCollaboratorOwner(folderId)) as CollaboratorSerialized;
     if (currFolderOwner) {

@@ -146,8 +146,7 @@ const NestedFolderPageComponent: React.FC = () => {
   const { files, status: fileStatus } = useFilesState();
 
   const isLoading = useMemo(
-    () =>
-      fileStatus === "loading" || folderStatus === "loading" || fetchCollaboratorsUserDataStatus === "loading" || fetchStatus === "loading",
+    () => fileStatus === "loading" || folderStatus === "loading" || fetchCollaboratorsUserDataStatus === "loading" || fetchStatus === "loading",
     [fetchCollaboratorsUserDataStatus, fetchStatus, fileStatus, folderStatus]
   );
 
@@ -165,7 +164,7 @@ const NestedFolderPageComponent: React.FC = () => {
   );
 
   return (
-    <MainLayout showAddButton>
+    <MainLayout showAddButton showPasteButton>
       {isLoading ? (
         <Layout className="h-screen w-full flex justify-center items-center">
           <Spin size="large" />

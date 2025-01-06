@@ -1,4 +1,4 @@
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { deleteDoc, doc } from "firebase/firestore";
 
 interface HandleRemoveCollaboratorParams {

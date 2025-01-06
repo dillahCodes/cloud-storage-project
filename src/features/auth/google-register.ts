@@ -1,4 +1,4 @@
-import { auth } from "@/firebase/firebase-serices";
+import { auth } from "@/firebase/firebase-services";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { AuthResponse } from "./auth";
 

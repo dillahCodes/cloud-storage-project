@@ -4,7 +4,7 @@ import useUser from "./use-user";
 import filteredUserData from "../filtered-user-data";
 import getUserDataInDb from "../get-user-data-in-db";
 import createUserDataDb from "../create-user-data-db";
-import { auth } from "@/firebase/firebase-serices";
+import { auth } from "@/firebase/firebase-services";
 import { FirebaseUserData, UserDataDb } from "../auth";
 
 interface HasUserDataChangedProps {

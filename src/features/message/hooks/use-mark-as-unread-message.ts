@@ -3,7 +3,7 @@ import { messageSelector, setMyMessageCount, setMyMessages } from "../slice/mess
 import { resetSelectedMessage, selectedMessageSelector } from "../slice/selected-message-slice";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { message } from "antd";
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { doc, updateDoc } from "firebase/firestore";
 
 const useMarkAsUnreadMessage = () => {

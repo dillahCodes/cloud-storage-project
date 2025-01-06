@@ -13,15 +13,16 @@ const useGetClientScreenWidth = (): UseGetClientScreenWidthReturn => {
   const [screenWidth, setScreenWidth] = useState<number>(Math.floor(window.innerWidth));
 
   const isDesktopDevice = useMediaQuery({
-    query: "(min-width: 1024px)",
-  });
-
-  const isMobileDevice = useMediaQuery({
-    query: "(max-width: 768px)",
+    minWidth: 1025,
   });
 
   const isTabletDevice = useMediaQuery({
-    query: "(max-width: 1024px)",
+    minWidth: 768,
+    maxWidth: 1024,
+  });
+
+  const isMobileDevice = useMediaQuery({
+    maxWidth: 767,
   });
 
   useEffect(() => {

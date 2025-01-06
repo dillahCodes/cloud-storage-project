@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { RootFolderGetData, SubFolderGetData } from "../folder";
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { doc, getDoc } from "firebase/firestore";
 
 const useGetFolderById = (folderId: string | null | undefined) => {

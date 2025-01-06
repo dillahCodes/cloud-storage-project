@@ -9,7 +9,9 @@ export type HeaderMobileType =
   | "trash"
   | "my profile"
   | "folders"
-  | "notification";
+  | "notification"
+  | "activity"
+  | "Select Destination";
 
 interface MobileHeaderTitleStateType {
   title: HeaderMobileType;

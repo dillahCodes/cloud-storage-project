@@ -6,6 +6,7 @@ import {
   DrawerState,
   openDesktopDrawerMenu,
   openDrawerMenu,
+  resetDrawerState,
   setDesktopDrawerFolderId,
   setDesktopDrawerTitle,
   toggleDesktopDrawerMenu,
@@ -36,7 +37,10 @@ const useDrawer = (): UseDrawerReturn => {
 
     openDrawerDesktop: () => dispatch(openDesktopDrawerMenu()),
     closeDrawerDesktop: () => dispatch(closeDesktopDrawerMenu()),
-    toggleDrawerDekstop: () => dispatch(toggleDesktopDrawerMenu()),
+    toggleDrawerDekstop: () => {
+      dispatch(toggleDesktopDrawerMenu());
+      drawerState.isDrawerMenuOpen && dispatch(resetDrawerState());
+    },
 
     setDrawerDesktopTitle: (title: DesktopDrawerTitleType) => dispatch(setDesktopDrawerTitle(title)),
     setDrawerDesktopFolderId: (id: string) => dispatch(setDesktopDrawerFolderId(id)),

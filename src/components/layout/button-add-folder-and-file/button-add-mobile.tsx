@@ -22,7 +22,7 @@ const ButtonAddMobile: React.FC = () => {
   const { folderName, handleSetFolderName, handleConfirmAddFolder, addFolderStatus } = useAddFolder();
   const { floatingNotificationContext } = useShowFloatingNotification(addFolderStatus, "bottomLeft", false);
 
-  const { handleSetAndUploadFile } = useAddFile({ parent_folder_id: folderId });
+  const { handleSetAndUploadFile } = useAddFile({ parentFolderData: parentFolderState });
 
   const [modalStatus, setModalStatus] = useState<ModalStatus>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -67,8 +67,12 @@ const ButtonAddMobile: React.FC = () => {
         onOpen={handleOnOpenModal}
         neoBrutalType="medium"
         size="large"
-        className="text-black font-archivo rounded-sm fixed bottom-4 right-4 z-10  bg-[#fff1ff] p-7"
-        icon={<RiFolderAddLine className="text-2xl" />}
+        className="text-black font-archivo rounded-sm border-2 bg-[#fff1ff] p-7"
+        icon={
+          <div className="animate-wiggle animate-infinite animate-duration-[5000ms] animate-ease-in animate-fill-both text-3xl">
+            <RiFolderAddLine className="text-3xl" />
+          </div>
+        }
       />
     </>
   );

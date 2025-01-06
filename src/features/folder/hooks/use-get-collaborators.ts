@@ -1,16 +1,5 @@
-import { db } from "@/firebase/firebase-serices";
-import {
-  collection,
-  doc,
-  DocumentData,
-  DocumentSnapshot,
-  getDoc,
-  onSnapshot,
-  Query,
-  query,
-  QueryDocumentSnapshot,
-  where,
-} from "firebase/firestore";
+import { db } from "@/firebase/firebase-services";
+import { collection, doc, DocumentData, DocumentSnapshot, getDoc, onSnapshot, Query, query, QueryDocumentSnapshot, where } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 import { Collaborator, CollaboratorRole, CollaboratorUserData } from "../folder-collaborator";
 
@@ -22,21 +11,14 @@ interface UseGetCollabolatorsParams {
 
 export type CollaboratorsStatusFetch = "loading" | "succeeded" | "failed" | "idle";
 
-export const useGetCollaborators = ({
-  folderId,
-  shouldFetch,
-  shoudFetchUserCollaboratorsData,
-}: UseGetCollabolatorsParams) => {
+export const useGetCollaborators = ({ folderId, shouldFetch, shoudFetchUserCollaboratorsData }: UseGetCollabolatorsParams) => {
   const [collaborators, setCollaborators] = useState<Collaborator[] | null>(null);
   const [fetchStatus, setFetchStatus] = useState<CollaboratorsStatusFetch>("idle");
 
   const [collaboratorsUserData, setCollaboratorsUserData] = useState<CollaboratorUserData[] | null>(null);
-  const [fetchCollaboratorsUserDataStatus, setFetchCollaboratorsUserDataStatus] =
-    useState<CollaboratorsStatusFetch>("idle");
+  const [fetchCollaboratorsUserDataStatus, setFetchCollaboratorsUserDataStatus] = useState<CollaboratorsStatusFetch>("idle");
 
-  const handleFetchCollaboratorsUserData = useCallback(async (): Promise<
-    (CollaboratorUserData | null)[] | null
-  > => {
+  const handleFetchCollaboratorsUserData = useCallback(async (): Promise<(CollaboratorUserData | null)[] | null> => {
     const collaboratorsUserId = handleGetAllCollaboratorsUserId(collaborators);
 
     if (!collaboratorsUserId || collaboratorsUserId.length === 0) return null;
@@ -69,10 +51,7 @@ export const useGetCollaborators = ({
         setFetchCollaboratorsUserDataStatus("succeeded");
       } catch (error) {
         setFetchCollaboratorsUserDataStatus("failed");
-        console.error(
-          "Error while fetching collaborators user data: ",
-          error instanceof Error ? error.message : error
-        );
+        console.error("Error while fetching collaborators user data: ", error instanceof Error ? error.message : error);
       }
     };
 
@@ -128,10 +107,7 @@ const handleGetAllCollaboratorsUserId = (collaborators: Collaborator[] | null) =
   return collaborators.map((collaborator) => collaborator.userId);
 };
 
-const handleSetUserData = (
-  data: DocumentSnapshot<DocumentData>,
-  collaborators: Collaborator[] | null
-): CollaboratorUserData | null => {
+const handleSetUserData = (data: DocumentSnapshot<DocumentData>, collaborators: Collaborator[] | null): CollaboratorUserData | null => {
   if (!data.exists()) return null;
 
   const userData = data.data();

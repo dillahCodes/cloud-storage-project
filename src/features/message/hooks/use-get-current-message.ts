@@ -1,5 +1,5 @@
 import { UserDataDb } from "@/features/auth/auth";
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { message } from "antd";
 import { doc, getDoc } from "firebase/firestore";
 import { useCallback, useEffect } from "react";
@@ -28,9 +28,7 @@ const useGetCurrentMessage = ({ id, shouldFetch }: UseGetCurrentMessageParams) =
    * Helper to validate
    */
   const createValidation = useCallback(() => {
-    const validations: ValidationsGetCurrentMessage[] = [
-      { condition: !id, message: "Message ID is required.", key: "message-get-required-id" },
-    ];
+    const validations: ValidationsGetCurrentMessage[] = [{ condition: !id, message: "Message ID is required.", key: "message-get-required-id" }];
 
     return validations.find((validation) => validation.condition) || null;
   }, [id]);

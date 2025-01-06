@@ -1,6 +1,6 @@
 import { CreateUserMessage } from "@/features/message/message";
 import handleSerializeMessage from "@/features/message/serialize-message-data";
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { doc, getDoc } from "firebase/firestore";
 import { useCallback, useEffect, useMemo } from "react";
 import useBreadcrumbSetState from "./use-breadcrumb-setstate";

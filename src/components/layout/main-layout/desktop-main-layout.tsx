@@ -1,9 +1,13 @@
+import useBreadcrumbState from "@/features/breadcrumb/hooks/use-breadcrumb-state";
 import useFileUploading from "@/features/file/hooks/use-file-uploading";
 import useDrawer from "@/hooks/use-drawer";
+import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
 import { themeColors } from "@/theme/antd-theme";
-import { Layout } from "antd";
+import { Flex, Layout } from "antd";
 import { Footer } from "antd/es/layout/layout";
+import classNames from "classnames";
 import { MainLayoutProps } from ".";
+import Breadcrumb from "../breadcrumb/breadcrumb";
 import ButtonUploadStatusModal from "../button-upload-status/buttton-upload-status-modal";
 import DesktopDrawer from "../drawer/dekstop-drawer";
 import DesktopDrawerActivity from "../drawer/desktop-drawer-activity";
@@ -11,14 +15,11 @@ import DesktopDrawerNotification from "../drawer/desktop-drawer-notification";
 import FolderDetails from "../folder/folder-details";
 import DekstopHeader from "../header/desktop-header";
 import DesktopSider from "../sider/desktop-sider";
-import useBreadcrumbState from "@/features/breadcrumb/hooks/use-breadcrumb-state";
-import Breadcrumb from "../breadcrumb/breadcrumb";
+import DektopMoveModal from "../modal/dektop-move-modal";
+import withLoadingOverlay from "@components/hoc/with-loading-overlay";
 
-const DesktopMainLayout: React.FC<Omit<MainLayoutProps, "showAddButton">> = ({
-  children,
-  withFooter = true,
-  withBreadcrumb,
-}) => {
+const DesktopMainLayout: React.FC<Omit<MainLayoutProps, "showAddButton" | "showPasteButton">> = ({ children, withFooter = true, withBreadcrumb }) => {
+  const { isTabletDevice, isDesktopDevice } = useGetClientScreenWidth();
   const { fileUploadingState } = useFileUploading();
   const { drawerState } = useDrawer();
   const { items } = useBreadcrumbState();
@@ -26,6 +27,7 @@ const DesktopMainLayout: React.FC<Omit<MainLayoutProps, "showAddButton">> = ({
   return (
     <Layout className="max-h-screen">
       <DesktopSider />
+      <DektopMoveModal />
       <DesktopDrawer>
         {drawerState.desktopDrawerTitle === "notification" && <DesktopDrawerNotification />}
         {drawerState.desktopDrawerTitle === "activity" && <DesktopDrawerActivity />}
@@ -41,7 +43,16 @@ const DesktopMainLayout: React.FC<Omit<MainLayoutProps, "showAddButton">> = ({
               </div>
             )}
             <div className="min-h-screen" id="container-main-layout">
-              {fileUploadingState.fileUploadingList.length > 0 && <ButtonUploadStatusModal />}
+              <Flex
+                vertical
+                gap="middle"
+                className={classNames("fixed  z-10", {
+                  "bottom-5 right-5": isTabletDevice,
+                  "bottom-10 right-10": isDesktopDevice,
+                })}
+              >
+                {fileUploadingState.fileUploadingList.length > 0 && <ButtonUploadStatusModal />}
+              </Flex>
 
               {children}
             </div>
@@ -58,3 +69,4 @@ const DesktopMainLayout: React.FC<Omit<MainLayoutProps, "showAddButton">> = ({
 };
 
 export default DesktopMainLayout;
+export const DektopMainLayoutWithOverlayLoading = withLoadingOverlay(DesktopMainLayout);

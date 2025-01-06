@@ -1,4 +1,4 @@
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { doc, getDoc } from "firebase/firestore";
 import { SubFolderGetData } from "./folder";
 

@@ -1,4 +1,4 @@
-import { auth, db } from "@/firebase/firebase-serices";
+import { auth, db } from "@/firebase/firebase-services";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { useCallback, useEffect, useRef } from "react";
 import { SharedWithMeData } from "../folder";

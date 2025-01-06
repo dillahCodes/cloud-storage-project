@@ -1,4 +1,4 @@
-import { auth } from "@/firebase/firebase-serices";
+import { auth } from "@/firebase/firebase-services";
 import { updateProfile } from "firebase/auth";
 import { useState } from "react";
 import { ChangeUserDataStatusProps } from "../auth";
@@ -8,11 +8,7 @@ interface ValidationChangeName extends Pick<ChangeUserDataStatusProps, "type"> {
   check: boolean;
   message: string;
 }
-const validationUserNameChane = (
-  nameState: string,
-  statusState: (props: ChangeUserDataStatusProps) => void,
-  userName: string
-) => {
+const validationUserNameChane = (nameState: string, statusState: (props: ChangeUserDataStatusProps) => void, userName: string) => {
   // if (userName) {
   const validations: ValidationChangeName[] = [
     {

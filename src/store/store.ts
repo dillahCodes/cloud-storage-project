@@ -1,8 +1,20 @@
 import { authSlice } from "@/features/auth/slice/user-slice";
+import { breadcrumbSlice } from "@/features/breadcrumb/slice/breadcrumb-slice";
 import { fileSlice } from "@/features/file/slice/file-slice";
+import { fileSortingTypeSlice } from "@/features/file/slice/file-sorting-type-slice";
 import { fileUploadingSlice } from "@/features/file/slice/file-uploading-slice";
+import { mappingFileTypeSlice } from "@/features/file/slice/mapping-file-type-slice";
+import { currentFoldersSlice } from "@/features/folder/slice/current-folders-slice";
+import { folderActivitySlice } from "@/features/folder/slice/folder-activity-slice";
 import { folderPermissionSlice } from "@/features/folder/slice/folder-permission-slice";
+import { folderSortingTypeSlice } from "@/features/folder/slice/folder-sorting-type";
+import { mappingFolderTypeSlice } from "@/features/folder/slice/mapping-folder-type-slice";
+import { modalAddSelectedCollaboratorsSlice } from "@/features/folder/slice/modal-add-selected-collaborators";
+import { modalManageAccessContentSlice } from "@/features/folder/slice/modal-manage-access-content-slice";
 import { parentFolderSlice } from "@/features/folder/slice/parent-folder-slice";
+import { currentMessageSlice } from "@/features/message/slice/current-message-slice";
+import { messageSlice } from "@/features/message/slice/message-slice";
+import { selectedMessageSlice } from "@/features/message/slice/selected-message-slice";
 import { configureStore } from "@reduxjs/toolkit";
 import { createBrowserHistory } from "history";
 import { createReduxHistoryContext } from "redux-first-history";
@@ -11,17 +23,9 @@ import locationMiddleware from "./middleware/location-middleware";
 import { drawerSlice } from "./slice/drawer-slice";
 import { mobileHeaderTitleSlice } from "./slice/mobile-header-title-slice";
 import { siderSlice } from "./slice/sider-slice";
-import { breadcrumbSlice } from "@/features/breadcrumb/slice/breadcrumb-slice";
-import { currentFoldersSlice } from "@/features/folder/slice/current-folders-slice";
-import { mappingFolderTypeSlice } from "@/features/folder/slice/mapping-folder-type-slice";
-import { mappingFileTypeSlice } from "@/features/file/slice/mapping-file-type-slice";
-import { folderSortingTypeSlice } from "@/features/folder/slice/folder-sorting-type";
-import { fileSortingTypeSlice } from "@/features/file/slice/file-sorting-type-slice";
-import { modalManageAccessContentSlice } from "@/features/folder/slice/modal-manage-access-content-slice";
-import { modalAddSelectedCollaboratorsSlice } from "@/features/folder/slice/modal-add-selected-collaborators";
-import { messageSlice } from "@/features/message/slice/message-slice";
-import { selectedMessageSlice } from "@/features/message/slice/selected-message-slice";
-import { currentMessageSlice } from "@/features/message/slice/current-message-slice";
+import { mobileMoveSlice } from "@/features/move-folder-or-file/slice/mobile-move-slice";
+import { moveFoldersAndFilesDataSlice } from "@/features/move-folder-or-file/slice/move-folders-and-files-data-slice";
+import { dekstopMoveSlice } from "@/features/move-folder-or-file/slice/dekstop-move-slice";
 
 const { createReduxHistory, routerMiddleware, routerReducer } = createReduxHistoryContext({
   history: createBrowserHistory(),
@@ -48,6 +52,12 @@ export const store = configureStore({
     parentFolder: parentFolderSlice.reducer,
     file: fileSlice.reducer,
     fileUploading: fileUploadingSlice.reducer,
+    folderActivity: folderActivitySlice.reducer,
+
+    // move folder or file
+    mobileMove: mobileMoveSlice.reducer,
+    moveFoldersAndFilesData: moveFoldersAndFilesDataSlice.reducer,
+    dekstopMove: dekstopMoveSlice.reducer,
 
     // mapping type
     mappingFolderType: mappingFolderTypeSlice.reducer,

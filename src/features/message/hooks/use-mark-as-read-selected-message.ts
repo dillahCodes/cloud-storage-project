@@ -1,4 +1,4 @@
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { message } from "antd";
 import { doc, updateDoc } from "firebase/firestore";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -35,9 +35,7 @@ const useMarkAsReadSelectedMessage = () => {
    */
   useEffect(() => {
     const handleSetCanMarkAsRead = () => {
-      const isSelectedMessageHaveUnreadMessage = messages.some(
-        (message) => selectedMessagesId.includes(message.messageId) && !message.isRead
-      );
+      const isSelectedMessageHaveUnreadMessage = messages.some((message) => selectedMessagesId.includes(message.messageId) && !message.isRead);
       setCanMarkAsRead(!isSelectedMessageHaveUnreadMessage);
     };
 

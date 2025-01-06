@@ -28,8 +28,9 @@ const useDetectLocation = () => {
   const handleDetectIsNotFoundLocation = (path: string): boolean => path === "/not-found";
 
   const isDetailsFolderLocation = location.pathname === "/storage/folder/details/:folderId";
-  const handleDetectIsDetailsFolderLocation = (path: string, folderId: string): boolean =>
-    path === `/storage/folder/details/${folderId}`;
+  const handleDetectIsDetailsFolderLocation = (path: string, folderId: string): boolean => path === `/storage/folder/details/${folderId}`;
+
+  const isMoveFolderOrFileLocation = location.pathname === "/storage/folder/move";
 
   const handleDetectIsPathEqual = (path: string): boolean => location.pathname === path;
 
@@ -53,6 +54,7 @@ const useDetectLocation = () => {
     handleDetectIsNotFoundLocation,
     isDetailsFolderLocation,
     handleDetectIsDetailsFolderLocation,
+    isMoveFolderOrFileLocation,
   };
 };
 

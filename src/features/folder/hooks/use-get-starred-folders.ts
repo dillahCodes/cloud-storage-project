@@ -1,4 +1,4 @@
-import { auth, db } from "@/firebase/firebase-serices";
+import { auth, db } from "@/firebase/firebase-services";
 import { RootFolderGetData, StarredFolderData, StarredFolderDataSerialized, SubFolderGetData } from "../folder";
 import { useCallback, useEffect } from "react";
 import { collection, deleteDoc, doc, DocumentData, getDoc, getDocs, orderBy, query, Query, where } from "firebase/firestore";

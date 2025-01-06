@@ -1,5 +1,5 @@
 import { SubFolderGetData } from "@/features/folder/folder";
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { doc, getDoc } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -9,10 +9,7 @@ interface UseSubFolderAutoGetBreadcrumsProps {
   shouldFetch: boolean;
 }
 
-const useSubFolderAutoGetBreadcrums = ({
-  currentFolderId,
-  shouldFetch,
-}: UseSubFolderAutoGetBreadcrumsProps) => {
+const useSubFolderAutoGetBreadcrums = ({ currentFolderId, shouldFetch }: UseSubFolderAutoGetBreadcrumsProps) => {
   const { "0": urlSearchParams } = useSearchParams();
   const [params] = useState(urlSearchParams.get("st"));
 
@@ -61,10 +58,7 @@ const useSubFolderAutoGetBreadcrums = ({
     } catch (error) {
       setFetchStatus("failed");
 
-      console.error(
-        "Error fetching breadcrumbs:",
-        error instanceof Error ? error.message : "An unknown error occurred."
-      );
+      console.error("Error fetching breadcrumbs:", error instanceof Error ? error.message : "An unknown error occurred.");
     }
   }, [currentFolderId, handleFetchFolderByIdRecursively]);
 

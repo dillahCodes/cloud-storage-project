@@ -1,4 +1,4 @@
-import { auth, db } from "@/firebase/firebase-serices";
+import { auth, db } from "@/firebase/firebase-services";
 import { collection, DocumentData, getDocs, orderBy, Query, query, where } from "firebase/firestore";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";

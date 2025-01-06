@@ -9,16 +9,13 @@ import { Flex, Layout, Spin, Typography } from "antd";
 import { useSelector } from "react-redux";
 import MessageMapping from "./message-mapping";
 import MessageOptionsButton from "./message-options-button";
-import useBreadcrumbState from "@/features/breadcrumb/hooks/use-breadcrumb-state";
 
 const { Text } = Typography;
 const NotificationPageComponent: React.FC = () => {
   useMobileHeaderTitle("notification");
 
-  const { items } = useBreadcrumbState();
-
   useResetAllBreadcrumbItems({
-    shouldReset: items.length > 1,
+    shouldReset: true,
     addFirstBreadcrumbItem: {
       label: "notification",
       path: "/storage/notification",
@@ -52,7 +49,7 @@ const NotificationPageComponent: React.FC = () => {
     );
 
   return (
-    <MainLayout showAddButton={false}>
+    <MainLayout showAddButton={false} showPasteButton={false}>
       <Flex className="max-w-screen-lg mx-auto p-3" vertical gap="middle">
         {/*
          * notification options

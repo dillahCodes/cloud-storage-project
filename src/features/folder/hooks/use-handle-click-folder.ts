@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { RootFolderGetData, SubFolderGetData } from "../folder";
 import useBreadcrumbSetState from "@/features/breadcrumb/hooks/use-breadcrumb-setstate";
 import useDetectLocation from "@/hooks/use-detect-location";
-import { auth } from "@/firebase/firebase-serices";
+import { auth } from "@/firebase/firebase-services";
 
 interface UseHandleClickFolderProps {
   isSubFolder: boolean;

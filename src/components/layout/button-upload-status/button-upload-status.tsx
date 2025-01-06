@@ -11,15 +11,10 @@ interface ButtonUploadStatusProps extends React.HTMLAttributes<HTMLDivElement> {
 
 // ButtonUploadStatus component
 const ButtonUploadStatus: React.FC<ButtonUploadStatusProps> = ({ notifCount, ...props }) => {
-  const { isDesktopDevice, isTabletDevice } = useGetClientScreenWidth();
-
   return (
     <div
       {...props}
-      className={classNames("fixed bottom-24 right-4 cursor-pointer z-10 border-2 border-black rounded-sm max-w-[57.6px]", {
-        "right-8": isDesktopDevice,
-        "bottom-16": isTabletDevice,
-      })}
+      className={classNames(" cursor-pointer z-10 border-2 border-black rounded-sm max-w-[57.6px]")}
       style={{ ...neoBrutalBorderVariants.medium, background: themeColors.primary300 }}
     >
       <div className="w-full h-full relative p-4">

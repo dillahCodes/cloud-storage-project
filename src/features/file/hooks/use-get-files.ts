@@ -1,6 +1,6 @@
 import useIsValidParams from "@/features/folder/hooks/use-isvalid-params";
 import useParentFolder from "@/features/folder/hooks/use-parent-folder";
-import { auth, db } from "@/firebase/firebase-serices";
+import { auth, db } from "@/firebase/firebase-services";
 import { collection, onSnapshot, orderBy, Query, query, where } from "firebase/firestore";
 import { useCallback, useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -34,19 +34,10 @@ const useGetFiles = ({ isRoot, shouldFetchInMount }: UseGetFilesProps) => {
     const filesRef = collection(db, "files");
 
     if (!isRoot && parent_folder_id) {
-      return query(
-        filesRef,
-        where("parent_folder_id", "==", parent_folder_id),
-        orderBy("created_at", "desc")
-      );
+      return query(filesRef, where("parent_folder_id", "==", parent_folder_id), orderBy("created_at", "desc"));
     }
 
-    return query(
-      filesRef,
-      where("parent_folder_id", "==", null),
-      where("owner_user_id", "==", currentUser?.uid),
-      orderBy("created_at", "desc")
-    );
+    return query(filesRef, where("parent_folder_id", "==", null), where("owner_user_id", "==", currentUser?.uid), orderBy("created_at", "desc"));
   }, [isRoot, parent_folder_id]);
 
   /**
@@ -55,9 +46,7 @@ const useGetFiles = ({ isRoot, shouldFetchInMount }: UseGetFilesProps) => {
    * @param {RootFileGetData | SubFileGetData} file - File data to filter.
    * @returns {RootFileGetData | SubFileGetData} - Filtered file data.
    */
-  const handleFilteredDataFile = (
-    file: RootFileGetData | SubFileGetData
-  ): RootFileGetData | SubFileGetData => {
+  const handleFilteredDataFile = (file: RootFileGetData | SubFileGetData): RootFileGetData | SubFileGetData => {
     if (file.parent_folder_id) {
       return {
         ...file,
@@ -85,9 +74,7 @@ const useGetFiles = ({ isRoot, shouldFetchInMount }: UseGetFilesProps) => {
       return onSnapshot(
         q,
         (snapshot) => {
-          const fetchedFiles = snapshot.docs.map((doc) =>
-            handleFilteredDataFile(doc.data() as RootFileGetData | SubFileGetData)
-          );
+          const fetchedFiles = snapshot.docs.map((doc) => handleFilteredDataFile(doc.data() as RootFileGetData | SubFileGetData));
 
           setFilesState(fetchedFiles as RootFileGetData[] | SubFileGetData[]);
           setFilesStatusState("succeeded");

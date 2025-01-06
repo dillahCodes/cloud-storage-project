@@ -3,7 +3,7 @@ import { neoBrutalBorderVariants, themeColors } from "@/theme/antd-theme";
 import { Flex, Modal, Typography } from "antd";
 import { forwardRef, useCallback, useEffect } from "react";
 import { MdFolderOpen } from "react-icons/md";
-import useFolderOptionsMenu from "../menu/hooks/use-folder-menu";
+import useFolderOptionsMenu from "../menu/folder-menu/hooks/use-folder-menu";
 import MenuItemComponent from "../menu/menu-item";
 import { DesktopFolderOptionsButtonWithFloatingElement } from "./desktop-folder-options-button";
 import ModalContentDeleteFolder from "./modal-content-delete-folder";
@@ -26,11 +26,7 @@ const DesktopFolder = forwardRef<HTMLDivElement, FolderProps>(({ folderData, onC
         return <ModalContentRenameFolder folderData={folderData} afterCloseButton={handleCloseAllChildren} />;
       case "delete":
         return (
-          <ModalContentDeleteFolder
-            folderData={folderData}
-            afterCloseButton={handleCloseAllChildren}
-            afterDeleteFolder={handleCloseAllChildren}
-          />
+          <ModalContentDeleteFolder folderData={folderData} afterCloseButton={handleCloseAllChildren} afterDeleteFolder={handleCloseAllChildren} />
         );
 
       default:

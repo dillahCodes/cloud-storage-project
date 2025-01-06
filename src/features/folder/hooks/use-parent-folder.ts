@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SubFolderGetData } from "../folder";
 import { parentFolderSelector } from "../slice/parent-folder-slice";
@@ -19,6 +19,8 @@ const useParentFolder = ({ fetchParentFolderDataOnMount, resetParentFolderDataOn
 
   const { setParentFolderData, resetFolderData, setStatus } = useParentFolderSetState();
   const { fetchFolderData } = useFetchFolderData(folderId);
+
+  const isValidFolderId = useMemo(() => folderId && folderId.trim() !== "", [folderId]);
 
   const dispatch = useDispatch();
 
@@ -46,8 +48,8 @@ const useParentFolder = ({ fetchParentFolderDataOnMount, resetParentFolderDataOn
       }
     };
 
-    if (fetchParentFolderDataOnMount) fetchData();
-  }, [fetchParentFolderDataOnMount, fetchFolderData, setParentFolderData, setStatus, navigate, dispatch]);
+    if (fetchParentFolderDataOnMount && isValidFolderId) fetchData();
+  }, [fetchParentFolderDataOnMount, fetchFolderData, setParentFolderData, setStatus, navigate, dispatch, isValidFolderId]);
 
   // Reset data on mount
   useEffect(() => {

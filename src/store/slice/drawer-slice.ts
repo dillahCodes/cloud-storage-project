@@ -46,6 +46,7 @@ export const drawerSlice = createSlice({
     setDesktopDrawerFolderId: (state, action: PayloadAction<string>) => {
       state.desktopDrawerFolderId = action.payload;
     },
+    resetDrawerState: () => initialState,
   },
 });
 
@@ -58,6 +59,7 @@ export const {
   toggleDesktopDrawerMenu,
   setDesktopDrawerTitle,
   setDesktopDrawerFolderId,
+  resetDrawerState,
 } = drawerSlice.actions;
 export const drawerSelector = (state: RootState) => state.drawer;
 export default drawerSlice.reducer;

@@ -1,4 +1,4 @@
-import { auth } from "@/firebase/firebase-serices";
+import { auth } from "@/firebase/firebase-services";
 import { createUserWithEmailAndPassword, updateProfile, UserCredential } from "firebase/auth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";

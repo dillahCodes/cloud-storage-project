@@ -1,4 +1,4 @@
-import { auth } from "@/firebase/firebase-serices";
+import { auth } from "@/firebase/firebase-services";
 import { signInWithEmailAndPassword, UserCredential } from "firebase/auth";
 import { useState } from "react";
 import createAuthResponse from "../create-auth-res";

@@ -1,9 +1,10 @@
-import { auth, db } from "@/firebase/firebase-serices";
+import { auth, db } from "@/firebase/firebase-services";
 import { collection, doc, getDocs, query, serverTimestamp, setDoc, where } from "firebase/firestore";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { FolderResponseStatus, RootFolderCreateData, SubFolderCreateData, SubFolderGetData } from "../folder";
 import { Collaborator, CollaboratorRole, GeneralAccessData } from "../folder-collaborator";
+import useAddActivityCreatedFolder from "./use-add-activity-created-folder";
 
 export interface HandleConfirmAddFolder {
   parentFolderData: SubFolderGetData | null;
@@ -11,6 +12,8 @@ export interface HandleConfirmAddFolder {
 }
 
 const useAddFolder = () => {
+  const { handleAddActivityCreatedFolder } = useAddActivityCreatedFolder();
+
   const [folderName, setFolderName] = useState<string>("");
   const [addFolderStatus, setAddFolderStatus] = useState<FolderResponseStatus>({
     message: "",
@@ -21,7 +24,9 @@ const useAddFolder = () => {
   const handleSetFolderName = (e: React.ChangeEvent<HTMLInputElement>) => setFolderName(e.target.value);
 
   const handleConfirmAddFolder = async ({ parentFolderData, afterAddFolder }: HandleConfirmAddFolder) => {
-    if (!folderName.trim()) return;
+    const { currentUser } = auth;
+
+    if (!folderName.trim() || !currentUser) return;
 
     afterAddFolder();
     setAddFolderStatus({ status: "loading", message: "Adding Folder...", type: "info" });
@@ -37,6 +42,23 @@ const useAddFolder = () => {
       await saveFolderToFirestore(folderData);
       await saveGeneraAccessDataToFirestore(general);
       await saveCollaboratorsToFirestore(collaboratorsData);
+
+      await handleAddActivityCreatedFolder({
+        type: "create-folder-activity",
+        activityId: uuidv4(),
+
+        folderId: folderData.folder_id,
+        folderName: folderData.folder_name,
+
+        rootFolderId: folderData.root_folder_id,
+        rootFolderOwnerUserId: folderData.root_folder_user_id,
+
+        parentFolderId: folderData.parent_folder_id ?? null,
+        parentFolderName: parentFolderData?.folder_name ?? null,
+
+        activityByUserId: currentUser.uid,
+        activityDate: serverTimestamp(),
+      });
 
       setAddFolderStatus({ status: "succeeded", message: "Folder added successfully", type: "success" });
       setFolderName("");

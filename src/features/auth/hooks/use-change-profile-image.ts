@@ -1,4 +1,4 @@
-import { auth, storage } from "@/firebase/firebase-serices";
+import { auth, storage } from "@/firebase/firebase-services";
 import Compressor from "compressorjs";
 import { updateProfile } from "firebase/auth";
 import { getDownloadURL, ref, StorageReference, uploadBytes } from "firebase/storage";

@@ -3,7 +3,7 @@ import { deleteMyMessageById, messageSelector, setMyMessageCount } from "../slic
 import { resetSelectedMessage, selectedMessageSelector } from "../slice/selected-message-slice";
 import { message } from "antd";
 import { deleteDoc, doc } from "firebase/firestore";
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { useCallback } from "react";
 
 const useDeleteSelectedMessage = () => {
@@ -69,9 +69,7 @@ const useDeleteSelectedMessage = () => {
           message.open({
             key: "failed",
             type: "error",
-            content: `failed to delete ${selectedMessagesId.length} ${
-              selectedMessagesId.length > 1 ? "messages" : "message"
-            }, please try again`,
+            content: `failed to delete ${selectedMessagesId.length} ${selectedMessagesId.length > 1 ? "messages" : "message"}, please try again`,
             className: "font-archivo text-sm capitalize",
           });
           break;

@@ -1,6 +1,8 @@
 import useDrawer from "@/hooks/use-drawer";
+import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
 import Drawer from "@components/ui/drawer";
 import { Typography } from "antd";
+import { useMemo } from "react";
 
 interface DesktopDrawerProps {
   children: React.ReactNode;
@@ -9,6 +11,15 @@ interface DesktopDrawerProps {
 const { Text } = Typography;
 const DesktopDrawer: React.FC<DesktopDrawerProps> = ({ children }) => {
   const { drawerState, toggleDrawerDekstop } = useDrawer();
+  const { screenWidth } = useGetClientScreenWidth();
+
+  const drawerWidth = useMemo(() => {
+    if (screenWidth < 1300) return "34%";
+    else if (screenWidth > 1075 && screenWidth < 1300) return "33%";
+    else if (screenWidth >= 1032 && screenWidth < 1075) return "35%";
+    return "25%";
+  }, [screenWidth]);
+
   return (
     <Drawer
       title={
@@ -27,7 +38,7 @@ const DesktopDrawer: React.FC<DesktopDrawerProps> = ({ children }) => {
           borderBottom: "2px solid black",
         },
       }}
-      width={"26%"}
+      width={drawerWidth}
       isDrawerOpen={drawerState.isDrawerDesktopOpen}
       className="border-2 border-black border-t-0"
       onDrawerClose={toggleDrawerDekstop}

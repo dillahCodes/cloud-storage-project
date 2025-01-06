@@ -1,6 +1,6 @@
 import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { CollaboratorRole } from "./folder-collaborator";
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 
 interface ChangeCollaboratorRoleProps {
   folderId: string;

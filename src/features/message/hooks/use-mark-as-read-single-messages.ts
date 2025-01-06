@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { messageSelector, setMyMessageCount, setMyMessages } from "../slice/message-slice";
-import { db } from "@/firebase/firebase-serices";
+import { db } from "@/firebase/firebase-services";
 import { doc, updateDoc } from "firebase/firestore";
 
 const useMarkAsReadSingleMessages = () => {
