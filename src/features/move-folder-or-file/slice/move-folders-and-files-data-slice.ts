@@ -35,10 +35,18 @@ export const moveFoldersAndFilesDataSlice = createSlice({
     setMoveParentFolderStatus: (state, action: PayloadAction<MoveFolderOrFileFoldersAndFilesDataState["parentFolderStatus"]>) => {
       state.parentFolderStatus = action.payload;
     },
+    resetMoveDataState: () => initialState,
   },
 });
 
-export const { setMoveFoldersData, setMoveFilesData, setMoveFolderStatus, setMoveFileStatus, setMoveParentFolderData, setMoveParentFolderStatus } =
-  moveFoldersAndFilesDataSlice.actions;
+export const {
+  setMoveFoldersData,
+  setMoveFilesData,
+  setMoveFolderStatus,
+  setMoveFileStatus,
+  setMoveParentFolderData,
+  setMoveParentFolderStatus,
+  resetMoveDataState,
+} = moveFoldersAndFilesDataSlice.actions;
 export const moveFoldersAndFilesDataSelector = (state: RootState) => state.moveFoldersAndFilesData;
 export default moveFoldersAndFilesDataSlice.reducer;

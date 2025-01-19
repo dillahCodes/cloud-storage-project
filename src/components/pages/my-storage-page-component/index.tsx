@@ -40,9 +40,11 @@ const MyStoragePageComponent = () => {
 
   // set permission as root to fetch all permissions
   useFolderPermissionSetState({
-    withUseEffect: {
-      setIsRoot: true,
-    },
+    isRootFolder: true,
+    detailsFolderPermissions: null,
+    subFolderPermissions: null,
+    permissionsStatus: "idle",
+    shouldProceed: true,
   });
 
   const { folderId } = useParams<{ folderId: string }>();

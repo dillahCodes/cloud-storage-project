@@ -1,31 +1,24 @@
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 import useDeleteFolder from "@/features/folder/hooks/use-delete-folder";
+import { resetFolderOptions, setFolderOptionsAction } from "@/features/folder/slice/folder-options-slice";
 import Button from "@components/ui/button";
 import { Flex, Modal, Typography } from "antd";
 import { LuTrash } from "react-icons/lu";
+import { useDispatch } from "react-redux";
 
 const { Text } = Typography;
 interface ModalContentDeleteFolderProps {
   folderData: RootFolderGetData | SubFolderGetData;
-  afterCloseButton: () => void;
-  afterDeleteFolder: () => void;
 }
-const ModalContentDeleteFolder: React.FC<ModalContentDeleteFolderProps> = ({
-  folderData,
-  afterCloseButton,
-  afterDeleteFolder,
-}) => {
+const ModalContentDeleteFolder: React.FC<ModalContentDeleteFolderProps> = ({ folderData }) => {
+  const dispatch = useDispatch();
   const { handleConfirmDeleteFolder } = useDeleteFolder(folderData);
 
-  const handleCloseModal = () => {
-    Modal.destroyAll();
-    afterCloseButton();
-  };
+  const handleCloseModal = () => dispatch(setFolderOptionsAction(null));
 
   const handleConfirmModal = () => {
-    Modal.destroyAll();
     handleConfirmDeleteFolder();
-    afterDeleteFolder();
+    dispatch(resetFolderOptions());
   };
 
   return (
@@ -44,19 +37,10 @@ const ModalContentDeleteFolder: React.FC<ModalContentDeleteFolderProps> = ({
 
       {/* button */}
       <Flex align="center" gap="small" className="ml-auto">
-        <Button
-          className="w-fit rounded-sm text-black font-archivo"
-          neoBrutalType="medium"
-          onClick={handleCloseModal}
-        >
+        <Button className="w-fit rounded-sm text-black font-archivo" neoBrutalType="medium" onClick={handleCloseModal}>
           Cancel
         </Button>
-        <Button
-          type="primary"
-          className="w-fit rounded-sm text-black font-archivo"
-          neoBrutalType="medium"
-          onClick={handleConfirmModal}
-        >
+        <Button type="primary" className="w-fit rounded-sm text-black font-archivo" neoBrutalType="medium" onClick={handleConfirmModal}>
           Confirm
         </Button>
       </Flex>

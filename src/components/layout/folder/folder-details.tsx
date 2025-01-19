@@ -21,8 +21,7 @@ const FolderDetails = () => {
   const { user } = useUser();
   const { isRootFolder } = useFolderPermissionState();
   const { isDesktopDevice } = useGetClientScreenWidth();
-  const { folderDetailsData, handleNavigateToFolderLocation, folderStatus, handleBack, folderData } =
-    useFolderDetails();
+  const { folderDetailsData, handleNavigateToFolderLocation, folderStatus, handleBack, folderData } = useFolderDetails();
 
   /**
    * fetch collaborators data
@@ -36,6 +35,10 @@ const FolderDetails = () => {
     folderId: folderData?.folder_id,
     shouldFetch: Boolean(folderData?.folder_id),
   });
+
+  const isLoading = useMemo(() => {
+    return folderStatus === "loading" || fetchCollaboratorsUserDataStatus === "loading" || fetchStatus === "loading";
+  }, [fetchCollaboratorsUserDataStatus, fetchStatus, folderStatus]);
 
   /**
    * set data to store
@@ -51,43 +54,30 @@ const FolderDetails = () => {
   /**
    * get permission based on collaborators data
    */
+  // get permission in this subfolder
   const { permissions } = useFolderGetPermission({
-    collaboratorsUserData,
-    generalAccessDataState,
-    userId: user?.uid,
-    parentFolderOwnerId: folderData?.owner_user_id,
+    userId: user ? user.uid : null,
+    collaboratorsUserData: collaboratorsUserData ?? null,
+    generalAccessDataState: generalAccessDataState ?? null,
+    parentFolderOwnerId: null,
+    shouldProcessPermission: isLoading,
   });
-
-  const isLoading = useMemo(
-    () =>
-      folderStatus === "loading" ||
-      fetchCollaboratorsUserDataStatus === "loading" ||
-      fetchStatus === "loading",
-    [fetchCollaboratorsUserDataStatus, fetchStatus, folderStatus]
-  );
 
   const isFolderPrivate = generalAccessDataState?.type === "private";
 
-  const generateCollaboratorsNameInfo = (
-    collaborators: CollaboratorUserData[] | null,
-    isFolderPrivate: boolean
-  ): string => {
+  const generateCollaboratorsNameInfo = (collaborators: CollaboratorUserData[] | null, isFolderPrivate: boolean): string => {
     if (!collaborators) return "";
 
     if (isFolderPrivate || collaborators.length === 1) return "private to you";
 
     if (collaborators.length > 0) {
       const owner = collaborators.find((collaborator) => collaborator.role === "owner");
-      const names = collaborators
-        .map((collaborator) => collaborator.name)
-        .filter((name) => name !== owner?.name);
+      const names = collaborators.map((collaborator) => collaborator.name).filter((name) => name !== owner?.name);
 
       if (names.length === 1) return `Owned by ${owner?.name}. Shared with ${names[0]}`;
       if (names.length === 2) return names.join(" and ");
 
-      return `Owned by ${owner?.name}. shared with ${names.slice(0, -1).join(", ")}, and ${
-        names[names.length - 1]
-      }`;
+      return `Owned by ${owner?.name}. shared with ${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
     }
 
     return "shared with collaborators";
@@ -108,13 +98,7 @@ const FolderDetails = () => {
         <>
           <Flex className="w-full p-3" gap="middle" vertical>
             {!isDesktopDevice && (
-              <Button
-                type="primary"
-                size="small"
-                className="w-fit text-black"
-                icon={<IoIosArrowBack />}
-                onClick={handleBack}
-              >
+              <Button type="primary" size="small" className="w-fit text-black" icon={<IoIosArrowBack />} onClick={handleBack}>
                 <Text className="text-sm font-archivo">Back</Text>
               </Button>
             )}
@@ -135,13 +119,7 @@ const FolderDetails = () => {
 
             <Flex vertical>
               <Text className="text-sm font-archivo font-bold  capitalize">location :</Text>
-              <Button
-                type="primary"
-                size="small"
-                className="w-fit text-black"
-                onClick={handleNavigateToFolderLocation}
-                icon={<GrStorage />}
-              >
+              <Button type="primary" size="small" className="w-fit text-black" onClick={handleNavigateToFolderLocation} icon={<GrStorage />}>
                 <Text className="text-sm font-archivo">{folderDetailsData.folderLocationName}</Text>
               </Button>
             </Flex>
@@ -156,8 +134,7 @@ const FolderDetails = () => {
             <Flex vertical>
               <Text className="text-sm font-archivo font-bold  capitalize">Modified :</Text>
               <Text className="text-sm font-archivo ">
-                {folderDetailsData.folderModifiedAt}{" "}
-                {folderDetailsData.folderModifiedByName !== "-" ? " by" : "-"}{" "}
+                {folderDetailsData.folderModifiedAt} {folderDetailsData.folderModifiedByName !== "-" ? " by" : "-"}{" "}
                 {folderDetailsData.folderModifiedByName}
               </Text>
             </Flex>
@@ -167,10 +144,7 @@ const FolderDetails = () => {
             <Text className="text-base font-archivo font-bold text-center  capitalize">Who has access</Text>
 
             <Flex vertical gap="small">
-              <FolderCollaboratorsAvatar
-                collaborators={collaboratorsUserData}
-                generalAccessData={generalAccessDataState}
-              />
+              <FolderCollaboratorsAvatar collaborators={collaboratorsUserData} generalAccessData={generalAccessDataState} />
               <Text className="text-sm font-archivo">{collaboratorsNameInfo}</Text>
               <ManageAccessButton disabledButton={!permissions.canManageAccess && !isRootFolder} />
             </Flex>

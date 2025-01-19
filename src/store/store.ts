@@ -15,6 +15,9 @@ import { parentFolderSlice } from "@/features/folder/slice/parent-folder-slice";
 import { currentMessageSlice } from "@/features/message/slice/current-message-slice";
 import { messageSlice } from "@/features/message/slice/message-slice";
 import { selectedMessageSlice } from "@/features/message/slice/selected-message-slice";
+import { dekstopMoveSlice } from "@/features/move-folder-or-file/slice/dekstop-move-slice";
+import { mobileMoveSlice } from "@/features/move-folder-or-file/slice/mobile-move-slice";
+import { moveFoldersAndFilesDataSlice } from "@/features/move-folder-or-file/slice/move-folders-and-files-data-slice";
 import { configureStore } from "@reduxjs/toolkit";
 import { createBrowserHistory } from "history";
 import { createReduxHistoryContext } from "redux-first-history";
@@ -23,9 +26,8 @@ import locationMiddleware from "./middleware/location-middleware";
 import { drawerSlice } from "./slice/drawer-slice";
 import { mobileHeaderTitleSlice } from "./slice/mobile-header-title-slice";
 import { siderSlice } from "./slice/sider-slice";
-import { mobileMoveSlice } from "@/features/move-folder-or-file/slice/mobile-move-slice";
-import { moveFoldersAndFilesDataSlice } from "@/features/move-folder-or-file/slice/move-folders-and-files-data-slice";
-import { dekstopMoveSlice } from "@/features/move-folder-or-file/slice/dekstop-move-slice";
+import { fileOptionsSlice } from "@/features/file/slice/file-options-slice";
+import { folderOptionsSlice } from "@/features/folder/slice/folder-options-slice";
 
 const { createReduxHistory, routerMiddleware, routerReducer } = createReduxHistoryContext({
   history: createBrowserHistory(),
@@ -53,6 +55,8 @@ export const store = configureStore({
     file: fileSlice.reducer,
     fileUploading: fileUploadingSlice.reducer,
     folderActivity: folderActivitySlice.reducer,
+    fileOptions: fileOptionsSlice.reducer,
+    folderOptions: folderOptionsSlice.reducer,
 
     // move folder or file
     mobileMove: mobileMoveSlice.reducer,

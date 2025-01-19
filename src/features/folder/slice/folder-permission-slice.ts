@@ -3,20 +3,9 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: FolderPermissionState = {
   isRootFolder: false,
-  statusFetch: {
-    CollaboratorsFetchStatus: "idle",
-    GeneralAccessFetchStatus: "idle",
-  },
-  subFolderPermission: {
-    canCRUD: true,
-    canManageAccess: true,
-    canView: true,
-  },
-  detailsFolderPermission: {
-    canCRUD: true,
-    canManageAccess: true,
-    canView: true,
-  },
+  statusFetch: "idle",
+  subFolderPermission: null,
+  detailsFolderPermission: null,
 };
 
 export const folderPermissionSlice = createSlice({
@@ -40,11 +29,6 @@ export const folderPermissionSlice = createSlice({
 });
 
 export default folderPermissionSlice.reducer;
-export const {
-  setIsRootFolder,
-  setSubFolderPermission,
-  setDetailsFolderPermission,
-  setFetchStatus,
-  resetStateFolderPermission,
-} = folderPermissionSlice.actions;
+export const { setIsRootFolder, setSubFolderPermission, setDetailsFolderPermission, setFetchStatus, resetStateFolderPermission } =
+  folderPermissionSlice.actions;
 export const folderPermissionSelector = (state: RootState) => state.folderPermission;

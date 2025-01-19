@@ -4,7 +4,7 @@ import { message } from "antd";
 import { useSearchParams } from "react-router-dom";
 
 const useMobileMoveFolderClick = () => {
-  const { "1": setParams } = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const { folderId: folderIdWantToMove } = useSelector(mobileMoveSelector);
 
   const handleClickFolder = (folderId: string) => {
@@ -18,7 +18,7 @@ const useMobileMoveFolderClick = () => {
       return;
     }
 
-    setParams({ parentId: folderId });
+    setParams({ parentId: folderId, st: params.get("st") || "" });
   };
 
   return handleClickFolder;

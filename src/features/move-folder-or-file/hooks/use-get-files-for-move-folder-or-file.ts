@@ -1,7 +1,7 @@
 import useUser from "@/features/auth/hooks/use-user";
 import { db } from "@/firebase/firebase-services";
 import { collection, getDocs, orderBy, query, Query, where } from "firebase/firestore";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { setMoveFilesData, setMoveFileStatus } from "../slice/move-folders-and-files-data-slice";
@@ -55,21 +55,22 @@ const handleGetFilesData = async (parentFolderId: string | null, userId: string)
   return fileSnapshot.empty ? null : fileSnapshot.docs.map((doc) => handleFilteredDataFile(doc.data() as RootFileGetData | SubFileGetData));
 };
 
-/**
- * get params
- */
-const params = ["parentId"] as const;
-const parseParam = (key: string, getSearchParams: URLSearchParams) => {
-  const value = getSearchParams.get(key);
-  return value === "null" || value === "" ? null : value;
-};
+interface UseGetFilesForMoveFolderOrFileProps {
+  shouldFetch: boolean;
+}
 
-const useGetFilesForMoveFolderOrFile = () => {
+const useGetFilesForMoveFolderOrFile = ({ shouldFetch }: UseGetFilesForMoveFolderOrFileProps) => {
   const dispatch = useDispatch();
   const { user } = useUser();
 
   const { "0": searchParams } = useSearchParams();
-  const [parentId] = params.map((key) => parseParam(key, searchParams));
+  const [parentId, setParentId] = useState<string | null>(searchParams.get("parentId") || null);
+
+  const handleGetAndUpdateParentId = useCallback(() => {
+    const newParentId = searchParams.get("parentId") || null;
+    if (newParentId === parentId) return;
+    setParentId(newParentId);
+  }, [parentId, searchParams]);
 
   const fetchFilesData = useCallback(async () => {
     if (!user) return;
@@ -88,8 +89,12 @@ const useGetFilesForMoveFolderOrFile = () => {
   }, [parentId, user, dispatch]);
 
   useEffect(() => {
-    fetchFilesData();
-  }, [fetchFilesData]);
+    shouldFetch && fetchFilesData();
+  }, [fetchFilesData, shouldFetch]);
+
+  useEffect(() => {
+    handleGetAndUpdateParentId();
+  }, [handleGetAndUpdateParentId]);
 };
 
 export default useGetFilesForMoveFolderOrFile;

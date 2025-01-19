@@ -29,7 +29,7 @@ const MenuItemComponent: React.FC<MenuItemProps> = ({ menuList, handleToggleChil
                 className=" font-archivo ml-auto text-lg transition-transform"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleToggleChildren(item.key);
+                  handleToggleChildren && handleToggleChildren(item.key);
                 }}
               >
                 <MdPlayArrow className={`transition-transform ${item.isChildrenOpen ? "rotate-90" : ""}`} />

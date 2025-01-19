@@ -5,7 +5,7 @@ import { dekstopMoveSelector, setModalMoveButtonDisabled } from "../slice/deksto
 
 const useDekstopMoveValidation = () => {
   const dispatch = useDispatch();
-  const { folderId } = useSelector(dekstopMoveSelector);
+  const { folderId, folderMovePermission } = useSelector(dekstopMoveSelector);
   const { foldersData, folderStatus } = useSelector(moveFoldersAndFilesDataSelector);
 
   const handleValidation = useCallback(() => {
@@ -15,7 +15,8 @@ const useDekstopMoveValidation = () => {
 
   useEffect(() => {
     handleValidation();
-  }, [handleValidation]);
+    if (!folderMovePermission.canCRUD) dispatch(setModalMoveButtonDisabled(true));
+  }, [handleValidation, folderMovePermission, dispatch]);
 };
 
 export default useDekstopMoveValidation;

@@ -1,21 +1,24 @@
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 import useChangeFolderName from "@/features/folder/hooks/use-change-folder-name";
+import { resetFolderOptions, setFolderOptionsAction } from "@/features/folder/slice/folder-options-slice";
 import { neoBrutalBorderVariants } from "@/theme/antd-theme";
 import Button from "@components/ui/button";
-import { Flex, Input, Modal, Typography } from "antd";
+import { Flex, Input, Typography } from "antd";
 import { LuPenLine } from "react-icons/lu";
+import { useDispatch } from "react-redux";
 
 const { Text } = Typography;
 interface ModalContentRenameFolderProps {
   folderData: RootFolderGetData | SubFolderGetData;
-  afterCloseButton: () => void;
 }
-const ModalContentRenameFolder: React.FC<ModalContentRenameFolderProps> = ({ folderData, afterCloseButton }) => {
+const ModalContentRenameFolder: React.FC<ModalContentRenameFolderProps> = ({ folderData }) => {
+  const dispatch = useDispatch();
   const { handleInputChange, newFolderNameValue, handleConfirmChangeFolderName } = useChangeFolderName(folderData);
 
-  const handleCloseModal = () => {
-    Modal.destroyAll();
-    afterCloseButton();
+  const handleCloseModal = () => dispatch(setFolderOptionsAction(null));
+  const handleConfirm = () => {
+    dispatch(resetFolderOptions());
+    handleConfirmChangeFolderName();
   };
 
   return (
@@ -48,7 +51,7 @@ const ModalContentRenameFolder: React.FC<ModalContentRenameFolderProps> = ({ fol
         <Button
           type="primary"
           disabled={!newFolderNameValue || newFolderNameValue === folderData.folder_name}
-          onClick={handleConfirmChangeFolderName}
+          onClick={handleConfirm}
           className="w-fit rounded-sm text-black font-archivo"
           neoBrutalType="medium"
         >

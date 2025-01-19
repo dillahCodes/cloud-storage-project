@@ -1,13 +1,8 @@
 interface FolderPermissionState {
   isRootFolder: boolean;
-  subFolderPermission: FolderPermission;
-  detailsFolderPermission: FolderPermission;
-  statusFetch: StatusFetch;
-}
-
-interface StatusFetch {
-  CollaboratorsFetchStatus: FetchPermissionStatus;
-  GeneralAccessFetchStatus: FetchPermissionStatus;
+  subFolderPermission: FolderPermission | null;
+  detailsFolderPermission: FolderPermission | null;
+  statusFetch: FetchPermissionStatus;
 }
 
 interface FolderPermission {

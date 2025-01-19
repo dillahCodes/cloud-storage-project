@@ -1,10 +1,9 @@
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 import { auth, db } from "@/firebase/firebase-services";
 import { collection, DocumentData, getDocs, orderBy, Query, query, QueryDocumentSnapshot, where } from "firebase/firestore";
-import { useCallback, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { useSearchParams } from "react-router-dom";
-import { setMoveFoldersData, setMoveFolderStatus } from "../slice/move-folders-and-files-data-slice";
+import { useCallback, useEffect, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { moveFoldersAndFilesDataSelector, setMoveFoldersData, setMoveFolderStatus } from "../slice/move-folders-and-files-data-slice";
 
 /**
  * serialize - serialize timestamps data for redux toolkit
@@ -46,20 +45,17 @@ const handleGetFodlerData = async (parentId: string | null) => {
   const folderSnapshot = await getDocs(q);
   return folderSnapshot.empty ? null : folderSnapshot.docs.map((doc) => handleSerializeFoldersData(doc, isRoot));
 };
-/**
- * get params
- */
-const params = ["parentId"] as const;
-const parseParam = (key: string, getSearchParams: URLSearchParams) => {
-  const value = getSearchParams.get(key);
-  return value === "null" || value === "" ? null : value;
-};
 
-const useGetFoldersForMoveFolderOrFile = () => {
+interface UseGetFoldersForMoveFolderOrFileProps {
+  shouldFetch: boolean;
+}
+
+const useGetFoldersForMoveFolderOrFile = ({ shouldFetch }: UseGetFoldersForMoveFolderOrFileProps) => {
   const dispatch = useDispatch();
 
-  const { "0": searchParams } = useSearchParams();
-  const [parentId] = params.map((key) => parseParam(key, searchParams));
+  const { parentFolderData, parentFolderStatus } = useSelector(moveFoldersAndFilesDataSelector);
+  const parentId = useMemo(() => parentFolderData?.folder_id, [parentFolderData]);
+  const isParentLoading = useMemo(() => parentFolderStatus === "loading", [parentFolderStatus]);
 
   const fetchFolderData = useCallback(
     async (parentFolderId: string | null) => {
@@ -81,8 +77,9 @@ const useGetFoldersForMoveFolderOrFile = () => {
   );
 
   useEffect(() => {
-    fetchFolderData(parentId);
-  }, [parentId, fetchFolderData]);
+    if (isParentLoading) return;
+    shouldFetch && fetchFolderData(parentId ?? null);
+  }, [parentId, fetchFolderData, shouldFetch, isParentLoading]);
 };
 
 export default useGetFoldersForMoveFolderOrFile;

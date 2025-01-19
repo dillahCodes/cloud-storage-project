@@ -7,6 +7,7 @@ import useAddActivityDeletedFolder from "./use-add-activity-deleted-folder";
 import { v4 as uuidv4 } from "uuid";
 import { useCallback } from "react";
 import { DeleteFolderActivity } from "../folder-activity";
+import { message } from "antd";
 
 interface DeleteFolderParams {
   folderId: string;
@@ -72,9 +73,17 @@ const useDeleteFolder = (folderData: RootFolderGetData | SubFolderGetData) => {
     if (!currentUser) return;
 
     try {
+      message.open({
+        type: "loading",
+        content: "Deleting folder...",
+        className: "font-archivo text-sm",
+        duration: 0,
+        key: "folder-delete-loading",
+      });
+
       switch (true) {
         case isSharedWithMeLocation:
-          await deleteSharedWithMeFolder(folderData.folder_id);
+          await deleteSharedWithMeFolder(folderData.folder_id, currentUser.uid);
           window.location.reload();
           break;
 
@@ -93,6 +102,15 @@ const useDeleteFolder = (folderData: RootFolderGetData | SubFolderGetData) => {
           });
           break;
       }
+
+      message.destroy("folder-delete-loading");
+      message.open({
+        type: "success",
+        content: "Folder deleted successfully.",
+        className: "font-archivo text-sm",
+        key: "folder-delete-success",
+        duration: 3,
+      });
     } catch (error) {
       console.error("Error confirming folder deletion: ", error instanceof Error ? error.message : "An unknown error occurred.");
     }
@@ -147,8 +165,8 @@ const deleteStarredFolder = async (folderId: string, userId: string) => {
  * @param {string} folderId - The ID of the folder to delete.
  * @returns {Promise<void>} A promise that resolves when the folder has been deleted.
  */
-const deleteSharedWithMeFolder = async (folderId: string) => {
-  const folderRef = doc(db, "sharedWithMeFolders", folderId);
+const deleteSharedWithMeFolder = async (folderId: string, userId: string) => {
+  const folderRef = doc(db, "sharedWithMeFolders", `${userId}_${folderId}`);
   await deleteDoc(folderRef);
 };
 

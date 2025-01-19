@@ -35,14 +35,14 @@ const DesktopMainLayout: React.FC<Omit<MainLayoutProps, "showAddButton" | "showP
       </DesktopDrawer>
       <Layout>
         <DekstopHeader />
-        <Layout className="overflow-y-auto">
+        <Layout className="overflow-y-auto" id="container-main-layout">
           <main>
             {withBreadcrumb && (
               <div className="p-3 max-w-screen-lg mx-auto w-full">
                 <Breadcrumb items={items} />
               </div>
             )}
-            <div className="min-h-screen" id="container-main-layout">
+            <div className="min-h-screen">
               <Flex
                 vertical
                 gap="middle"
@@ -53,7 +53,6 @@ const DesktopMainLayout: React.FC<Omit<MainLayoutProps, "showAddButton" | "showP
               >
                 {fileUploadingState.fileUploadingList.length > 0 && <ButtonUploadStatusModal />}
               </Flex>
-
               {children}
             </div>
           </main>

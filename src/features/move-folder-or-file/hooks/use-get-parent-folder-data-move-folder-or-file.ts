@@ -1,92 +1,72 @@
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
-import { setParentFolderStatus } from "@/features/folder/slice/parent-folder-slice";
 import { db } from "@/firebase/firebase-services";
-import { collection, DocumentData, getDocs, query, QueryDocumentSnapshot, where } from "firebase/firestore";
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { setMoveParentFolderData } from "../slice/move-folders-and-files-data-slice";
-import { mobileMoveSelector } from "../slice/mobile-move-slice";
+import useDetectLocation from "@/hooks/use-detect-location";
 import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
 import { message } from "antd";
-
-/**
- * serialize - serialize timestamps data for redux toolkit
- **/
-const handleSerializeFoldersData = (data: QueryDocumentSnapshot<DocumentData, DocumentData>): RootFolderGetData | SubFolderGetData => {
-  const folderDataSerialized = {
-    ...data.data(),
-    created_at: JSON.parse(JSON.stringify(data.data().created_at)),
-    updated_at: data.data().updated_at ? JSON.parse(JSON.stringify(data.data().updated_at)) : null,
-  } as RootFolderGetData | SubFolderGetData;
-
-  return folderDataSerialized;
-};
+import { doc, getDoc } from "firebase/firestore";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { mobileMoveSelector } from "../slice/mobile-move-slice";
+import { moveFoldersAndFilesDataSelector, setMoveParentFolderData, setMoveParentFolderStatus } from "../slice/move-folders-and-files-data-slice";
 
 /**
  * handle get parentFolderId
  */
 const handleGetParentFolderId = async (parentId: string) => {
-  const folderCollectionRef = collection(db, "folders");
-  const folderQuery = query(folderCollectionRef, where("folder_id", "==", parentId));
-
-  const folderSnapshot = await getDocs(folderQuery);
-
-  return folderSnapshot.empty ? null : folderSnapshot.docs.map(handleSerializeFoldersData);
-};
-
-/**
- * get params
- */
-const params = ["parentId"] as const;
-const parseParam = (key: string, getSearchParams: URLSearchParams) => {
-  const value = getSearchParams.get(key);
-  return value === "null" || value === "" ? null : value;
+  const folderDoc = doc(db, "folders", parentId);
+  const folderSnap = await getDoc(folderDoc);
+  return folderSnap.exists() ? (JSON.parse(JSON.stringify(folderSnap.data())) as RootFolderGetData | SubFolderGetData) : null;
 };
 
 const useGetParentFolderData = () => {
-  const [isInValidParentFolder, setIsInValidParentFolder] = useState<boolean>(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  const { isMobileDevice } = useGetClientScreenWidth();
-  const { moveFromLocationPath } = useSelector(mobileMoveSelector);
-
   const { "0": searchParams } = useSearchParams();
-  const [parentId] = params.map((key) => parseParam(key, searchParams));
+
+  const { isMoveFolderOrFileLocation, isSubMoveFolderOrFileLocation } = useDetectLocation();
+  const { isMobileDevice } = useGetClientScreenWidth();
+
+  const [parentId, setParentId] = useState<string | null>(searchParams.get("parentId") || null);
+  const { moveFromLocationPath } = useSelector(mobileMoveSelector);
+  const { parentFolderStatus } = useSelector(moveFoldersAndFilesDataSelector);
+
+  const isParentLoading = useMemo(() => parentFolderStatus === "loading", [parentFolderStatus]);
+
+  const handleGetAndUpdateParentId = useCallback(() => {
+    const newParentId = searchParams.get("parentId") || null;
+    if (newParentId === parentId) return;
+    setParentId(newParentId);
+  }, [parentId, searchParams]);
 
   const handleFetch = useCallback(async () => {
     try {
-      dispatch(setParentFolderStatus("loading"));
+      dispatch(setMoveParentFolderStatus("loading"));
       if (!parentId) {
         dispatch(setMoveParentFolderData(null));
-        dispatch(setParentFolderStatus("succeeded"));
+        dispatch(setMoveParentFolderStatus("succeeded"));
         return;
       }
 
       const parentFolderDataSnapshot = await handleGetParentFolderId(parentId);
       if (!parentFolderDataSnapshot) {
-        setIsInValidParentFolder(true);
         dispatch(setMoveParentFolderData(null));
-        dispatch(setParentFolderStatus("succeeded"));
+        dispatch(setMoveParentFolderStatus("succeeded"));
         return;
       }
 
-      const parentFolderData = parentFolderDataSnapshot[0];
+      parentFolderDataSnapshot.parent_folder_id
+        ? dispatch(setMoveParentFolderData(parentFolderDataSnapshot as SubFolderGetData))
+        : dispatch(setMoveParentFolderData(parentFolderDataSnapshot as RootFolderGetData));
 
-      parentFolderData.parent_folder_id
-        ? dispatch(setMoveParentFolderData(parentFolderData as SubFolderGetData))
-        : dispatch(setMoveParentFolderData(parentFolderData as RootFolderGetData));
-
-      dispatch(setParentFolderStatus("succeeded"));
+      dispatch(setMoveParentFolderStatus("succeeded"));
     } catch (error) {
       console.error("Error fetching parent folder data:", error instanceof Error ? error.message : "An unknown error occurred.");
     }
   }, [parentId, dispatch]);
 
   useEffect(() => {
-    if (!isInValidParentFolder || !moveFromLocationPath) return;
-
+    if (!moveFromLocationPath || isParentLoading || isMoveFolderOrFileLocation) return;
     if (isMobileDevice) navigate(moveFromLocationPath);
 
     message.open({
@@ -94,11 +74,15 @@ const useGetParentFolderData = () => {
       content: "Parent folder not found.",
       className: "font-archivo text-sm",
     });
-  }, [isMobileDevice, moveFromLocationPath, navigate, isInValidParentFolder]);
+  }, [isMobileDevice, moveFromLocationPath, navigate, isParentLoading, isMoveFolderOrFileLocation]);
 
   useEffect(() => {
-    handleFetch();
-  }, [handleFetch]);
+    handleGetAndUpdateParentId();
+  }, [handleGetAndUpdateParentId]);
+
+  useEffect(() => {
+    isSubMoveFolderOrFileLocation && handleFetch();
+  }, [handleFetch, isSubMoveFolderOrFileLocation]);
 };
 
 export default useGetParentFolderData;

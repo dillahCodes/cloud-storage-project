@@ -1,16 +1,22 @@
+import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
 import { neoBrutalBorderVariants, themeColors } from "@/theme/antd-theme";
-import { Button, Flex, Typography } from "antd";
-import { BsThreeDotsVertical } from "react-icons/bs";
+import { Flex, Typography } from "antd";
+import { memo } from "react";
 import FileIconsVariant from "./file-icons-variant";
+import OptionsFileButtonWithDrawer from "./options-file-button-with-drawer";
+import OptionsFileButtonWithFloatingElement from "./options-file-button-with-floating-element";
 import RenderResponsiveFileName from "./responsive-file-name";
 
-interface FileProps {
-  name: string;
-  fileType: string;
+interface VariantFileListItemParams {
+  fileData: SubFileGetData | RootFileGetData;
 }
 
 const { Text } = Typography;
-const VariantFileListItem: React.FC<FileProps> = ({ name, fileType }) => {
+
+const VariantFileListItem: React.FC<VariantFileListItemParams> = ({ fileData }) => {
+  const { file_name, file_type } = fileData;
+  const { isDesktopDevice } = useGetClientScreenWidth();
+
   return (
     <Flex
       className="border-2 border-black rounded-md cursor-pointer w-full p-3"
@@ -19,28 +25,22 @@ const VariantFileListItem: React.FC<FileProps> = ({ name, fileType }) => {
       justify="space-between"
       style={{ ...neoBrutalBorderVariants.medium, backgroundColor: themeColors.primary200 }}
     >
+      {/* file icon and name */}
       <Flex align="center" gap="small">
         <Text className="text-xl">
-          <FileIconsVariant fileType={fileType} />
+          <FileIconsVariant fileType={file_type} />
         </Text>
         <Text className=" text-sm font-archivo">
-          <RenderResponsiveFileName fileName={name} />
+          <RenderResponsiveFileName fileName={file_name} />
         </Text>
       </Flex>
 
-      <Button
-        size="small"
-        className="p-0.5 text-black bg-transparent shadow-none border-none"
-        onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-          e.stopPropagation();
-
-          console.log("opened file settings");
-        }}
-      >
-        <BsThreeDotsVertical className="text-xl" />
-      </Button>
+      {/* file button options and drawer */}
+      <div id="file-options">
+        {isDesktopDevice ? <OptionsFileButtonWithFloatingElement fileData={fileData} /> : <OptionsFileButtonWithDrawer fileData={fileData} />}
+      </div>
     </Flex>
   );
 };
 
-export default VariantFileListItem;
+export default memo(VariantFileListItem);

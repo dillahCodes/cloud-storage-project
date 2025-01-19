@@ -27,6 +27,12 @@ interface MoveFolderOrFileFoldersAndFilesDataState {
   parentFolderStatus: "idle" | "loading" | "succeeded" | "failed";
 }
 
+interface DektopMovePermissionState {
+  canCRUD: boolean;
+  canView: boolean;
+  canManageAccess: boolean;
+}
+
 interface DekstopMoveState {
   isModalOpen: boolean;
   isModalMoveButtonDisabled: boolean;
@@ -42,6 +48,8 @@ interface DekstopMoveState {
   fileId: string | null;
   fileName: string | null;
   fileType: string | null;
+
+  folderMovePermission: DektopMovePermissionState;
 
   dekstopMoveStatus: "idle" | "loading" | "success" | "error";
 }

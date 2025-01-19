@@ -64,3 +64,9 @@ interface FileUploadingList {
 interface FileUploadingState {
   fileUploadingList: FileUploadingList[];
 }
+
+type FileActionSelected = "delete" | "details" | "move" | "dowload" | "visit" | null;
+interface FileOptionsState {
+  activeFileData: RootFileGetData | SubFileGetData | null;
+  activeAction: FileActionSelected;
+}

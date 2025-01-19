@@ -44,15 +44,7 @@ export const mobileMoveSlice = createSlice({
     setMobileMoveFolderMoveErrorMessage: (state, action: PayloadAction<MoveFolderOrFileMobileState["folderMoveErrorMessage"]>) => {
       state.folderMoveErrorMessage = action.payload;
     },
-    resetMobileMoveState: (state) => {
-      state.folderId = null;
-      state.folderName = null;
-      state.fileId = null;
-      state.fileName = null;
-      state.fileType = null;
-      state.moveFromLocationPath = null;
-      state.moveStatus = "idle";
-    },
+    resetMobileMoveState: () => initialState,
   },
 });
 

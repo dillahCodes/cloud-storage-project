@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { mobileMoveSelector, resetMobileMoveState } from "../slice/mobile-move-slice";
 import { MobileFolderOrFileMoveLocalStorageKey } from "../move-folder-or-file";
+import { mobileMoveSelector, resetMobileMoveState } from "../slice/mobile-move-slice";
 
 const MOBILE_MOVE_STATE_KEY: MobileFolderOrFileMoveLocalStorageKey = "moveFolderOrFileMobile";
 
@@ -21,9 +21,7 @@ const useMobileMoveNavigate = () => {
     }
   };
 
-  const handleBackPrevLocation = () => navigate(-1);
-
-  return { handleCancelMove, handleBackPrevLocation };
+  return { handleCancelMove };
 };
 
 export default useMobileMoveNavigate;

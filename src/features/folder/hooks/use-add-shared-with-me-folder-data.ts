@@ -1,55 +1,79 @@
-import { auth, db } from "@/firebase/firebase-services";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
-import { useCallback, useEffect, useRef } from "react";
-import { SharedWithMeData } from "../folder";
+import { FirebaseUserData } from "@/features/auth/auth";
+import useUser from "@/features/auth/hooks/use-user";
+import { db } from "@/firebase/firebase-services";
+import { collection, doc, getDocs, limit, query, serverTimestamp, setDoc, where } from "firebase/firestore";
+import { useCallback, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { SharedWithMeData, SubFolderGetData } from "../folder";
+import { parentFolderSelector } from "../slice/parent-folder-slice";
 
 interface UseAddSharedWithMeFolderDataProps {
   shouldAdd: boolean;
-  sharedFolderId: string;
 }
 
-const useAddSharedWithMeFolderData = ({ shouldAdd, sharedFolderId }: UseAddSharedWithMeFolderDataProps) => {
-  const sharedFolderIdRef = useRef<string | null>(null); // using ref for disable value change in re-render
+interface HandleAddSharedWithMeFolderData {
+  parentFolderData: SubFolderGetData;
+  userData: FirebaseUserData;
+}
 
-  // set initial parent folder id using ref for disable value change in re-render
-  useEffect(() => {
-    if (sharedFolderIdRef.current === null && sharedFolderId) sharedFolderIdRef.current = sharedFolderId;
-  }, [sharedFolderId]);
+const handleAddSharedWithMeFolderData = async ({ parentFolderData, userData }: HandleAddSharedWithMeFolderData) => {
+  const sharedWithMeFolderRef = doc(db, "sharedWithMeFolders", `${userData.uid}_${parentFolderData.folder_id}`);
+  const sharedWithMeFolderData: SharedWithMeData = {
+    folderId: parentFolderData.folder_id,
+    userId: userData.uid,
+    rootFolderId: parentFolderData.root_folder_id,
+    createdAt: serverTimestamp(),
+    updatedAt: null,
+  };
+  await setDoc(sharedWithMeFolderRef, sharedWithMeFolderData);
+};
 
-  const handleCheckIfSharedFolderIsNotExist = useCallback(async () => {
-    const { currentUser } = auth;
-    if (!sharedFolderIdRef.current || !currentUser) return;
+const handleCheckIsSharedWithMeFolderDataExist = async ({ parentFolderData, userData }: HandleAddSharedWithMeFolderData): Promise<boolean> => {
+  const sharedWithMeFolderCollection = collection(db, "sharedWithMeFolders");
 
-    const sharedWithMeFolderRef = doc(db, "sharedWithMeFolders", `${currentUser.uid}_${sharedFolderIdRef.current}`);
-    const result = await getDoc(sharedWithMeFolderRef);
-    return !result.exists();
-  }, [sharedFolderIdRef]);
+  // Define query to find shared folder data matching rootFolderId and userId
+  const sharedWithMeFolderQuery = query(
+    sharedWithMeFolderCollection,
+    where("rootFolderId", "==", parentFolderData.root_folder_id),
+    where("userId", "==", userData.uid),
+    limit(1)
+  );
 
-  const handleAddSharedWithMeFolderData = useCallback(async () => {
-    const { currentUser } = auth;
+  // Execute query and check if results exist
+  const sharedWithMeFolderSnapshot = await getDocs(sharedWithMeFolderQuery);
+  return sharedWithMeFolderSnapshot.size > 0;
+};
+
+const useAddSharedWithMeFolderData = ({ shouldAdd }: UseAddSharedWithMeFolderDataProps) => {
+  const { parentFolderData, status } = useSelector(parentFolderSelector);
+  const { user } = useUser();
+
+  const handleConfirmAddSharedWithMeData = useCallback(async () => {
     try {
-      if (!currentUser || !sharedFolderIdRef.current) return;
+      /**
+       * Invalid add shared with me folder data
+       */
+      const isInvalidAddSharedWithMeFolder = !parentFolderData || !user || status !== "succeeded";
+      if (isInvalidAddSharedWithMeFolder) return;
 
-      const sharedWithMeFolderData: SharedWithMeData = {
-        folderId: sharedFolderIdRef.current,
-        userId: currentUser.uid,
-        createdAt: serverTimestamp(),
-        updatedAt: null,
-      };
+      /**
+       * return if shared folder exists
+       */
+      const isSharedFolderExists = await handleCheckIsSharedWithMeFolderDataExist({ parentFolderData, userData: user });
+      if (isSharedFolderExists) return;
 
-      const isDataNotExist = await handleCheckIfSharedFolderIsNotExist();
-      if (!isDataNotExist) return;
-
-      const sharedWithMeFolderRef = doc(db, "sharedWithMeFolders", `${currentUser.uid}_${sharedFolderIdRef.current}`);
-      await setDoc(sharedWithMeFolderRef, sharedWithMeFolderData);
+      /**
+       * add shared folder data
+       */
+      await handleAddSharedWithMeFolderData({ parentFolderData, userData: user });
     } catch (error) {
       console.error("Error adding shared with me folder data:", error instanceof Error ? error.message : "An unknown error occurred.");
     }
-  }, [, handleCheckIfSharedFolderIsNotExist]);
+  }, [parentFolderData, status, user]);
 
   useEffect(() => {
-    if (shouldAdd) handleAddSharedWithMeFolderData();
-  }, [shouldAdd, handleAddSharedWithMeFolderData]);
+    if (shouldAdd) handleConfirmAddSharedWithMeData();
+  }, [shouldAdd, handleConfirmAddSharedWithMeData]);
 };
 
 export default useAddSharedWithMeFolderData;

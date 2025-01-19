@@ -55,6 +55,8 @@ const useGetFodlersDektopMoveFolderOrFile = ({ shouldFetch }: UseGetFodlersDekto
   const dispatch = useDispatch();
   const { parentFolderId } = useSelector(dekstopMoveSelector);
 
+  // console.log({ parentFolderId });
+
   const fetchFoldersData = useCallback(
     async (parentFolderId: string | null) => {
       try {

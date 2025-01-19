@@ -9,5 +9,5 @@ interface MenuItem {
 
 interface MenuItemProps {
   menuList: MenuItem[];
-  handleToggleChildren: (key: string) => void;
+  handleToggleChildren?: (key: string) => void;
 }

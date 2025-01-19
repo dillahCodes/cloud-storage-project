@@ -1,4 +1,5 @@
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
+import { folderPermissionSelector } from "@/features/folder/slice/folder-permission-slice";
 import { parentFolderSelector } from "@/features/folder/slice/parent-folder-slice";
 import {
   dekstopMoveSetFolderData,
@@ -11,29 +12,25 @@ import {
   setMobileMoveFolderName,
   setMobileMoveFromLocationPath,
 } from "@/features/move-folder-or-file/slice/mobile-move-slice";
+import useDetectLocation from "@/hooks/use-detect-location";
 import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
 import copyToClipboard from "@/util/copy-to-clipboard";
 import { message } from "antd";
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { ActionSelected } from "./use-folder-menu";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const useHandleActionFolderMenu = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [searchParams] = useSearchParams();
-
+  const { subFolderPermission } = useSelector(folderPermissionSelector);
   const parentFolderState = useSelector(parentFolderSelector);
   const { isDesktopDevice, isTabletDevice, isMobileDevice } = useGetClientScreenWidth();
+  const { isSubSharedWithMeLocation, isMystorageLocation, isSubMyStorageLocation } = useDetectLocation();
 
-  const handleClipboard = async (
-    folderData: RootFolderGetData | SubFolderGetData,
-    setAction: React.Dispatch<React.SetStateAction<ActionSelected>>
-  ) => {
-    setAction("copy-link");
+  const handleClipboard = async (folderData: RootFolderGetData | SubFolderGetData) => {
     const params: NestedBreadcrumbType = "shared-with-me";
     const folderId = folderData?.folder_id ?? "";
 
@@ -45,29 +42,84 @@ const useHandleActionFolderMenu = () => {
 
   const prepareForMobileMove = useCallback(
     (folderId: string, folderName: string) => {
-      const fullPath = `${location.pathname}${location.search}`;
+      if (subFolderPermission && !subFolderPermission.canCRUD) {
+        message.open({
+          type: "error",
+          content: "You don't have permission to move this folder.",
+          className: "font-archivo text-sm",
+          key: "folder-move-error-message",
+        });
+        return;
+      }
 
-      const isSharedWithMeLocation = searchParams.get("st") === "shared-with-me";
+      const fullPath = `${location.pathname}${location.search}`;
 
       dispatch(setMobileMoveFolderName(folderName));
       dispatch(setMobileMoveFolderId(folderId));
       dispatch(setMobileMoveFromLocationPath(fullPath));
 
-      isSharedWithMeLocation
-        ? navigate(`/storage/folder/move?parentId=${parentFolderState.parentFolderData?.folder_id}`)
-        : navigate(`/storage/folder/move`);
+      const isMoveFromSharedSubFolder = isSubSharedWithMeLocation && parentFolderState.parentFolderData !== null;
+      const isMoveFromRoot = isMystorageLocation;
+      const isMoveFromSubFolder = isSubMyStorageLocation && parentFolderState.parentFolderData !== null;
 
-      message.open({
-        type: "info",
-        content: "Please select a destination.",
-        className: "font-archivo text-sm",
-      });
+      const moveActions = [
+        {
+          condition: isMoveFromSharedSubFolder,
+          url: parentFolderState.parentFolderData
+            ? `/storage/folder/move?parentId=${parentFolderState.parentFolderData.folder_id}&st=shared-with-me`
+            : "",
+          message: "move from shared sub folder",
+        },
+        {
+          condition: isMoveFromRoot,
+          url: `/storage/folder/move?st=my-storage`,
+          message: "move from root",
+        },
+        {
+          condition: isMoveFromSubFolder,
+          url: parentFolderState.parentFolderData
+            ? `/storage/folder/move?parentId=${parentFolderState.parentFolderData.folder_id}&st=my-storage`
+            : "",
+          message: "move from sub folder",
+        },
+      ];
+
+      const findActions = moveActions.find((action) => action.condition && action.url);
+
+      if (findActions) {
+        navigate(findActions.url);
+        message.open({
+          type: "info",
+          content: "Please select a destination.",
+          className: "font-archivo text-sm",
+        });
+      }
     },
-    [location.pathname, location.search, searchParams, dispatch, navigate, parentFolderState.parentFolderData]
+    [
+      subFolderPermission,
+      location.pathname,
+      location.search,
+      dispatch,
+      navigate,
+      parentFolderState.parentFolderData,
+      isSubSharedWithMeLocation,
+      isMystorageLocation,
+      isSubMyStorageLocation,
+    ]
   );
 
   const prepareForDektopMove = useCallback(
-    (setAction: React.Dispatch<React.SetStateAction<ActionSelected>>, folderId: string, folderName: string) => {
+    (folderId: string, folderName: string) => {
+      if (subFolderPermission && !subFolderPermission.canCRUD) {
+        message.open({
+          type: "error",
+          content: "You don't have permission to move this folder.",
+          className: "font-archivo text-sm",
+          key: "folder-move-error-message",
+        });
+        return;
+      }
+
       dispatch(openModal());
       dispatch(dekstopMoveSetFolderData({ folderId, folderName }));
       dispatch(
@@ -78,14 +130,13 @@ const useHandleActionFolderMenu = () => {
       );
 
       dispatch(setMoveParentFolderId(parentFolderState.parentFolderData?.folder_id ?? null));
-      setAction("move");
     },
-    [dispatch, parentFolderState.parentFolderData]
+    [dispatch, parentFolderState.parentFolderData, subFolderPermission]
   );
 
   const handleMoveFolder = useCallback(
-    (folderId: string, folderName: string, setAction: React.Dispatch<React.SetStateAction<ActionSelected>>) => {
-      if (isDesktopDevice || isTabletDevice) prepareForDektopMove(setAction, folderId, folderName);
+    (folderId: string, folderName: string) => {
+      if (isDesktopDevice || isTabletDevice) prepareForDektopMove(folderId, folderName);
       if (isMobileDevice) prepareForMobileMove(folderId, folderName);
     },
     [isDesktopDevice, isTabletDevice, isMobileDevice, prepareForMobileMove, prepareForDektopMove]

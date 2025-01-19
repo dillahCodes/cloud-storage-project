@@ -1,9 +1,10 @@
 import useBreadcrumbState from "@/features/breadcrumb/hooks/use-breadcrumb-state";
 import useFileUploading from "@/features/file/hooks/use-file-uploading";
+import useMoveMobileErroMessage from "@/features/move-folder-or-file/hooks/use-move-mobile-error-message";
 import { mobileMoveSelector } from "@/features/move-folder-or-file/slice/mobile-move-slice";
-import { moveFoldersAndFilesDataSelector } from "@/features/move-folder-or-file/slice/move-folders-and-files-data-slice";
 import useDetectLocation from "@/hooks/use-detect-location";
 import { themeColors } from "@/theme/antd-theme";
+import withLoadingOverlay from "@components/hoc/with-loading-overlay";
 import { Flex, Layout } from "antd";
 import { Content, Footer } from "antd/es/layout/layout";
 import classNames from "classnames";
@@ -13,21 +14,17 @@ import { useSelector } from "react-redux";
 import { MainLayoutProps } from ".";
 import Breadcrumb from "../breadcrumb/breadcrumb";
 import ButtonAddMobile from "../button-add-folder-and-file/button-add-mobile";
-import ButtonMoveCancel from "../button-move/button-move-cancel";
 import ButtonMoveWithModal from "../button-move/button-move-with-modal";
 import ButtonUploadStatusModal from "../button-upload-status/buttton-upload-status-modal";
 import MobileDrawer from "../drawer/mobile-drawer";
 import MobileDrawerMenu from "../drawer/mobile-drawer-menu";
 import MobileHeder from "../header/mobile-header";
-import useMoveMobileErroMessage from "@/features/move-folder-or-file/hooks/use-move-mobile-error-message";
-import withLoadingOverlay from "@components/hoc/with-loading-overlay";
 
 const MobileMainLayout: React.FC<MainLayoutProps> = ({ children, showAddButton, withFooter = true, withBreadcrumb, showPasteButton }) => {
   useMoveMobileErroMessage();
 
   const { fileUploadingState } = useFileUploading();
   const { items } = useBreadcrumbState();
-  const { parentFolderData } = useSelector(moveFoldersAndFilesDataSelector);
 
   const { isMoveFolderOrFileLocation } = useDetectLocation();
   const { fileId, folderId } = useSelector(mobileMoveSelector);
@@ -52,7 +49,6 @@ const MobileMainLayout: React.FC<MainLayoutProps> = ({ children, showAddButton, 
         {isPasteButtonVisible && (
           <Flex vertical gap="middle">
             <ButtonMoveWithModal />
-            {parentFolderData && <ButtonMoveCancel />}
           </Flex>
         )}
         {showAddButton && <ButtonAddMobile />}

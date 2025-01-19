@@ -7,30 +7,24 @@ import { themeColors } from "@/theme/antd-theme";
 import Button from "@components/ui/button";
 import { Badge, Flex, Typography } from "antd";
 import { Header } from "antd/es/layout/layout";
-import { useMemo } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { IoIosArrowBack, IoMdClose } from "react-icons/io";
+import { IoMdClose } from "react-icons/io";
 import { IoSearchSharp } from "react-icons/io5";
 import { useSelector } from "react-redux";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import MobileProfileHeader from "./mobile-profile-header";
 
 const { Text } = Typography;
 
 const MobileHeder = () => {
   const navigate = useNavigate();
-  const { "0": searcParams } = useSearchParams();
 
   const { isMoveFolderOrFileLocation } = useDetectLocation();
   const { title } = useMobileHeaderTitle();
   const { messageCount } = useSelector(messageSelector);
 
   const { toggleDrawerMenu } = useDrawer();
-  const { handleCancelMove, handleBackPrevLocation } = useMobileMoveNavigate();
-
-  const isInSubFolder = useMemo(() => {
-    return searcParams.get("parentId") && isMoveFolderOrFileLocation ? true : false;
-  }, [searcParams, isMoveFolderOrFileLocation]);
+  const { handleCancelMove } = useMobileMoveNavigate();
 
   const handleNavigateToProfile = () => navigate("/storage/profile", { replace: true });
 
@@ -42,12 +36,8 @@ const MobileHeder = () => {
             /**
              * cancel move button
              */
-            <Button
-              type="primary"
-              onClick={isInSubFolder ? handleBackPrevLocation : handleCancelMove}
-              className="cursor-pointer text-xl text-black  w-fit px-2 rounded-sm bg-[#FFB6C1] "
-            >
-              {isInSubFolder ? <IoIosArrowBack /> : <IoMdClose />}
+            <Button type="primary" onClick={handleCancelMove} className="cursor-pointer text-xl text-black  w-fit px-2 rounded-sm bg-[#FFB6C1] ">
+              <IoMdClose />
             </Button>
           ) : (
             /**

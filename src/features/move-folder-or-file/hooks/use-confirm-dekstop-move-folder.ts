@@ -1,12 +1,14 @@
+import { FirebaseUserData } from "@/features/auth/auth";
+import useUser from "@/features/auth/hooks/use-user";
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 import { db } from "@/firebase/firebase-services";
+import useDetectLocation from "@/hooks/use-detect-location";
+import { message } from "antd";
 import { collection, doc, DocumentData, getDoc, getDocs, query, QuerySnapshot, updateDoc, where } from "firebase/firestore";
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { closeModal, dekstopMoveSelector, setDekstopMoveStatus } from "../slice/dekstop-move-slice";
+import { closeModal, dekstopMoveSelector, resetDektopMoveState, setDekstopMoveStatus } from "../slice/dekstop-move-slice";
 import { moveFoldersAndFilesDataSelector } from "../slice/move-folders-and-files-data-slice";
-import useUser from "@/features/auth/hooks/use-user";
-import { message } from "antd";
 
 interface MoveFolderParams {
   folderId: string;
@@ -134,11 +136,80 @@ const handleUpdateFilesPromises = async (files: SubFileGetData[], newRootFolderU
   await Promise.all(promises);
 };
 
+interface ValidateMoveParams {
+  user: FirebaseUserData | null;
+  folderWillBeMoved: RootFolderGetData | SubFolderGetData | null;
+  parentFolderData: RootFolderGetData | SubFolderGetData | null;
+  isSubSharedWithMeLocation: boolean;
+  foldersData: RootFolderGetData[] | SubFolderGetData[] | null;
+}
+
+const handleMoveFolderValidation = (params: ValidateMoveParams) => {
+  const { folderWillBeMoved, parentFolderData, user, foldersData, isSubSharedWithMeLocation } = params;
+
+  /**
+   * folder validation
+   */
+  const isFolderExists = !!foldersData?.some((folder) => folder.folder_id === folderWillBeMoved?.folder_id);
+  const isFolderWillBeMovedInvalid = !folderWillBeMoved;
+
+  /**
+   * folder permission validation
+   */
+  const isNotFolderOwner = folderWillBeMoved?.owner_user_id !== user!.uid;
+  const isRootFolderMine: boolean = parentFolderData?.root_folder_user_id === user!.uid;
+
+  /**
+   * folder move validation
+   */
+  const isNotOwnerMovingToRoot: boolean = isNotFolderOwner && !parentFolderData && isSubSharedWithMeLocation;
+  const isMovingSharedFolderToMyFolder: boolean = isRootFolderMine && isSubSharedWithMeLocation;
+  const isMovingSharedFolderNotOwnedByMe: boolean = isMovingSharedFolderToMyFolder && isNotFolderOwner;
+
+  const validation = [
+    {
+      condition: !user,
+      message: "Something went wrong. Please try again.",
+    },
+    {
+      condition: isFolderWillBeMovedInvalid,
+      message: "Folder not found. Please try again.",
+    },
+    {
+      condition: isNotOwnerMovingToRoot || isMovingSharedFolderNotOwnedByMe,
+      message: "Only folder owner can move to this location.",
+    },
+    {
+      condition: isFolderExists,
+      message: "folder already exists.",
+    },
+
+    // add folder validation here
+  ];
+
+  const failedValidation = validation.find((validation) => validation.condition);
+  if (failedValidation) return failedValidation;
+
+  return {
+    condition: false,
+    message: "",
+  };
+};
+
 const useConfirmDekstopMoveFolder = () => {
   const dispatch = useDispatch();
-  const { parentFolderData } = useSelector(moveFoldersAndFilesDataSelector);
-  const { folderId } = useSelector(dekstopMoveSelector);
+
+  /**
+   * state
+   */
   const { user } = useUser();
+  const { parentFolderData, foldersData } = useSelector(moveFoldersAndFilesDataSelector);
+  const { folderId } = useSelector(dekstopMoveSelector);
+
+  /**
+   * detect location
+   */
+  const { isSubSharedWithMeLocation } = useDetectLocation();
 
   const handleMoveFolderRecursively = useCallback(async (params: MoveFolderParams) => {
     const { folderId, newParentFolderId, newRootFolderId, newRootFolderOwnerUserId } = params;
@@ -165,8 +236,6 @@ const useConfirmDekstopMoveFolder = () => {
   }, []);
 
   const handleConfirmMoveFolder = useCallback(async () => {
-    if (!user) return;
-
     try {
       dispatch(setDekstopMoveStatus("loading"));
       dispatch(closeModal());
@@ -175,37 +244,54 @@ const useConfirmDekstopMoveFolder = () => {
        * fetch folder will be moved
        */
       const folderWillBeMoved = await handleGetFolderById(folderId as string);
-      if (!folderWillBeMoved) {
+
+      /**
+       * validate before move folder
+       */
+      const validationRes = handleMoveFolderValidation({
+        user,
+        folderWillBeMoved,
+        parentFolderData,
+        isSubSharedWithMeLocation,
+        foldersData,
+      });
+      if (validationRes.condition) {
+        dispatch(setDekstopMoveStatus("error"));
         message.open({
           type: "error",
-          content: "Folder not found, please try again",
+          content: validationRes.message,
           className: "font-archivo text-sm",
-          key: "folder-not-found-message",
+          key: "folder-move-error-message",
         });
-        dispatch(setDekstopMoveStatus("error"));
         return;
       }
 
       parentFolderData
         ? await handleMoveFolderRecursively({
-            folderId: folderWillBeMoved.folder_id,
+            folderId: folderWillBeMoved!.folder_id,
             newParentFolderId: parentFolderData.folder_id,
             newRootFolderId: parentFolderData.root_folder_id,
             newRootFolderOwnerUserId: parentFolderData.root_folder_user_id,
           })
         : await handleMoveFolderRecursively({
-            folderId: folderWillBeMoved.folder_id,
+            folderId: folderWillBeMoved!.folder_id,
             newParentFolderId: null,
-            newRootFolderId: folderWillBeMoved.folder_id,
-            newRootFolderOwnerUserId: user.uid,
+            newRootFolderId: folderWillBeMoved!.folder_id,
+            newRootFolderOwnerUserId: user!.uid,
           });
 
+      /**
+       * reset state and show success message
+       */
       dispatch(setDekstopMoveStatus("success"));
+      dispatch(resetDektopMoveState());
+
+      message.open({ type: "success", content: "Folder moved successfully.", className: "font-archivo text-sm", key: "folder-move-success-message" });
     } catch (error) {
       dispatch(setDekstopMoveStatus("error"));
       console.error("error while move folder: ", error instanceof Error ? error.message : "an unknown error occurred");
     }
-  }, [folderId, parentFolderData, handleMoveFolderRecursively, user, dispatch]);
+  }, [folderId, parentFolderData, user, dispatch, isSubSharedWithMeLocation, foldersData, handleMoveFolderRecursively]);
 
   return { handleConfirmMoveFolder };
 };

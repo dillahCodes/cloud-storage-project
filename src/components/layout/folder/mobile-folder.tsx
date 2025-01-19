@@ -1,117 +1,78 @@
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
+import useHandleClickFolder from "@/features/folder/hooks/use-handle-click-folder";
+import { folderOptionsSelector } from "@/features/folder/slice/folder-options-slice";
 import { neoBrutalBorderVariants, themeColors } from "@/theme/antd-theme";
-import { Flex, Modal, Typography } from "antd";
-import React, { forwardRef, useCallback, useEffect } from "react";
+import { Flex, Typography } from "antd";
+import React, { memo, useMemo } from "react";
 import { MdFolderOpen } from "react-icons/md";
-import MobileFolderOptionsButtonWithBottomDrawer from "./mobile-folder-options-button";
-import RenderResponsiveTextMemoized from "./responsive-folder-name";
+import { useSelector } from "react-redux";
 import useFolderOptionsMenu from "../menu/folder-menu/hooks/use-folder-menu";
 import MenuItemComponent from "../menu/menu-item";
-import ModalContentRenameFolder from "./modal-content-rename-folder";
-import ModalContentDeleteFolder from "./modal-content-delete-folder";
+import MobileFolderOptionsButtonWithBottomDrawer from "./mobile-folder-options-button";
+import RenderResponsiveTextMemoized from "./responsive-folder-name";
 
-interface FolderProps extends React.HTMLAttributes<HTMLDivElement> {
+interface FolderProps {
   folderData: RootFolderGetData | SubFolderGetData;
-  isDrawerMobileOpen: boolean;
-  onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
-  setMobileOpenedFolderId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const { Text } = Typography;
 
-const MobileFolder = forwardRef<HTMLDivElement, FolderProps>(
-  ({ folderData, isDrawerMobileOpen, onClick, setMobileOpenedFolderId, ...props }, ref) => {
-    const [modal, modalContextHolder] = Modal.useModal();
-    const { handleToggleChildren, menuList, handleCloseAllChildren, actionSelected } = useFolderOptionsMenu(folderData);
+const MobileFolder: React.FC<FolderProps> = ({ folderData }) => {
+  const { handleToggleChildren, folderMenuList, handleCloseAllChildren } = useFolderOptionsMenu(folderData);
+  const { handleClickFolder, handleClickMobileFolderOptions, handleCloseDrawerFolderMobileOptions } = useHandleClickFolder();
+  const { selectedFolderData } = useSelector(folderOptionsSelector);
 
-    /**
-     * Close the mobile drawer and reset related states.
-     */
-    const handleDrawerOnClose = useCallback(() => {
-      setMobileOpenedFolderId(null);
-      handleCloseAllChildren();
-    }, [handleCloseAllChildren, setMobileOpenedFolderId]);
+  const isDrawerOpen = useMemo(() => {
+    return Boolean(selectedFolderData?.folder_id === folderData.folder_id);
+  }, [folderData, selectedFolderData]);
 
-    /**
-     * Render modal content based on the selected action.
-     */
-    const renderModalContent = useCallback(() => {
-      switch (actionSelected) {
-        case "rename":
-          return <ModalContentRenameFolder folderData={folderData} afterCloseButton={handleCloseAllChildren} />;
-        case "delete":
-          return (
-            <ModalContentDeleteFolder folderData={folderData} afterCloseButton={handleCloseAllChildren} afterDeleteFolder={handleCloseAllChildren} />
-          );
+  const handleCloseDrawer = (e: React.MouseEvent<Element, MouseEvent> | React.KeyboardEvent<Element>) => {
+    handleCloseDrawerFolderMobileOptions(e);
+    handleCloseAllChildren();
+  };
 
-        default:
-          handleDrawerOnClose();
-          return null;
-      }
-    }, [actionSelected, folderData, handleCloseAllChildren, handleDrawerOnClose]);
+  return (
+    <>
+      <Flex
+        className="border-2 border-black rounded-md cursor-pointer w-full p-3"
+        gap="small"
+        align="center"
+        justify="space-between"
+        onClick={(e: React.MouseEvent<HTMLElement>) => handleClickFolder(folderData, e)}
+        style={{ ...neoBrutalBorderVariants.medium, backgroundColor: themeColors.primary200 }}
+      >
+        <FolderName folderName={folderData.folder_name} />
 
-    /**
-     * Display modal when an action is selected.
-     */
-    useEffect(() => {
-      if (!actionSelected) return;
-
-      modal.info({
-        content: renderModalContent(),
-        icon: null,
-        styles: { content: { padding: "12px" } },
-        footer: null,
-        afterClose: handleCloseAllChildren,
-        maskClosable: true,
-      });
-    }, [modal, renderModalContent, actionSelected, handleCloseAllChildren]);
-
-    return (
-      <>
-        {modalContextHolder}
-        <Flex
-          ref={ref}
-          className="border-2 border-black rounded-md cursor-pointer w-full p-3"
-          gap="small"
-          align="center"
-          justify="space-between"
-          onClick={onClick}
-          {...props}
-          style={{ ...neoBrutalBorderVariants.medium, backgroundColor: themeColors.primary200 }}
-        >
-          <FolderName folderName={folderData.folder_name} />
-
-          {/* Mobile folder options and drawer menu */}
-          <div id="folder-options">
-            <MobileFolderOptionsButtonWithBottomDrawer
-              children={<MobileFolderMenu menuList={menuList} handleToggleChildren={handleToggleChildren} />}
-              open={isDrawerMobileOpen}
-              onClose={handleDrawerOnClose}
-              height={"auto"}
-              title={<FolderName folderName={folderData.folder_name} />}
-              closeIcon={null}
-              placement="bottom"
-              styles={{
-                content: { borderRadius: "10px 10px 0 0" },
-                header: {
-                  padding: "12px",
-                  backgroundColor: themeColors.primary300,
-                  borderBottomColor: "black",
-                  borderBottomWidth: "2px",
-                },
-                body: { backgroundColor: themeColors.primary300, padding: "12px" },
-              }}
-            />
-          </div>
-        </Flex>
-      </>
-    );
-  }
-);
+        {/* Mobile folder options and drawer menu */}
+        <div id="folder-options" onClick={(e) => handleClickMobileFolderOptions(folderData, e)}>
+          <MobileFolderOptionsButtonWithBottomDrawer
+            drawerContent={<MobileFolderMenu menuList={folderMenuList} handleToggleChildren={handleToggleChildren} />}
+            open={isDrawerOpen}
+            onClose={(e) => handleCloseDrawer(e)}
+            height={"auto"}
+            title={<FolderName folderName={folderData.folder_name} />}
+            closeIcon={null}
+            placement="bottom"
+            styles={{
+              content: { borderRadius: "10px 10px 0 0" },
+              header: {
+                padding: "12px",
+                backgroundColor: themeColors.primary300,
+                borderBottomColor: "black",
+                borderBottomWidth: "2px",
+              },
+              body: { backgroundColor: themeColors.primary300, padding: "12px" },
+            }}
+          />
+        </div>
+      </Flex>
+    </>
+  );
+};
 
 MobileFolder.displayName = "MobileFolder";
 
-export default MobileFolder;
+export default memo(MobileFolder);
 
 const MobileFolderMenu: React.FC<{
   menuList: MenuItem[];

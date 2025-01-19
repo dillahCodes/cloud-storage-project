@@ -4,6 +4,7 @@ import useAddBreadcrumbItems from "@/features/breadcrumb/hooks/use-addbreadcrumb
 import useAutoDeleteUnusedBreadcrumbItems from "@/features/breadcrumb/hooks/use-auto-delete-unused-breadcrumb-items";
 import useBreadcrumbState from "@/features/breadcrumb/hooks/use-breadcrumb-state";
 import useSubFolderAutoGetBreadcrums from "@/features/breadcrumb/hooks/use-sub-folder-auto-get-breadcrumbs";
+import useFilesState from "@/features/file/hooks/use-files-state";
 import useGetFiles from "@/features/file/hooks/use-get-files";
 import useAddSharedWithMeFolderData from "@/features/folder/hooks/use-add-shared-with-me-folder-data";
 import useCurrentFolderState from "@/features/folder/hooks/use-current-folder-state";
@@ -21,7 +22,6 @@ import { useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import MappingFiles from "./mapping-files";
 import MappingFolders from "./mapping-folders";
-import useFilesState from "@/features/file/hooks/use-files-state";
 
 const NestedFolderPageComponent: React.FC = () => {
   useMobileHeaderTitle("folders");
@@ -35,64 +35,69 @@ const NestedFolderPageComponent: React.FC = () => {
   // parent folder state
   const { parentFolderState } = useParentFolder({
     fetchParentFolderDataOnMount: true,
-    resetParentFolderDataOnMount: false,
+    resetParentFolderDataOnMount: true,
     folderId,
   });
   const { status: parentFolderStatus } = parentFolderState;
 
   // get parent folder collaborators and general access data
   const { collaboratorsUserData, fetchCollaboratorsUserDataStatus } = useGetCollaborators({
-    shouldFetch: Boolean(folderId),
+    shouldFetch: parentFolderState.isValidParentFolder,
     folderId,
-    shoudFetchUserCollaboratorsData: Boolean(folderId),
+    shoudFetchUserCollaboratorsData: parentFolderState.isValidParentFolder,
   });
   const { generalAccessDataState, fetchStatus } = useGetGeneralAccess({
-    shouldFetch: Boolean(folderId),
+    shouldFetch: parentFolderState.isValidParentFolder,
     folderId,
   });
   const isGetPermissionSuccess = useMemo(() => {
-    return fetchCollaboratorsUserDataStatus === "succeeded" && fetchStatus === "succeeded";
-  }, [fetchCollaboratorsUserDataStatus, fetchStatus]);
+    return fetchCollaboratorsUserDataStatus === "succeeded" && fetchStatus === "succeeded" && parentFolderStatus === "succeeded";
+  }, [fetchCollaboratorsUserDataStatus, fetchStatus, parentFolderStatus]);
 
   // get permission in this sub folder
   const { permissions } = useFolderGetPermission({
-    userId: user?.uid,
-    collaboratorsUserData,
-    generalAccessDataState,
-    parentFolderOwnerId: parentFolderState.parentFolderData?.owner_user_id,
+    userId: user ? user.uid : null,
+    collaboratorsUserData: collaboratorsUserData ?? null,
+    generalAccessDataState: generalAccessDataState ?? null,
+    parentFolderOwnerId: parentFolderState.parentFolderData?.owner_user_id ?? null,
+    shouldProcessPermission: isGetPermissionSuccess,
   });
+
+  // const permissionState = useSelector(folderPermissionSelector);
+  // console.log(permissions);
+
+  // // set folder permission to state
   useFolderPermissionSetState({
-    withUseEffect: {
-      subFolder: {
-        data: permissions,
-      },
-      statusFetch: {
-        CollaboratorsFetchStatus: fetchCollaboratorsUserDataStatus,
-        GeneralAccessFetchStatus: fetchStatus,
-      },
-    },
+    isRootFolder: false,
+
+    subFolderPermissions: permissions,
+    detailsFolderPermissions: null,
+
+    permissionsStatus: isGetPermissionSuccess ? "succeeded" : "loading",
+    shouldProceed: isGetPermissionSuccess,
   });
 
   // delete shared folder if user can't view
-  const shouldDeleteSharedFolder = parentFolderState.parentFolderData?.root_folder_user_id !== user?.uid && !permissions.canView;
+  const shouldDeleteSharedFolder =
+    parentFolderState.parentFolderData?.root_folder_user_id !== user?.uid && !permissions.canView && isGetPermissionSuccess;
   useDeleteSharedFolder({
     parentFolderId: parentFolderState.parentFolderData?.folder_id,
     shouldFetch: shouldDeleteSharedFolder,
   });
 
   // if is shared-with me params then add save parentFolder id to firestore
-  const shouldSaveSharedFolder =
-    params === "shared-with-me" &&
-    parentFolderState.parentFolderData?.root_folder_user_id !== user?.uid &&
-    parentFolderState.isValidParentFolder &&
-    permissions.canView;
-
-  const sharedFolderId = parentFolderState.parentFolderData?.folder_id || "";
+  const shouldSaveSharedFolder = useMemo(() => {
+    return (
+      params === "shared-with-me" &&
+      parentFolderState.parentFolderData?.root_folder_user_id !== user?.uid &&
+      parentFolderState.isValidParentFolder &&
+      permissions.canView
+    );
+  }, [params, parentFolderState, user, permissions]);
 
   // add shared with me folder data
   useAddSharedWithMeFolderData({
     shouldAdd: shouldSaveSharedFolder,
-    sharedFolderId,
   });
 
   // set first breadcrumb item
@@ -145,13 +150,12 @@ const NestedFolderPageComponent: React.FC = () => {
   // files state
   const { files, status: fileStatus } = useFilesState();
 
-  const isLoading = useMemo(
-    () => fileStatus === "loading" || folderStatus === "loading" || fetchCollaboratorsUserDataStatus === "loading" || fetchStatus === "loading",
-    [fetchCollaboratorsUserDataStatus, fetchStatus, fileStatus, folderStatus]
-  );
+  const isLoading = useMemo(() => {
+    return fileStatus === "loading" || folderStatus === "loading" || fetchCollaboratorsUserDataStatus === "loading" || fetchStatus === "loading";
+  }, [fetchCollaboratorsUserDataStatus, fetchStatus, fileStatus, folderStatus]);
 
-  const isAllDataEmpty = useMemo(
-    () =>
+  const isAllDataEmpty = useMemo(() => {
+    return (
       files.length === 0 &&
       fileStatus !== "loading" &&
       fileStatus !== "idle" &&
@@ -159,9 +163,9 @@ const NestedFolderPageComponent: React.FC = () => {
       folderStatus !== "loading" &&
       folderStatus !== "idle" &&
       parentFolderStatus !== "loading" &&
-      parentFolderStatus !== "idle",
-    [fileStatus, folderStatus, files.length, folders.length, parentFolderStatus]
-  );
+      parentFolderStatus !== "idle"
+    );
+  }, [fileStatus, folderStatus, files.length, folders.length, parentFolderStatus]);
 
   return (
     <MainLayout showAddButton showPasteButton>

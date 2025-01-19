@@ -5,6 +5,7 @@ import { RootFolderGetData, SubFolderGetData } from "../folder";
 import useAddActivityRenamedFolder from "./use-add-activity-renamed-folder";
 import { v4 as uuidv4 } from "uuid";
 import useParentFolder from "./use-parent-folder";
+import { message } from "antd";
 
 const useChangeFolderName = (folderData: RootFolderGetData | SubFolderGetData) => {
   const { handleAddActivityRenamedFolder } = useAddActivityRenamedFolder();
@@ -15,7 +16,6 @@ const useChangeFolderName = (folderData: RootFolderGetData | SubFolderGetData) =
     folderId: folderData.folder_id,
   });
   const [newFolderNameValue, setNewFolderNameValue] = useState<string>(folderData.folder_name || "");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.target.value;
@@ -23,11 +23,17 @@ const useChangeFolderName = (folderData: RootFolderGetData | SubFolderGetData) =
   };
 
   const handleConfirmChangeFolderName = async () => {
-    setIsLoading(true);
-
     const { currentUser } = auth;
 
     try {
+      message.open({
+        type: "loading",
+        content: "Updating folder name...",
+        className: "font-archivo text-sm",
+        duration: 0,
+        key: "folder-name-update-loading",
+      });
+
       if (!currentUser) return;
       const folderRef = doc(db, "folders", folderData.folder_id);
 
@@ -51,14 +57,28 @@ const useChangeFolderName = (folderData: RootFolderGetData | SubFolderGetData) =
         activityByUserId: currentUser.uid,
         activityDate: serverTimestamp(),
       });
+
+      message.destroy("folder-name-update-loading");
+      message.open({
+        type: "success",
+        content: "Folder name updated successfully",
+        className: "font-archivo text-sm",
+        key: "folder-name-update-success",
+      });
     } catch (error) {
-      console.error("Error updating folder name:", error);
+      message.open({
+        type: "error",
+        content: "Please try again",
+        className: "font-archivo text-sm",
+        key: "folder-name-update-error",
+      });
+      console.error("Error updating folder name:", error instanceof Error ? error.message : "An unknown error occurred.");
     }
   };
 
   return {
     newFolderNameValue,
-    isLoading,
+    // isLoading,
     handleInputChange,
     handleConfirmChangeFolderName,
   };

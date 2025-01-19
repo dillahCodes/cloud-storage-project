@@ -6,14 +6,15 @@ interface WithLoadingOverlayProps {
   opacity: Opacity;
   zIndex: number;
   showLoading: boolean;
+  loadingText: string;
 }
 
 const { Text } = Typography;
 const withLoadingOverlay = <P extends object>(Component: React.ComponentType<P>) => {
-  const WrapperComponent: React.FC<P & WithLoadingOverlayProps> = ({ showLoading, opacity, zIndex, ...props }) => {
+  const WrapperComponent: React.FC<P & WithLoadingOverlayProps> = ({ loadingText, showLoading, opacity, zIndex, ...props }) => {
     return (
       <>
-        {showLoading && <LoadingComponent opacity={opacity} zIndex={zIndex} />}
+        {showLoading && <LoadingComponent opacity={opacity} zIndex={zIndex} loadingText={loadingText} />}
         <Component {...(props as P)} />
       </>
     );
@@ -27,6 +28,7 @@ export default withLoadingOverlay;
 interface LoadingComponentProps {
   opacity: Opacity;
   zIndex: number;
+  loadingText: string;
 }
 const LoadingComponent: React.FC<LoadingComponentProps> = ({ opacity, zIndex }) => {
   return (

@@ -78,6 +78,7 @@ interface SubFolderGetData {
 
 interface SharedWithMeData {
   folderId: string;
+  rootFolderId: string;
   userId: string;
   createdAt: FieldValue;
   updatedAt: null;

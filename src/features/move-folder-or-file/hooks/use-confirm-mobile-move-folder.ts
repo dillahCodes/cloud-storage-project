@@ -7,8 +7,10 @@ import { collection, doc, DocumentData, getDoc, getDocs, query, QuerySnapshot, u
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavigateFunction, useNavigate, useSearchParams } from "react-router-dom";
-import { mobileMoveSelector, setMobileMoveFolderMoveErrorMessage, setMobileMoveStatus } from "../slice/mobile-move-slice";
+import { mobileMoveSelector, resetMobileMoveState, setMobileMoveFolderMoveErrorMessage, setMobileMoveStatus } from "../slice/mobile-move-slice";
 import { moveFoldersAndFilesDataSelector } from "../slice/move-folders-and-files-data-slice";
+import { message } from "antd";
+import useDetectLocation from "@/hooks/use-detect-location";
 
 interface MoveFolderParams {
   folderId: string;
@@ -34,6 +36,9 @@ interface HandleMoveFolderSecondValidationParams {
   dispatch: Dispatch;
   navigate: NavigateFunction;
   moveFromPath: string;
+  user: FirebaseUserData | null;
+  isRootMovePage: boolean;
+  isSubMovePage: boolean;
 }
 
 /**
@@ -211,23 +216,59 @@ const handleMoveFolderFirstValidation = (params: HandleMoveFolderFirstValidation
  */
 
 const handleMoveFolderSecondValidation = (params: HandleMoveFolderSecondValidationParams): boolean => {
-  const { folderId, folderWillBeMoved, foldersData, searchParams, dispatch, moveFromPath, navigate, parentFolderData } = params;
+  const {
+    folderId,
+    folderWillBeMoved,
+    foldersData,
+    searchParams,
+    dispatch,
+    moveFromPath,
+    navigate,
+    parentFolderData,
+    user,
+    isRootMovePage,
+    isSubMovePage,
+  } = params;
 
   const isExistingFolder = foldersData?.some((folder) => folder.folder_id === folderId);
   const folderWillBeMovedIsInvalid = !folderWillBeMoved;
   const isMoveToSelf = searchParams.get("parentId") === folderId;
   const isMoveToSelfSubFolder = folderWillBeMoved?.folder_id === parentFolderData?.root_folder_id;
 
+  /**
+   * folder permission validation
+   */
+  const isNotFolderOwner: boolean = folderWillBeMoved?.owner_user_id !== user!.uid;
+  const isRootFolderMine: boolean = parentFolderData?.root_folder_user_id === user!.uid;
+
+  /**
+   * folder move validation
+   */
+  const isNotOwnerMovingToRoot: boolean = isNotFolderOwner && !parentFolderData && isRootMovePage;
+  const isMovingSharedFolderToMyFolder: boolean = isRootFolderMine && isRootMovePage;
+  const isMovingSharedFolderNotOwnedByMe: boolean = (isMovingSharedFolderToMyFolder || isSubMovePage) && isNotFolderOwner;
+
+  /**
+   * validations list
+   */
   const validations = [
     { condition: folderWillBeMovedIsInvalid, message: "Something went wrong. Please try again." },
     { condition: isExistingFolder, message: "folder already exists." },
     { condition: isMoveToSelf, message: "You cannot move a folder to its own location." },
     { condition: isMoveToSelfSubFolder, message: "You cannot move a folder to its own subfolder." },
+    { condition: isNotOwnerMovingToRoot || isMovingSharedFolderNotOwnedByMe, message: "Only folder owner can move to this location." },
   ];
 
+  /**
+   * failed validation
+   */
   const failedValidation = validations.find((validation) => validation.condition);
 
+  /**
+   * error message
+   */
   if (failedValidation) {
+    message.open({ type: "error", content: failedValidation.message, className: "font-archivo text-sm" });
     dispatch(setMobileMoveFolderMoveErrorMessage(failedValidation.message));
     navigate(moveFromPath);
     return false;
@@ -267,6 +308,7 @@ const useConfirmMobileMoveFolder = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { "0": searchParams } = useSearchParams();
+  const { isRootMoveFolderOrFileLocation, isSubMoveFolderOrFileLocation } = useDetectLocation();
 
   const { user } = useUser();
   const { parentFolderData, foldersData } = useSelector(moveFoldersAndFilesDataSelector);
@@ -283,6 +325,11 @@ const useConfirmMobileMoveFolder = () => {
       // fetch and update files
       const files = await handleGetFilesByParentFolderId(folderId);
       if (files) await handleUpdateFilesPromises(files, newRootFolderOwnerUserId as string);
+
+      if (newParentFolderId) {
+        const folderData = await handleGetFolderById(folderId);
+        if (!folderData) return;
+      }
 
       // move itself
       await handleMoveFoler({
@@ -323,6 +370,9 @@ const useConfirmMobileMoveFolder = () => {
         navigate,
         moveFromPath: moveFromLocationPath as string,
         parentFolderData,
+        user,
+        isRootMovePage: isRootMoveFolderOrFileLocation,
+        isSubMovePage: isSubMoveFolderOrFileLocation,
       });
       if (!secondValidation) {
         dispatch(setMobileMoveStatus("error"));
@@ -348,16 +398,30 @@ const useConfirmMobileMoveFolder = () => {
           });
 
       /**
-       * navigate after move folder
+       * navigate and update state after move folder
        */
       navigateAfterMoveFolder(parentFolderData, navigate);
-
       dispatch(setMobileMoveStatus("success"));
+      dispatch(resetMobileMoveState());
+
+      message.open({ type: "success", content: "Folder moved successfully.", className: "font-archivo text-sm", key: "folder-move-success-message" });
     } catch (error) {
       dispatch(setMobileMoveStatus("error"));
       console.error("error while move folder: ", error instanceof Error ? error.message : "an unknown error occurred");
     }
-  }, [folderId, moveFromLocationPath, navigate, user, dispatch, foldersData, searchParams, parentFolderData, handleMoveFolderRecursively]);
+  }, [
+    folderId,
+    moveFromLocationPath,
+    navigate,
+    user,
+    dispatch,
+    foldersData,
+    searchParams,
+    parentFolderData,
+    isRootMoveFolderOrFileLocation,
+    isSubMoveFolderOrFileLocation,
+    handleMoveFolderRecursively,
+  ]);
 
   return { confirmMobileMoveFolder };
 };

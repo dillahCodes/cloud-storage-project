@@ -6,7 +6,7 @@ const ActivityFolderPageComponent = () => {
   useMobileHeaderTitle("activity");
 
   return (
-    <MainLayout withBreadcrumb={false} withFooter={false} showAddButton={false}>
+    <MainLayout withBreadcrumb={false} withFooter={false} showAddButton={false} showPasteButton={false}>
       <MappingFolderActivity />
     </MainLayout>
   );

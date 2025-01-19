@@ -1,10 +1,9 @@
 import { auth, db } from "@/firebase/firebase-services";
+import abbreviateText from "@/util/abbreviate-text";
+import { message } from "antd";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { useCallback } from "react";
 import { StarredFolderData, StarredFolderDataSerialized } from "../folder";
-import { message } from "antd";
-import abbreviateText from "@/util/abbreviate-text";
-import { ActionSelected } from "@components/layout/menu/folder-menu/hooks/use-folder-menu";
 
 interface NotificationConfig {
   key: string;
@@ -85,8 +84,7 @@ const useAddFolderStarred = () => {
    * @param {string} folderName - The name of the folder
    */
   const addFolderToStarred = useCallback(
-    async (folderId: string, folderName: string, setAction: React.Dispatch<React.SetStateAction<ActionSelected>>): Promise<void> => {
-      setAction("starred");
+    async (folderId: string, folderName: string): Promise<void> => {
       try {
         // Notify the user that the process is starting
         showNotification({

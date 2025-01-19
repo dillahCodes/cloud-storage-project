@@ -225,7 +225,8 @@ const useAddFile = ({ parentFolderData }: UseAddFileProps) => {
         selectedFile,
       });
       if (isUploaded) {
-        await setDoc(doc(db, "files", fileId), fileData);
+        const fileDoc = doc(db, "files", fileId);
+        await setDoc(fileDoc, fileData);
         handleAddActivityCreatedFile({
           type: "create-folder-activity",
           activityId: uuidv4(),
@@ -268,9 +269,7 @@ const useAddFile = ({ parentFolderData }: UseAddFileProps) => {
 
     fileInputRef.current.onchange = () => {
       const file = fileInputRef.current?.files?.[0];
-      if (file) {
-        parent_folder_id ? uploadSubFile(file) : uploadRootFile(file);
-      }
+      if (file) parent_folder_id ? uploadSubFile(file) : uploadRootFile(file);
     };
   };
 

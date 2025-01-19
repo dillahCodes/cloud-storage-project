@@ -2,6 +2,7 @@ import useCurrentFolderState from "@/features/folder/hooks/use-current-folder-st
 import FoldersAndFilesSortingOptions from "@components/layout/folder-and-files-sorting-options";
 import AllTypeFolderMapping from "@components/layout/folder/all-type-folder-mapping";
 import FolderEmpty from "@components/layout/folder/empty";
+import RenderFolderModal from "@components/layout/folder/render-folder-modal";
 import { useMemo } from "react";
 
 const SharredMappingFolders: React.FC = () => {
@@ -10,6 +11,7 @@ const SharredMappingFolders: React.FC = () => {
 
   return (
     <>
+      <RenderFolderModal />
       {!isSharedFolderEmpty && <FoldersAndFilesSortingOptions sortingFor="Folders" />}
       {isSharedFolderEmpty ? <FolderEmpty isSharedFolder /> : <AllTypeFolderMapping />}
     </>

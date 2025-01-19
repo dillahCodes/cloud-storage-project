@@ -8,18 +8,24 @@ interface UserGetGeneralAccessParams {
   shouldFetch: boolean;
 }
 
-export type GenerealAccessStatusFetch = "loading" | "succeeded" | "failed" | "idle";
+export type GeneralAccessStatusFetch = "loading" | "succeeded" | "failed" | "idle";
 
 const useGetGeneralAccess = ({ folderId, shouldFetch }: UserGetGeneralAccessParams) => {
   const [generalAccessDataState, setGeneralAccessDataState] = useState<GeneralAccessDataSerialized | null>(null);
-  const [fetchStatus, setFetchStatus] = useState<GenerealAccessStatusFetch>("idle");
+  const [fetchStatus, setFetchStatus] = useState<GeneralAccessStatusFetch>("idle");
 
   useEffect(() => {
     if (!folderId || !shouldFetch) return;
 
-    const generalAccessDataRef = handleBuildQuery(folderId);
-    const unsubscribe = handleSubscribeToGeneralAccess(generalAccessDataRef, setGeneralAccessDataState, setFetchStatus);
-    return () => unsubscribe();
+    setFetchStatus("loading");
+
+    const generalAccessDataRef = buildQuery(folderId);
+    const unsubscribe = subscribeToGeneralAccess(generalAccessDataRef, setGeneralAccessDataState, setFetchStatus);
+
+    return () => {
+      unsubscribe();
+      setFetchStatus("idle"); // Reset state to idle after unsubscribe
+    };
   }, [folderId, shouldFetch]);
 
   return { generalAccessDataState, fetchStatus };
@@ -27,19 +33,16 @@ const useGetGeneralAccess = ({ folderId, shouldFetch }: UserGetGeneralAccessPara
 
 export default useGetGeneralAccess;
 
-// helper function
-const handleBuildQuery = (folderId: string): DocumentReference<DocumentData, DocumentData> => {
-  const generalAccessDataRef = doc(db, "generalAccess", folderId);
-  return generalAccessDataRef;
+// Helper functions
+const buildQuery = (folderId: string): DocumentReference<DocumentData, DocumentData> => {
+  return doc(db, "generalAccess", folderId);
 };
 
-const handleSubscribeToGeneralAccess = (
+const subscribeToGeneralAccess = (
   generalAccessDataRef: DocumentReference<DocumentData, DocumentData>,
   setGeneralAccessDataState: (data: GeneralAccessDataSerialized | null) => void,
-  setFetchStatus: (status: "loading" | "succeeded" | "failed" | "idle") => void
+  setFetchStatus: (status: GeneralAccessStatusFetch) => void
 ) => {
-  setFetchStatus("loading");
-
   const unsubscribe = onSnapshot(
     generalAccessDataRef,
     (docSnap) => {
@@ -50,27 +53,24 @@ const handleSubscribeToGeneralAccess = (
       }
 
       const data = docSnap.data() as GeneralAccessData;
-      const serializeData = handleSerializeGeneralAccessData(data);
-      setGeneralAccessDataState(serializeData);
-
+      const serializedData = serializeGeneralAccessData(data);
+      setGeneralAccessDataState(serializedData);
       setFetchStatus("succeeded");
     },
-    (err) => {
-      console.error("Error getting general access data:", err instanceof Error ? err.message : "An unknown error occurred.");
+    (error) => {
+      console.error("Error fetching general access data:", error instanceof Error ? error.message : "Unknown error");
+      setGeneralAccessDataState(null);
       setFetchStatus("failed");
-    },
-    () => setFetchStatus("idle")
+    }
   );
 
   return unsubscribe;
 };
 
-const handleSerializeGeneralAccessData = (generalAccessData: GeneralAccessData): GeneralAccessDataSerialized => {
-  const generalAccessDataSerialized: GeneralAccessDataSerialized = {
+const serializeGeneralAccessData = (generalAccessData: GeneralAccessData): GeneralAccessDataSerialized => {
+  return {
     ...generalAccessData,
     createAt: JSON.parse(JSON.stringify(generalAccessData.createAt)),
     updateAt: generalAccessData.updateAt ? JSON.parse(JSON.stringify(generalAccessData.updateAt)) : null,
   };
-
-  return generalAccessDataSerialized;
 };

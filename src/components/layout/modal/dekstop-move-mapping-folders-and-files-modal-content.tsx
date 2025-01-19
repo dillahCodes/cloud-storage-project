@@ -1,5 +1,5 @@
 import { dekstopMoveSelector, setMoveParentFolderId } from "@/features/move-folder-or-file/slice/dekstop-move-slice";
-import { moveFoldersAndFilesDataSelector } from "@/features/move-folder-or-file/slice/move-folders-and-files-data-slice";
+import { moveFoldersAndFilesDataSelector, setMoveParentFolderData } from "@/features/move-folder-or-file/slice/move-folders-and-files-data-slice";
 import { Flex, message, Spin, Typography } from "antd";
 import classNames from "classnames";
 import { IoMdFolderOpen } from "react-icons/io";
@@ -8,6 +8,7 @@ import emptyIlustration from "@assets/File-bundle-amico.svg";
 import { useMemo } from "react";
 import FileIconsVariant from "../file/file-icons-variant";
 import abbreviateText from "@/util/abbreviate-text";
+import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 
 const { Text } = Typography;
 
@@ -16,11 +17,17 @@ const DektopMoveMappingFoldersAndFilesContent: React.FC = () => {
   const { folderId: folderIdWantToMove } = useSelector(dekstopMoveSelector);
   const { foldersData, folderStatus, filesData, fileStatus } = useSelector(moveFoldersAndFilesDataSelector);
 
-  const isEmpty = useMemo(() => !foldersData || foldersData.length === 0, [foldersData]);
-  const isLoading = useMemo(() => folderStatus === "loading" || fileStatus === "loading", [folderStatus, fileStatus]);
+  const isFolderEmpty = useMemo(() => !foldersData || foldersData.length === 0, [foldersData]);
+  const isFileEmpty = useMemo(() => !filesData || filesData.length === 0, [filesData]);
 
-  const handleClickFolder = (folderId: string) => {
-    if (folderIdWantToMove === folderId) {
+  const isFileLoading = useMemo(() => fileStatus === "loading", [fileStatus]);
+  const isFolderLoading = useMemo(() => folderStatus === "loading", [folderStatus]);
+
+  const isEmpty = useMemo(() => isFolderEmpty && isFileEmpty, [isFolderEmpty, isFileEmpty]);
+  const isLoading = useMemo(() => isFolderLoading || isFileLoading, [isFolderLoading, isFileLoading]);
+
+  const handleClickFolder = (folderData: RootFolderGetData | SubFolderGetData) => {
+    if (folderIdWantToMove === folderData.folder_id) {
       message.open({
         type: "error",
         content: "You can't move to the same folder",
@@ -29,7 +36,8 @@ const DektopMoveMappingFoldersAndFilesContent: React.FC = () => {
       });
       return;
     }
-    dispatch(setMoveParentFolderId(folderId));
+    dispatch(setMoveParentFolderId(folderData.folder_id));
+    dispatch(setMoveParentFolderData(folderData));
   };
 
   if (isLoading) {
@@ -50,7 +58,7 @@ const DektopMoveMappingFoldersAndFilesContent: React.FC = () => {
             key={folder.folder_id}
             folder={folder}
             isSelected={folder.folder_id === folderIdWantToMove}
-            onClick={() => handleClickFolder(folder.folder_id)}
+            onClick={() => handleClickFolder(folder)}
           />
         ))}
       {filesData && filesData.map((file) => <FilesItem key={file.file_id} fileName={file.file_name} fileType={file.file_type} />)}

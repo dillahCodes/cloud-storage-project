@@ -1,12 +1,15 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 const useDetectLocation = () => {
+  const [searchParams] = useSearchParams();
   const location = useLocation();
 
   const isMystorageLocation = location.pathname === "/storage/my-storage";
+  const isSubMyStorageLocation = searchParams.get("st") === "my-storage";
   const handleDetectIsMyStorageLocation = (path: string): boolean => path === "/storage/my-storage";
 
   const isSharedWithMeLocation = location.pathname === "/storage/shared-with-me";
+  const isSubSharedWithMeLocation = searchParams.get("st") === "shared-with-me";
   const handleDetectIsSharedWithMeLocation = (path: string): boolean => path === "/storage/shared-with-me";
 
   const isMyProfileLocation = location.pathname === "/storage/profile";
@@ -31,11 +34,14 @@ const useDetectLocation = () => {
   const handleDetectIsDetailsFolderLocation = (path: string, folderId: string): boolean => path === `/storage/folder/details/${folderId}`;
 
   const isMoveFolderOrFileLocation = location.pathname === "/storage/folder/move";
+  const isSubMoveFolderOrFileLocation = !!searchParams.get("parentId");
+  const isRootMoveFolderOrFileLocation = location.pathname === "/storage/folder/move" && !searchParams.get("parentId");
 
   const handleDetectIsPathEqual = (path: string): boolean => location.pathname === path;
 
   return {
     isMystorageLocation,
+    isSubMyStorageLocation,
     handleDetectIsMyStorageLocation,
     isMyProfileLocation,
     handleDetectIsMyProfileLocation,
@@ -49,12 +55,15 @@ const useDetectLocation = () => {
     isTrashLocation,
     handleDetectIsTrashLocation,
     isSharedWithMeLocation,
+    isSubSharedWithMeLocation,
     handleDetectIsSharedWithMeLocation,
     isNotFoundLocation,
     handleDetectIsNotFoundLocation,
     isDetailsFolderLocation,
     handleDetectIsDetailsFolderLocation,
     isMoveFolderOrFileLocation,
+    isSubMoveFolderOrFileLocation,
+    isRootMoveFolderOrFileLocation,
   };
 };
 

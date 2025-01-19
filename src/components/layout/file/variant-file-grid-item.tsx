@@ -1,16 +1,21 @@
+import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
 import { neoBrutalBorderVariants, themeColors } from "@/theme/antd-theme";
-import { Button, Flex, Typography } from "antd";
+import { Flex, Typography } from "antd";
 import FileIconsVariant from "./file-icons-variant";
+import OptionsFileButtonWithDrawer from "./options-file-button-with-drawer";
+import OptionsFileButtonWithFloatingElement from "./options-file-button-with-floating-element";
 import RenderResponsiveFileName from "./responsive-file-name";
-import { BsThreeDotsVertical } from "react-icons/bs";
+
+interface VariantFileGridItemParams {
+  fileData: SubFileGetData | RootFileGetData;
+}
 
 const { Text } = Typography;
 
-interface FileProps {
-  name: string;
-  fileType: string;
-}
-const VariantFileGridItem: React.FC<FileProps> = ({ name, fileType }) => {
+const VariantFileGridItem: React.FC<VariantFileGridItemParams> = ({ fileData }) => {
+  const { file_name, file_type } = fileData;
+  const { isDesktopDevice } = useGetClientScreenWidth();
+
   return (
     <Flex
       vertical
@@ -19,18 +24,16 @@ const VariantFileGridItem: React.FC<FileProps> = ({ name, fileType }) => {
       style={{ ...neoBrutalBorderVariants.medium, background: themeColors.primary200 }}
     >
       <Flex className="w-full" align="center" gap="small" justify="space-between">
+        {/* file name and icon */}
         <Text className="text-lg font-archivo">
-          <FileIconsVariant fileType={fileType} />
+          <FileIconsVariant fileType={file_type} />
         </Text>
-        <RenderResponsiveFileName fileName={name} />
-        <Button
-          icon={<BsThreeDotsVertical />}
-          onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-            e.stopPropagation();
-            console.log("opened file settings");
-          }}
-          className="p-0 border-none shadow-none text-black bg-transparent"
-        />
+        <RenderResponsiveFileName fileName={file_name} />
+
+        {/* file options button */}
+        <div id="file-options">
+          {isDesktopDevice ? <OptionsFileButtonWithFloatingElement fileData={fileData} /> : <OptionsFileButtonWithDrawer fileData={fileData} />}
+        </div>
       </Flex>
       <Flex
         align="center"
@@ -39,7 +42,7 @@ const VariantFileGridItem: React.FC<FileProps> = ({ name, fileType }) => {
         style={{ background: themeColors.primary300, ...neoBrutalBorderVariants.small }}
       >
         <Text className="text-6xl font-archivo">
-          <FileIconsVariant fileType={fileType} />
+          <FileIconsVariant fileType={file_type} />
         </Text>
       </Flex>
     </Flex>

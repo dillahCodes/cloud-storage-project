@@ -1,26 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import useFolderPermissionState from "./use-folder-permission-state";
-import useFolderPermissionSetState from "./use-folder-permission-setstate";
+import { folderPermissionSelector } from "../slice/folder-permission-slice";
 
-const useHandleFolderAccessModal = (isGetPermissionSuccess: boolean) => {
+const useHandleFolderAccessModal = () => {
   const navigate = useNavigate();
 
-  const { resetState } = useFolderPermissionSetState({});
-  const { subFolderPermission } = useFolderPermissionState();
+  const { subFolderPermission, statusFetch, isRootFolder } = useSelector(folderPermissionSelector);
+  const isPermissionSuccess = useMemo(() => statusFetch === "succeeded", [statusFetch]);
+
   const [isModalVisible, setModalVisible] = useState(false);
 
-  const closeModal = () => {
-    setModalVisible(false);
-    resetState();
-  };
+  const closeModal = () => setModalVisible(false);
 
   useEffect(() => {
-    if (!subFolderPermission.canCRUD && isGetPermissionSuccess && !subFolderPermission.canView) {
-      setModalVisible(true);
-      navigate("/storage/my-storage");
-    }
-  }, [subFolderPermission.canCRUD, isGetPermissionSuccess, navigate, subFolderPermission.canView]);
+    if (isRootFolder) return;
+    if (!isPermissionSuccess) return;
+    if (!subFolderPermission) return;
+    if (subFolderPermission.canView) return;
+
+    setModalVisible(true);
+    navigate("/storage/my-storage");
+  }, [isPermissionSuccess, subFolderPermission, statusFetch, navigate, isRootFolder]);
 
   return { isModalVisible, closeModal };
 };

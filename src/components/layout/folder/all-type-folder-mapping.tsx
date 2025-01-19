@@ -1,30 +1,20 @@
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
+import useCurrentFolderState from "@/features/folder/hooks/use-current-folder-state";
 import { mappingFolderTypeSelector } from "@/features/folder/slice/mapping-folder-type-slice";
 import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
-import { useMemo, useRef } from "react";
-import { useSelector } from "react-redux";
-import MobileFolder from "./mobile-folder";
-import useHandleClickFolder from "@/features/folder/hooks/use-handle-click-folder";
-import { useSearchParams } from "react-router-dom";
-import DesktopFolder from "./dekstop-folder";
 import { Col, Flex, Row } from "antd";
-import useCurrentFolderState from "@/features/folder/hooks/use-current-folder-state";
+import { useMemo } from "react";
+import { useSelector } from "react-redux";
+import DesktopFolder from "./dekstop-folder";
+import MobileFolder from "./mobile-folder";
 
 const AllTypeFolderMapping: React.FC = () => {
-  const { "0": urlSearchParams } = useSearchParams();
-
   const { mappingFolderType: mappingType } = useSelector(mappingFolderTypeSelector);
   const { folders: foldersData } = useCurrentFolderState();
 
   const { isTabletDevice, isMobileDevice } = useGetClientScreenWidth();
 
-  const folderRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const isGridView = mappingType === "grid";
-
-  const { handleClickFolder, mobileOpenedFolderId, setMobileOpenedFolderId } = useHandleClickFolder({
-    isSubFolder: true,
-    params: (urlSearchParams.get("st") as NestedBreadcrumbType) || ("my-storage" as NestedBreadcrumbType),
-  });
 
   // Determine the grid column span based on the device type
   const gridColspan = useMemo(() => {
@@ -34,27 +24,8 @@ const AllTypeFolderMapping: React.FC = () => {
   }, [isMobileDevice, isTabletDevice]);
 
   const renderFolder = (folder: SubFolderGetData | RootFolderGetData) => {
-    if (isMobileDevice || isTabletDevice) {
-      return (
-        <MobileFolder
-          setMobileOpenedFolderId={setMobileOpenedFolderId}
-          isDrawerMobileOpen={mobileOpenedFolderId === folder.folder_id}
-          key={folder.folder_id}
-          folderData={folder}
-          ref={(el) => (folderRefs.current[folder.folder_id] = el)}
-          onClick={(e) => handleClickFolder(folder, e)}
-        />
-      );
-    } else {
-      return (
-        <DesktopFolder
-          key={folder.folder_id}
-          folderData={folder}
-          ref={(el) => (folderRefs.current[folder.folder_id] = el)}
-          onClick={(e) => handleClickFolder(folder, e)}
-        />
-      );
-    }
+    const isMobile = isMobileDevice || isTabletDevice;
+    return isMobile ? <MobileFolder key={folder.folder_id} folderData={folder} /> : <DesktopFolder key={folder.folder_id} folderData={folder} />;
   };
 
   const GridFolderMapping = () => {

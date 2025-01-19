@@ -18,6 +18,12 @@ const initialState: DekstopMoveState = {
   fileName: null,
   fileType: null,
 
+  folderMovePermission: {
+    canCRUD: true,
+    canView: true,
+    canManageAccess: true,
+  },
+
   dekstopMoveStatus: "idle",
 };
 
@@ -87,6 +93,13 @@ export const dekstopMoveSlice = createSlice({
       state.dekstopMoveStatus = action.payload;
     },
 
+    /**
+     * dekstop permission reducers
+     */
+    setFolderMovePermission: (state, action: PayloadAction<DekstopMoveState["folderMovePermission"]>) => {
+      state.folderMovePermission = action.payload;
+    },
+
     resetDektopMoveState: () => initialState,
   },
 });
@@ -102,6 +115,7 @@ export const {
   setMoveParentFolderId,
   setMoveParentFolderLocationData,
   setDekstopMoveStatus,
+  setFolderMovePermission,
 } = dekstopMoveSlice.actions;
 export const dekstopMoveSelector = (state: RootState) => state.dekstopMove;
 export default dekstopMoveSlice.reducer;

@@ -1,9 +1,9 @@
 import { db } from "@/firebase/firebase-services";
-import { collection, doc, DocumentData, DocumentSnapshot, getDoc, onSnapshot, Query, query, QueryDocumentSnapshot, where } from "firebase/firestore";
+import { collection, doc, DocumentData, DocumentSnapshot, getDoc, onSnapshot, query, QueryDocumentSnapshot, where } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
-import { Collaborator, CollaboratorRole, CollaboratorUserData } from "../folder-collaborator";
+import { Collaborator, CollaboratorUserData } from "../folder-collaborator";
 
-interface UseGetCollabolatorsParams {
+interface UseGetCollaboratorsParams {
   folderId?: string;
   shouldFetch: boolean;
   shoudFetchUserCollaboratorsData?: boolean;
@@ -11,70 +11,60 @@ interface UseGetCollabolatorsParams {
 
 export type CollaboratorsStatusFetch = "loading" | "succeeded" | "failed" | "idle";
 
-export const useGetCollaborators = ({ folderId, shouldFetch, shoudFetchUserCollaboratorsData }: UseGetCollabolatorsParams) => {
+export const useGetCollaborators = ({ folderId, shouldFetch, shoudFetchUserCollaboratorsData }: UseGetCollaboratorsParams) => {
   const [collaborators, setCollaborators] = useState<Collaborator[] | null>(null);
   const [fetchStatus, setFetchStatus] = useState<CollaboratorsStatusFetch>("idle");
 
   const [collaboratorsUserData, setCollaboratorsUserData] = useState<CollaboratorUserData[] | null>(null);
   const [fetchCollaboratorsUserDataStatus, setFetchCollaboratorsUserDataStatus] = useState<CollaboratorsStatusFetch>("idle");
 
-  const handleFetchCollaboratorsUserData = useCallback(async (): Promise<(CollaboratorUserData | null)[] | null> => {
-    const collaboratorsUserId = handleGetAllCollaboratorsUserId(collaborators);
+  /**
+   * Fetch user data for collaborators
+   */
+  const fetchCollaboratorsUserData = useCallback(async () => {
+    try {
+      setFetchCollaboratorsUserDataStatus("loading");
+      const userIds = collaborators?.map((collaborator) => collaborator.userId) || [];
+      if (!userIds.length) throw new Error("No collaborator user IDs found");
 
-    if (!collaboratorsUserId || collaboratorsUserId.length === 0) return null;
+      const promises = userIds.map(async (userId) => {
+        const userDoc = doc(db, "users", userId);
+        const snapshot = await getDoc(userDoc);
+        return serializeUserData(snapshot, collaborators);
+      });
 
-    const promises = collaboratorsUserId.map(async (userId: string) => {
-      const userDoc = doc(db, "users", userId);
-      const userData = await getDoc(userDoc);
-      return handleSetUserData(userData, collaborators);
-    });
-
-    const userData = await Promise.all(promises);
-    return userData;
+      const userData = (await Promise.all(promises)).filter((user): user is CollaboratorUserData => user !== null);
+      setCollaboratorsUserData(userData);
+      setFetchCollaboratorsUserDataStatus("succeeded");
+    } catch (error) {
+      console.error("Error fetching collaborators user data:", error);
+      setFetchCollaboratorsUserDataStatus("failed");
+    }
   }, [collaborators]);
 
-  useEffect(() => {
-    const handleFetch = async () => {
-      if (!shoudFetchUserCollaboratorsData || !collaborators) return;
-
-      try {
-        setFetchCollaboratorsUserDataStatus("loading");
-
-        const userData = await handleFetchCollaboratorsUserData();
-        if (userData) {
-          const validUserData = userData.filter((user): user is CollaboratorUserData => user !== null);
-          setCollaboratorsUserData(validUserData);
-        } else {
-          setCollaboratorsUserData(null);
-        }
-
-        setFetchCollaboratorsUserDataStatus("succeeded");
-      } catch (error) {
-        setFetchCollaboratorsUserDataStatus("failed");
-        console.error("Error while fetching collaborators user data: ", error instanceof Error ? error.message : error);
-      }
-    };
-
-    handleFetch();
-  }, [shoudFetchUserCollaboratorsData, collaborators, handleFetchCollaboratorsUserData]);
-
+  /**
+   * Build query for fetching collaborators
+   */
   const buildQuery = useCallback(() => {
-    const collaboratorsCollection = collection(db, "collaborators");
-    const collaboratorsQuery = query(collaboratorsCollection, where("folderId", "==", folderId));
-    return collaboratorsQuery;
+    if (!folderId) throw new Error("Folder ID is undefined");
+    return query(collection(db, "collaborators"), where("folderId", "==", folderId));
   }, [folderId]);
 
-  const subscribeToCollaborators = useCallback((q: Query) => {
+  /**
+   * Subscribe to collaborators collection
+   */
+  const subscribeToCollaborators = useCallback((collaboratorsQuery: ReturnType<typeof buildQuery>) => {
     setFetchStatus("loading");
     return onSnapshot(
-      q,
+      collaboratorsQuery,
       (snapshot) => {
-        const data = snapshot.docs.map((doc) => handleSerializeData(doc)) as Collaborator[];
+        const data = snapshot.docs.map((doc) => serializeCollaboratorData(doc));
         setCollaborators(data);
         setFetchStatus("succeeded");
       },
-      (err) => {
-        console.error("error while fetching collaborators: ", err.message);
+      (error) => {
+        console.error("Error fetching collaborators:", error);
+        setCollaborators(null);
         setFetchStatus("failed");
       }
     );
@@ -83,41 +73,53 @@ export const useGetCollaborators = ({ folderId, shouldFetch, shoudFetchUserColla
   useEffect(() => {
     if (!shouldFetch || !folderId) return;
 
-    const q = buildQuery();
-    const unsubscribe = subscribeToCollaborators(q);
-    return () => unsubscribe();
-  }, [shouldFetch, buildQuery, subscribeToCollaborators, folderId]);
+    try {
+      const queryInstance = buildQuery();
+      const unsubscribe = subscribeToCollaborators(queryInstance);
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Error initializing collaborators subscription:", error);
+      setFetchStatus("failed");
+    }
+  }, [shouldFetch, folderId, buildQuery, subscribeToCollaborators]);
+
+  useEffect(() => {
+    if (shoudFetchUserCollaboratorsData && collaborators) {
+      fetchCollaboratorsUserData();
+    }
+  }, [shoudFetchUserCollaboratorsData, collaborators, fetchCollaboratorsUserData]);
 
   return { collaborators, fetchStatus, collaboratorsUserData, fetchCollaboratorsUserDataStatus };
 };
 
 export default useGetCollaborators;
 
-// helper
-const handleSerializeData = (data: QueryDocumentSnapshot<DocumentData>) => {
+/**
+ * Helper functions
+ */
+const serializeCollaboratorData = (doc: QueryDocumentSnapshot): Collaborator => {
+  const data = doc.data();
   return {
-    ...data.data(),
-    createAt: JSON.parse(JSON.stringify(data.data().createAt)),
-    updateAt: data.data().updateAt ? JSON.parse(JSON.stringify(data.data().updateAt)) : null,
-  };
+    ...data,
+    createAt: JSON.parse(JSON.stringify(data.createAt)),
+    updateAt: data.updateAt ? JSON.parse(JSON.stringify(data.updateAt)) : null,
+  } as Collaborator;
 };
 
-const handleGetAllCollaboratorsUserId = (collaborators: Collaborator[] | null) => {
-  if (!collaborators) return [];
-  return collaborators.map((collaborator) => collaborator.userId);
-};
+const serializeUserData = (doc: DocumentSnapshot<DocumentData, DocumentData>, collaborators: Collaborator[] | null): CollaboratorUserData | null => {
+  if (!doc.exists()) return null;
 
-const handleSetUserData = (data: DocumentSnapshot<DocumentData>, collaborators: Collaborator[] | null): CollaboratorUserData | null => {
-  if (!data.exists()) return null;
+  const userData = doc.data();
+  if (!userData || !collaborators) return null;
 
-  const userData = data.data();
-  if (!userData || !collaborators || collaborators.length === 0) return null;
+  const collaborator = collaborators.find((c) => c.userId === doc.id);
+  if (!collaborator) return null;
 
   return {
-    email: userData.email as string,
-    name: userData.displayName as string,
-    photoUrl: userData.photoURL ? (userData.photoURL as string) : null,
-    role: collaborators?.find((collaborator) => collaborator.userId === data.id)?.role as CollaboratorRole,
-    userId: data.id,
+    email: userData.email,
+    name: userData.displayName,
+    photoUrl: userData.photoURL || null,
+    role: collaborator.role,
+    userId: doc.id,
   };
 };

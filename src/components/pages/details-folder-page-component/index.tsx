@@ -7,7 +7,7 @@ import useParentFolder from "@/features/folder/hooks/use-parent-folder";
 import FolderDetails from "@components/layout/folder/folder-details";
 import MainLayout from "@components/layout/main-layout";
 import { Flex } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const DetailsFolderPageComponent = () => {
@@ -18,48 +18,45 @@ const DetailsFolderPageComponent = () => {
   const { "0": urlSearchParams } = useSearchParams();
   const [parentFolderId] = useState<string>(urlSearchParams.get("parent") || "");
 
-  // get parent folder collaborators and general access data
-  const { collaboratorsUserData, fetchCollaboratorsUserDataStatus } = useGetCollaborators({
-    shouldFetch: Boolean(parentFolderId),
-    shoudFetchUserCollaboratorsData: Boolean(parentFolderId),
-    folderId: parentFolderId,
-  });
-  const { generalAccessDataState, fetchStatus } = useGetGeneralAccess({
-    shouldFetch: Boolean(parentFolderId),
-    folderId: parentFolderId,
-  });
-
   // get parent folder data
   const { parentFolderState } = useParentFolder({
     fetchParentFolderDataOnMount: true,
     resetParentFolderDataOnMount: false,
     folderId: parentFolderId,
   });
+  const isParentSuccess = useMemo(() => parentFolderState.status === "succeeded", [parentFolderState.status]);
+
+  // get parent folder collaborators and general access data
+  const { collaboratorsUserData, fetchCollaboratorsUserDataStatus } = useGetCollaborators({
+    shouldFetch: parentFolderState.isValidParentFolder,
+    folderId: parentFolderId,
+    shoudFetchUserCollaboratorsData: parentFolderState.isValidParentFolder,
+  });
+  const { generalAccessDataState, fetchStatus } = useGetGeneralAccess({
+    shouldFetch: parentFolderState.isValidParentFolder,
+    folderId: parentFolderId,
+  });
+  const isGetPermissionSuccess = useMemo(() => {
+    return fetchCollaboratorsUserDataStatus === "succeeded" && fetchStatus === "succeeded";
+  }, [fetchCollaboratorsUserDataStatus, fetchStatus]);
 
   // get permission in this subfolder
   const { permissions } = useFolderGetPermission({
-    userId: user?.uid,
-    collaboratorsUserData,
-    generalAccessDataState,
-    parentFolderOwnerId: parentFolderState.parentFolderData?.owner_user_id,
-  });
-  useFolderPermissionSetState({
-    withUseEffect: {
-      subFolder: {
-        data: permissions,
-      },
-      statusFetch: {
-        CollaboratorsFetchStatus: fetchCollaboratorsUserDataStatus,
-        GeneralAccessFetchStatus: fetchStatus,
-      },
-    },
+    userId: user ? user.uid : null,
+    collaboratorsUserData: collaboratorsUserData ?? null,
+    generalAccessDataState: generalAccessDataState ?? null,
+    parentFolderOwnerId: parentFolderState.parentFolderData?.root_folder_user_id ?? null,
+    shouldProcessPermission: isGetPermissionSuccess && isParentSuccess,
   });
 
-  // if folderid is empty set is root folder
-  const { setIsRootFolderPermissionState } = useFolderPermissionSetState({});
-  useEffect(() => {
-    if (!parentFolderId || parentFolderId.trim() === "") setIsRootFolderPermissionState(true);
-  }, [parentFolderId, setIsRootFolderPermissionState]);
+  // set details folder permission to state
+  useFolderPermissionSetState({
+    detailsFolderPermissions: permissions,
+    subFolderPermissions: null,
+    isRootFolder: !parentFolderId ? true : false,
+    permissionsStatus: isGetPermissionSuccess && isParentSuccess ? "succeeded" : "loading",
+    shouldProceed: isGetPermissionSuccess && isParentSuccess,
+  });
 
   // navigate to my storage if parent is empty
   useEffect(() => {
@@ -70,7 +67,7 @@ const DetailsFolderPageComponent = () => {
   }, [parentFolderState.isValidParentFolder, parentFolderState.parentFolderData, navigate, urlSearchParams]);
 
   return (
-    <MainLayout showAddButton={false} withFooter={false} withBreadcrumb={false}>
+    <MainLayout showAddButton={false} withFooter={false} withBreadcrumb={false} showPasteButton={false}>
       <Flex className="pb-3">
         <FolderDetails />
       </Flex>
