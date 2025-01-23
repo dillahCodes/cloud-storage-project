@@ -4,3 +4,9 @@ interface StorageData {
   storageCapacity: number;
   storageUsed: number;
 }
+
+type StorageStatus = "idle" | "loading" | "succeeded" | "failed";
+interface StorageDataState {
+  data: StorageData | null;
+  status: StorageStatus;
+}

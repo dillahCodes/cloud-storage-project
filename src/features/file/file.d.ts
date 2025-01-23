@@ -23,7 +23,7 @@ interface RootFileCreateData {
   file_name: string;
   file_size: string;
   file_type: string;
-  is_password: false;
+
   created_at: FieldValue;
   updated_at: null;
 }
@@ -36,7 +36,7 @@ interface RootFileGetData {
   file_name: string;
   file_size: string;
   file_type: string;
-  is_password: false;
+
   updated_at: null | {
     seconds: number;
     nanoseconds: number;

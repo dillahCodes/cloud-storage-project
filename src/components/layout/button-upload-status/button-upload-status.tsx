@@ -1,4 +1,3 @@
-import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
 import { neoBrutalBorderVariants, themeColors } from "@/theme/antd-theme";
 import animationUploadIcon from "@assets/lotties/uploading-file-icon.json";
 import classNames from "classnames";

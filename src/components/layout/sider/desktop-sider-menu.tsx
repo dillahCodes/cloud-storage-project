@@ -8,6 +8,11 @@ import { GrStorage } from "react-icons/gr";
 import { MdAccessTime, MdOutlineShare, MdOutlineStarOutline } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import ButtonAddDesktop from "../button-add-folder-and-file/button-add-desktop";
+import { userStorageSelector } from "@/features/storage/slice/user-storage-slice";
+import { useSelector } from "react-redux";
+import { useMemo } from "react";
+import createPercentStorageUsed from "@/util/create-percent-storage-used";
+import formatBytes from "@/util/format-bytes";
 // import ButtonAddDesktop from "../button-add-folder-and-file/button-add-desktop";
 
 interface SiderMenuProps {
@@ -54,6 +59,11 @@ const menu2: MenuItem[] = [
 
 const { Text } = Typography;
 const DesktopSiderMenu: React.FC<SiderMenuProps> = ({ showText }) => {
+  const { data } = useSelector(userStorageSelector);
+
+  const userStoragePercentUsed = useMemo(() => data && createPercentStorageUsed(data.storageUsed, data.storageCapacity), [data]);
+  const userStorageUsedInfo = useMemo(() => `${formatBytes(data?.storageUsed || 0)} of ${formatBytes(data?.storageCapacity || 0)}  used`, [data]);
+
   return (
     <Flex vertical>
       <Flex className="p-3 border-b-2 border-black">
@@ -66,8 +76,8 @@ const DesktopSiderMenu: React.FC<SiderMenuProps> = ({ showText }) => {
       <Flex vertical gap="small" className=" p-3 border-black">
         {/* avaiblable storage */}
         <Flex vertical>
-          <Progress percent={30} size="small" showInfo={false} strokeColor={themeColors.primary200} />
-          {showText && <Text className="capitalize text-base font-archivo">1 GB of 5 GB used</Text>}
+          <Progress percent={userStoragePercentUsed || 0} size="small" showInfo={false} strokeColor={themeColors.primary200} />
+          {showText && <Text className=" text-base font-archivo">{userStorageUsedInfo}</Text>}
         </Flex>
 
         <Button type="primary" neoBrutalType="medium" size="large" className="h-[50px]">

@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useCallback } from "react";
 import { DeleteFolderActivity } from "../folder-activity";
 import { message } from "antd";
+import { handleDecrementUserStorageUsage } from "@/features/file/hooks/use-handle-delete-file";
 
 interface DeleteFolderParams {
   folderId: string;
@@ -235,8 +236,11 @@ const handleDeleteAllFiles = async (
   const deletionPromises = fileSnapshot.docs.map(async (fileDoc) => {
     const fileData = fileDoc.data() as SubFileGetData;
     const fileRef = ref(storage, `user-files/${fileData.file_id}/${fileData.file_name}`);
+
     await deleteObject(fileRef);
     await deleteDoc(fileDoc.ref);
+
+    await handleDecrementUserStorageUsage(deletedFileParams.rootFolderOwnerUserId, parseInt(fileData.file_size));
     await handleDeletedFolderActivity({
       type: "delete-folder-activity",
       activityId: uuidv4(),

@@ -28,6 +28,7 @@ import { mobileHeaderTitleSlice } from "./slice/mobile-header-title-slice";
 import { siderSlice } from "./slice/sider-slice";
 import { fileOptionsSlice } from "@/features/file/slice/file-options-slice";
 import { folderOptionsSlice } from "@/features/folder/slice/folder-options-slice";
+import { userStorageSlice } from "@/features/storage/slice/user-storage-slice";
 
 const { createReduxHistory, routerMiddleware, routerReducer } = createReduxHistoryContext({
   history: createBrowserHistory(),
@@ -55,8 +56,13 @@ export const store = configureStore({
     file: fileSlice.reducer,
     fileUploading: fileUploadingSlice.reducer,
     folderActivity: folderActivitySlice.reducer,
+
+    // file and folder options11
     fileOptions: fileOptionsSlice.reducer,
     folderOptions: folderOptionsSlice.reducer,
+
+    // storage
+    userStorage: userStorageSlice.reducer,
 
     // move folder or file
     mobileMove: mobileMoveSlice.reducer,

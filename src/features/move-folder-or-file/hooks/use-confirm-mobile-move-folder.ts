@@ -230,19 +230,19 @@ const handleMoveFolderSecondValidation = (params: HandleMoveFolderSecondValidati
     isSubMovePage,
   } = params;
 
-  const isExistingFolder = foldersData?.some((folder) => folder.folder_id === folderId);
-  const folderWillBeMovedIsInvalid = !folderWillBeMoved;
-  const isMoveToSelf = searchParams.get("parentId") === folderId;
-  const isMoveToSelfSubFolder = folderWillBeMoved?.folder_id === parentFolderData?.root_folder_id;
+  const isExistingFolder: boolean = !!foldersData?.some((folder) => folder.folder_id === folderId);
+  const folderWillBeMovedIsInvalid: boolean = !folderWillBeMoved;
+  const isMoveToSelf: boolean = searchParams.get("parentId") === folderId;
+  const isMoveToSelfSubFolder: boolean = folderWillBeMoved?.folder_id === parentFolderData?.root_folder_id;
 
   /**
-   * folder permission validation
+   * folder permission validations
    */
   const isNotFolderOwner: boolean = folderWillBeMoved?.owner_user_id !== user!.uid;
   const isRootFolderMine: boolean = parentFolderData?.root_folder_user_id === user!.uid;
 
   /**
-   * folder move validation
+   * folder move validations
    */
   const isNotOwnerMovingToRoot: boolean = isNotFolderOwner && !parentFolderData && isRootMovePage;
   const isMovingSharedFolderToMyFolder: boolean = isRootFolderMine && isRootMovePage;

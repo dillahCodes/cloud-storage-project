@@ -12,7 +12,7 @@ import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import { mobileMoveSelector, resetMobileMoveState, setMobileMoveFolderMoveErrorMessage, setMobileMoveStatus } from "../slice/mobile-move-slice";
-import { moveFoldersAndFilesDataSelector } from "../slice/move-folders-and-files-data-slice";
+import { moveFoldersAndFilesDataSelector, resetMoveDataState } from "../slice/move-folders-and-files-data-slice";
 
 interface HandleChangeSubFileMetadata {
   fileId: string;
@@ -177,6 +177,7 @@ const useConfirmMobileMoveFile = () => {
      */
     showSuccess(`${abbreviateText(fileName!, 15)} moved to ${abbreviateText(parentFolderData!.folder_name!, 15)}`);
     dispatch(resetMobileMoveState());
+    dispatch(resetMoveDataState());
     dispatch(setMobileMoveStatus("success"));
   }, [parentFolderData, fileId, fileName, user, navigate, dispatch, showSuccess]);
 
@@ -197,6 +198,7 @@ const useConfirmMobileMoveFile = () => {
      */
     showSuccess(`${abbreviateText(fileName!, 15)} moved to My Storage`);
     dispatch(resetMobileMoveState());
+    dispatch(resetMoveDataState());
     dispatch(setMobileMoveStatus("success"));
   }, [fileId, user, dispatch, navigate, fileName, showSuccess]);
 

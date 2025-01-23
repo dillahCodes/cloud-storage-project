@@ -7,6 +7,7 @@ import createAuthResponse from "../create-auth-res";
 import googleRegister from "../google-register";
 import handleAuthError from "../handle-auth-error";
 import useUser from "./use-user";
+import handleCreateUserStorageQuota from "@/features/storage/handle-create-user-storage-quota";
 
 interface UseFormAuthRegisterReturn {
   formAuthRegister: FormAuthRegister;
@@ -57,6 +58,7 @@ const useFormRegister = (): UseFormAuthRegisterReturn => {
     try {
       const result: UserCredential = await createUserWithEmailAndPassword(auth, formAuthRegister.email, formAuthRegister.password);
 
+      await handleCreateUserStorageQuota();
       await updateProfile(result.user, {
         displayName: formAuthRegister.username,
       });

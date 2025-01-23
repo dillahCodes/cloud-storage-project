@@ -13,22 +13,58 @@ import {
   setMobileMoveFileType,
   setMobileMoveFromLocationPath,
 } from "@/features/move-folder-or-file/slice/mobile-move-slice";
+import useDetectLocation from "@/hooks/use-detect-location";
 import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
 import { message } from "antd";
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const useHandleActionMoveFile = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   const parentFolderState = useSelector(parentFolderSelector);
   const { activeFileData } = useSelector(fileOptionsSelector);
   const { isMobileDevice, isDesktopDevice, isTabletDevice } = useGetClientScreenWidth();
   const { subFolderPermission } = useSelector(folderPermissionSelector);
+
+  const { isSubSharedWithMeLocation, isMystorageLocation, isSubMyStorageLocation } = useDetectLocation();
+
+  /**
+   * handle navigate
+   */
+  const handleNavigateList = useCallback(() => {
+    const isMoveFromSharedSubFolder = isSubSharedWithMeLocation && parentFolderState.parentFolderData !== null;
+    const isMoveFromRoot = isMystorageLocation;
+    const isMoveFromSubFolder = isSubMyStorageLocation && parentFolderState.parentFolderData !== null;
+
+    const moveActions = [
+      {
+        condition: isMoveFromSharedSubFolder,
+        url: parentFolderState.parentFolderData
+          ? `/storage/folder/move?parentId=${parentFolderState.parentFolderData.folder_id}&st=shared-with-me`
+          : "",
+        message: "move from shared sub folder",
+      },
+      {
+        condition: isMoveFromRoot,
+        url: `/storage/folder/move?st=my-storage`,
+        message: "move from root",
+      },
+      {
+        condition: isMoveFromSubFolder,
+        url: parentFolderState.parentFolderData ? `/storage/folder/move?parentId=${parentFolderState.parentFolderData.folder_id}&st=my-storage` : "",
+        message: "move from sub folder",
+      },
+    ];
+
+    const findActions = moveActions.find((action) => action.condition && action.url);
+    if (findActions) return findActions;
+
+    return null;
+  }, [isMystorageLocation, isSubMyStorageLocation, isSubSharedWithMeLocation, parentFolderState.parentFolderData]);
 
   /**
    * handle for mobile device
@@ -55,7 +91,6 @@ const useHandleActionMoveFile = () => {
     }
 
     const fullPath = `${location.pathname}${location.search}`;
-    const isSharedWithMeLocation = searchParams.get("st") === "shared-with-me";
 
     /**
      * set file data to move state
@@ -70,12 +105,18 @@ const useHandleActionMoveFile = () => {
     dispatch(setMobileMoveFromLocationPath(fullPath));
 
     /**
-     * navigate to move page
+     * navigate
      */
-    isSharedWithMeLocation
-      ? navigate(`/storage/folder/move?parentId=${parentFolderState.parentFolderData?.folder_id}&st=shared-with-me`)
-      : navigate(`/storage/folder/move?st=my-storage`);
-  }, [location, subFolderPermission, searchParams, dispatch, activeFileData, parentFolderState, navigate]);
+    const findActions = handleNavigateList();
+    if (findActions) {
+      navigate(findActions.url);
+      message.open({
+        type: "info",
+        content: "Please select a destination.",
+        className: "font-archivo text-sm",
+      });
+    }
+  }, [location, subFolderPermission, dispatch, activeFileData, navigate, handleNavigateList]);
 
   /**
    * handle for desktop device

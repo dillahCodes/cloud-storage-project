@@ -10,15 +10,11 @@ interface ModalAddFolderContentProps {
 }
 
 const { Text } = Typography;
-const ModalAddFolderContent: React.FC<ModalAddFolderContentProps> = ({
-  onCancel,
-  handleSetFolderName,
-  folderName,
-  handleConfirmAddFolder,
-}) => {
+const ModalAddFolderContent: React.FC<ModalAddFolderContentProps> = ({ onCancel, handleSetFolderName, folderName, handleConfirmAddFolder }) => {
   return (
     <Flex className="w-full" gap="middle" vertical>
       <Text className="capitalize text-base font-archivo font-bold">New Folder</Text>
+
       <Input
         className="w-full border-2 border-black rounded-sm"
         name="folderName"
@@ -34,15 +30,7 @@ const ModalAddFolderContent: React.FC<ModalAddFolderContentProps> = ({
         <Button size="large" className="text-black font-archivo rounded-sm" neoBrutalType="medium" onClick={onCancel}>
           Cancel
         </Button>
-        <Button
-          type="primary"
-          onClick={handleConfirmAddFolder}
-          // onClick={() => handleConfirmAddFolder({ parentFolderId: folderId })}
-          size="large"
-          className="text-black font-archivo rounded-sm"
-          neoBrutalType="medium"
-          // disabled={addFolderStatus.status === "loading"}
-        >
+        <Button type="primary" onClick={handleConfirmAddFolder} size="large" className="text-black font-archivo rounded-sm" neoBrutalType="medium">
           Create
         </Button>
       </Flex>

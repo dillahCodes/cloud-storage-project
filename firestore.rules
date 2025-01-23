@@ -51,5 +51,10 @@ service cloud.firestore {
       allow read: if true;
       allow write: if request.auth != null;
     }
+
+    match /users-storage/{userId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
   }
 }

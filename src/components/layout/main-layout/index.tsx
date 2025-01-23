@@ -24,11 +24,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, showAddButton, withFo
   const isDekstopMoveFile = useMemo(() => !!moveDektopSelector.fileId, [moveDektopSelector.fileId]);
   const isDektopMoveLoading = useMemo(() => moveDektopSelector.dekstopMoveStatus === "loading", [moveDektopSelector.dekstopMoveStatus]);
 
+  const renderMobileMoveMessage = useMemo(() => (isMoveFile ? "Moving File..." : "Moving Folder..."), [isMoveFile]);
+  const renderDektopMoveMessage = useMemo(() => (isDekstopMoveFile ? "Moving File..." : "Moving Folder..."), [isDekstopMoveFile]);
+
   const { isMobileDevice } = useGetClientScreenWidth();
 
   return isMobileDevice ? (
     <MobileMainLayoutWithOverlayLoading
-      loadingText={isMoveFile ? "Moving File..." : "Moving Folder..."}
+      loadingText={renderMobileMoveMessage}
       opacity={0.7}
       showLoading={isMobileMoveLoading}
       zIndex={40}
@@ -42,7 +45,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, showAddButton, withFo
     </MobileMainLayoutWithOverlayLoading>
   ) : (
     <DektopMainLayoutWithOverlayLoading
-      loadingText={isDekstopMoveFile ? "Moving File..." : "Moving Folder..."}
+      loadingText={renderDektopMoveMessage}
       opacity={0.7}
       showLoading={isDektopMoveLoading}
       zIndex={40}

@@ -1,10 +1,14 @@
 import logOut from "@/features/auth/logout";
 import { messageSelector } from "@/features/message/slice/message-slice";
+import { userStorageSelector } from "@/features/storage/slice/user-storage-slice";
 import useIsLocationActive from "@/hooks/use-is-location-active";
 import { themeColors } from "@/theme/antd-theme";
+import createPercentStorageUsed from "@/util/create-percent-storage-used";
+import formatBytes from "@/util/format-bytes";
 import Button from "@components/ui/button";
 import { Badge, Flex, Progress, Typography } from "antd";
 import classNames from "classnames";
+import { useMemo } from "react";
 import { BiLogOut } from "react-icons/bi";
 import { BsDatabaseAdd } from "react-icons/bs";
 import { GrStorage } from "react-icons/gr";
@@ -84,7 +88,11 @@ const secondMenu: MenuItem[] = [
 
 const { Text } = Typography;
 const MobileDrawerMenu = () => {
+  const { data } = useSelector(userStorageSelector);
   const { messageCount } = useSelector(messageSelector);
+
+  const userStoragePercentUsed = useMemo(() => data && createPercentStorageUsed(data.storageUsed, data.storageCapacity), [data]);
+  const userStorageUsedInfo = useMemo(() => `${formatBytes(data?.storageUsed || 0)} of ${formatBytes(data?.storageCapacity || 0)}  used`, [data]);
 
   const { handleIsLocationActive } = useIsLocationActive();
   const navigate = useNavigate();
@@ -146,8 +154,8 @@ const MobileDrawerMenu = () => {
       {/* avaiblable storage */}
       <Flex className="p-3 bg-transparent" vertical gap="middle">
         <Flex vertical>
-          <Progress percent={30} size="small" showInfo={false} strokeColor={themeColors.primary200} />
-          <Text className="text-base capitalize font-archivo">1 gb of 5 gb used</Text>
+          <Progress percent={userStoragePercentUsed || 0} size="small" showInfo={false} strokeColor={themeColors.primary200} />
+          <Text className="text-base  font-archivo">{userStorageUsedInfo}</Text>
         </Flex>
 
         {/* more storage */}

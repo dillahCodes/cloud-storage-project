@@ -1,15 +1,14 @@
+import useAddFile from "@/features/file/hooks/use-add-file";
 import useAddFolder from "@/features/folder/hooks/use-add-folder";
-import useShowFloatingNotification from "@/features/folder/hooks/use-show-floating-notification";
+import useParentFolder from "@/features/folder/hooks/use-parent-folder";
 import withModal from "@components/hoc/with-modal";
 import Button from "@components/ui/button";
 import { Flex, Typography } from "antd";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { RiFolderAddLine } from "react-icons/ri";
 import { useParams } from "react-router-dom";
 import ModalAddContent from "./modal-add-content";
 import ModalAddFolderContent from "./modal-add-folder-content";
-import useAddFile from "@/features/file/hooks/use-add-file";
-import useParentFolder from "@/features/folder/hooks/use-parent-folder";
 
 interface ButtonWithModalProps {
   showText?: boolean;
@@ -18,31 +17,68 @@ interface ButtonWithModalProps {
 const { Text } = Typography;
 const ButtonWithModal = withModal(Button);
 
-const ButtonAddDesktop: React.FC<ButtonWithModalProps> = ({ showText }) => {
+const ButtonAddDesktop: React.FC<ButtonWithModalProps> = ({ showText = false }) => {
   const { folderId } = useParams<{ folderId: string }>();
-
-  const { parentFolderState } = useParentFolder({ fetchParentFolderDataOnMount: false, resetParentFolderDataOnMount: false, folderId });
-  const { folderName, handleSetFolderName, handleConfirmAddFolder, addFolderStatus } = useAddFolder();
-  const { floatingNotificationContext } = useShowFloatingNotification(addFolderStatus, "bottomRight", true);
-
-  const { handleSetAndUploadFile } = useAddFile({ parentFolderData: parentFolderState });
+  const { parentFolderState } = useParentFolder({
+    fetchParentFolderDataOnMount: false,
+    resetParentFolderDataOnMount: false,
+    folderId,
+  });
+  const { folderName, handleSetFolderName, handleConfirmAddFolder } = useAddFolder();
+  const { handleSetAndUploadFile } = useAddFile();
 
   const [modalStatus, setModalStatus] = useState<ModalStatus>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const handleAfterAddFolder = () => {
+  // Handle open/close modal
+  const toggleModalOpen = useCallback(() => {
     setModalOpen((prev) => !prev);
+  }, []);
+
+  const closeModalWithDelay = useCallback(() => {
     setTimeout(() => setModalStatus(null), 500);
-  };
+    toggleModalOpen();
+  }, [toggleModalOpen]);
 
-  const handleOnCancelAddFolder = () => setModalStatus(null);
-
-  const handleOnCloseModal = () => {
+  // Handle actions after folder is added
+  const handleAfterAddFolder = useCallback(() => {
+    toggleModalOpen();
     setTimeout(() => setModalStatus(null), 500);
-    setModalOpen((prev) => !prev);
-  };
+  }, [toggleModalOpen]);
 
-  const handleOnOpenModal = () => setModalOpen((prev) => !prev);
+  const handleOnCancelAddFolder = useCallback(() => {
+    setModalStatus(null);
+  }, []);
+
+  // Render modal content based on modalStatus
+  const renderModalContent = useMemo(() => {
+    if (modalStatus === "add-folder") {
+      return (
+        <ModalAddFolderContent
+          onCancel={handleOnCancelAddFolder}
+          handleSetFolderName={handleSetFolderName}
+          folderName={folderName}
+          handleConfirmAddFolder={() =>
+            handleConfirmAddFolder({
+              parentFolderData: parentFolderState.parentFolderData,
+              afterAddFolder: handleAfterAddFolder,
+            })
+          }
+        />
+      );
+    }
+
+    return <ModalAddContent setModalStatus={setModalStatus} setFile={handleSetAndUploadFile} />;
+  }, [
+    folderName,
+    handleAfterAddFolder,
+    handleConfirmAddFolder,
+    handleOnCancelAddFolder,
+    handleSetAndUploadFile,
+    handleSetFolderName,
+    modalStatus,
+    parentFolderState.parentFolderData,
+  ]);
 
   return (
     <ButtonWithModal
@@ -51,29 +87,15 @@ const ButtonAddDesktop: React.FC<ButtonWithModalProps> = ({ showText }) => {
       size="large"
       className="h-[45px]"
       isOpen={modalOpen}
-      onClose={handleOnCloseModal}
-      onOpen={handleOnOpenModal}
-      modalContent={
-        modalStatus === "add-folder" ? (
-          <ModalAddFolderContent
-            onCancel={handleOnCancelAddFolder}
-            handleSetFolderName={handleSetFolderName}
-            folderName={folderName}
-            handleConfirmAddFolder={() =>
-              handleConfirmAddFolder({ parentFolderData: parentFolderState.parentFolderData, afterAddFolder: handleAfterAddFolder })
-            }
-          />
-        ) : (
-          <ModalAddContent setModalStatus={setModalStatus} setFile={handleSetAndUploadFile} />
-        )
-      }
+      onClose={closeModalWithDelay}
+      onOpen={toggleModalOpen}
+      modalContent={renderModalContent}
     >
-      {floatingNotificationContext}
       <Flex align="center" gap="middle" className="rounded-md w-full">
         <Text className="text-lg">
           <RiFolderAddLine />
         </Text>
-        {showText && <Text className="cfloatingNotificationApitalize text-base font-archivo">add</Text>}
+        {showText && <Text className="capitalize text-base font-archivo">Add</Text>}
       </Flex>
     </ButtonWithModal>
   );
