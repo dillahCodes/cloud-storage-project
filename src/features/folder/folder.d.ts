@@ -1,5 +1,6 @@
 import { FieldValue } from "firebase/firestore";
 import { FirebaseUserData } from "../auth/auth";
+import { TimestampValue } from "./folder-activity";
 
 interface FolderResponseStatus {
   status: "loading" | "succeeded" | "failed" | "idle";
@@ -112,3 +113,12 @@ interface StarredFolderDataSerialized extends Omit<StarredFolderData, "createdAt
   createdAt: StarredFolderTimeStamp;
   updatedAt: null | StarredFolderTimeStamp;
 }
+
+interface SecurredFolderData {
+  folderId: string;
+  userId: string;
+  isSecuredFolderActive: boolean;
+  createdAt: TimestampValue | FieldValue;
+  updatedAt: TimestampValue | FieldValue | null;
+}
+type SecuredFolderStatus = "idle" | "loading" | "succeded" | "failed";

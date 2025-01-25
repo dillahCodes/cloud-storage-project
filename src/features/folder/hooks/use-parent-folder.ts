@@ -1,12 +1,11 @@
+import { resetBreadcrumb } from "@/features/breadcrumb/slice/breadcrumb-slice";
 import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { SubFolderGetData } from "../folder";
 import { parentFolderSelector } from "../slice/parent-folder-slice";
 import useFetchFolderData from "./use-fetch-folder-data";
 import useParentFolderSetState from "./use-parent-folder-setstate";
-import { useNavigate } from "react-router-dom";
-import { message } from "antd";
-import { resetBreadcrumb } from "@/features/breadcrumb/slice/breadcrumb-slice";
 
 interface UseParentFolderProps {
   fetchParentFolderDataOnMount: boolean;
@@ -38,11 +37,6 @@ const useParentFolder = ({ fetchParentFolderDataOnMount, resetParentFolderDataOn
         setStatus("succeeded");
       } else {
         dispatch(resetBreadcrumb());
-        message.open({
-          type: "error",
-          content: "Folder not found.",
-          className: "font-archivo text-sm capitalize",
-        });
         navigate("/not-found", { replace: true, state: { message: "Folder not found." } });
         setStatus("failed");
       }

@@ -55,7 +55,7 @@ const NestedFolderPageComponent: React.FC = () => {
   }, [fetchCollaboratorsUserDataStatus, fetchStatus, parentFolderStatus]);
 
   // get permission in this sub folder
-  const { permissions } = useFolderGetPermission({
+  const { permissions, permissionDataDetails } = useFolderGetPermission({
     userId: user ? user.uid : null,
     collaboratorsUserData: collaboratorsUserData ?? null,
     generalAccessDataState: generalAccessDataState ?? null,
@@ -63,8 +63,7 @@ const NestedFolderPageComponent: React.FC = () => {
     shouldProcessPermission: isGetPermissionSuccess,
   });
 
-  // const permissionState = useSelector(folderPermissionSelector);
-  // console.log(permissions);
+  // console.log(permissionDataDetails);
 
   // // set folder permission to state
   useFolderPermissionSetState({

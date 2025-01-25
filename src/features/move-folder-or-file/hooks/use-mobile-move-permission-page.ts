@@ -1,11 +1,10 @@
-import { Permissions } from "@/features/folder/hooks/use-folder-get-permission";
 import useDetectLocation from "@/hooks/use-detect-location";
 import { message } from "antd";
 import { useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface UseMobileMovePermissionFolder {
-  permissions: Permissions;
+  permissions: FolderPermission;
   isGetPermissionSuccess: boolean;
   moveFromLocationPath: string | null;
 }

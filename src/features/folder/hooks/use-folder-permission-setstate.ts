@@ -24,7 +24,7 @@ const useFolderPermissionSetState = ({
   useEffect(() => {
     if (!shouldProceed) return;
 
-    if (isRootFolder) dispatch(setIsRootFolder(isRootFolder));
+    dispatch(setIsRootFolder(isRootFolder));
     if (subFolderPermissions) dispatch(setSubFolderPermission(subFolderPermissions));
     if (permissionsStatus) dispatch(setFetchStatus(permissionsStatus));
     if (detailsFolderPermissions) dispatch(setDetailsFolderPermission(detailsFolderPermissions));

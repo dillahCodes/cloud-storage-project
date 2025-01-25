@@ -1,3 +1,4 @@
+import useDetectLocation from "@/hooks/use-detect-location";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -5,6 +6,9 @@ import { folderPermissionSelector } from "../slice/folder-permission-slice";
 
 const useHandleFolderAccessModal = () => {
   const navigate = useNavigate();
+
+  const { isSubMyStorageLocation, isSubSharedWithMeLocation } = useDetectLocation();
+  const isSubFolderLocation = isSubMyStorageLocation || isSubSharedWithMeLocation;
 
   const { subFolderPermission, statusFetch, isRootFolder } = useSelector(folderPermissionSelector);
   const isPermissionSuccess = useMemo(() => statusFetch === "succeeded", [statusFetch]);
@@ -14,14 +18,10 @@ const useHandleFolderAccessModal = () => {
   const closeModal = () => setModalVisible(false);
 
   useEffect(() => {
-    if (isRootFolder) return;
-    if (!isPermissionSuccess) return;
-    if (!subFolderPermission) return;
-    if (subFolderPermission.canView) return;
-
+    if (!subFolderPermission || isRootFolder || subFolderPermission.canView) return;
     setModalVisible(true);
     navigate("/storage/my-storage");
-  }, [isPermissionSuccess, subFolderPermission, statusFetch, navigate, isRootFolder]);
+  }, [navigate, isPermissionSuccess, subFolderPermission, isSubFolderLocation, isRootFolder]);
 
   return { isModalVisible, closeModal };
 };

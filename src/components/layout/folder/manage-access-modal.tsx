@@ -7,24 +7,37 @@ import copyToClipboard from "@/util/copy-to-clipboard";
 import { withDynamicFloatingElement } from "@components/hoc/with-dynamic-floating-element";
 import Button from "@components/ui/button";
 import { Flex, Input, Spin, Typography } from "antd";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { IoLink } from "react-icons/io5";
 import GeneralAccess from "./general-access";
 import PeopleWithAcess from "./people-with-acess";
 import UsersFloatingDataList from "./users-floating-list";
+import SecureFolder from "./secure-folder";
+import useOnSecuredFolderChange from "@/features/folder/hooks/use-secured-folder-on-data-change";
+import useSecuredFoldertoggleHandler from "@/features/folder/hooks/use-secured-folder-toggle-handler";
 
 const { Text } = Typography;
 const InputWithFloatingElement = withDynamicFloatingElement(Input);
 const ManageAccessModalComponent: React.FC = () => {
   const [inputSearchUser, setInputSearchUser] = useState<string>("");
 
-  const { folderData, collaboratorsUserData, generalData } = useModalManageAccessContentState();
-  const { collaboratorsFetched, handleSearchUsersWithDebounce } = useGetCollaboratorsByNameOrEmail();
-  const { handleAddCollaborator } = useAddCollaboratorsSelectedToState();
-
-  const isCollaboratorValid = collaboratorsFetched && collaboratorsFetched.length > 0;
-
+  /**
+   * state and add data to state
+   */
   const { setModalOpen } = useModalManageAccessContentSetState({});
+  const { handleAddCollaborator } = useAddCollaboratorsSelectedToState();
+  const { folderData, collaboratorsUserData, generalData } = useModalManageAccessContentState();
+  const folderId = useMemo(() => folderData?.folder_id ?? "", [folderData]);
+
+  /**
+   * get data from server
+   */
+  const { collaboratorsFetched, handleSearchUsersWithDebounce } = useGetCollaboratorsByNameOrEmail();
+  const isCollaboratorValid = useMemo(() => collaboratorsFetched && collaboratorsFetched.length > 0, [collaboratorsFetched]);
+
+  const { isSecuredFolderActive, statusFetch } = useOnSecuredFolderChange({ folderId });
+  const isSecuredFolderDataLoading = useMemo(() => statusFetch === "loading", [statusFetch]);
+  const { handleToggleSecuredFolder } = useSecuredFoldertoggleHandler({ isSecuredFolderActive, folderId, folderData });
 
   /*
    * handle copy to clipboard
@@ -88,12 +101,19 @@ const ManageAccessModalComponent: React.FC = () => {
       {/* general access */}
       <GeneralAccess generalData={generalData} folderId={folderData?.folder_id} />
 
+      {/* secure folder */}
+      <SecureFolder isChecked={isSecuredFolderActive} isLoading={isSecuredFolderDataLoading} handleToggle={handleToggleSecuredFolder} />
+
       <Flex className="w-full" gap="small" justify="space-between">
-        <Button className="flex items-center font-archivo justify-center" icon={<IoLink className="text-lg" />} onClick={handleClipboard}>
+        <Button
+          className="flex items-center font-archivo justify-center rounded-sm text-black"
+          icon={<IoLink className="text-lg" />}
+          onClick={handleClipboard}
+        >
           Copy Link
         </Button>
         <Button
-          className="flex items-center font-archivo justify-center"
+          className="flex items-center font-archivo justify-center rounded-sm text-black"
           type="primary"
           onClick={() => {
             setModalOpen(false);

@@ -56,5 +56,10 @@ service cloud.firestore {
       allow read: if true;
       allow write: if request.auth != null;
     }
+
+    match /secured-folder/{userId_folderId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
   }
 }

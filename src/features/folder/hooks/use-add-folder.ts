@@ -4,7 +4,7 @@ import { auth, db } from "@/firebase/firebase-services";
 import { collection, doc, getDocs, query, serverTimestamp, setDoc, where } from "firebase/firestore";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { RootFolderCreateData, SubFolderCreateData, SubFolderGetData } from "../folder";
+import { RootFolderCreateData, SecurredFolderData, SubFolderCreateData, SubFolderGetData } from "../folder";
 import { Collaborator, CollaboratorRole, GeneralAccessData } from "../folder-collaborator";
 import useAddActivityCreatedFolder from "./use-add-activity-created-folder";
 import { message } from "antd";
@@ -18,6 +18,11 @@ export interface HandleConfirmAddFolder {
 interface HandleValidateAddFolderParams {
   folderName: string;
   user: FirebaseUserData | null;
+}
+
+interface HandleCreateSecuredFolderData {
+  folderId: string;
+  userId: string;
 }
 
 const handleValitdateAddFolder = ({ folderName, user }: HandleValidateAddFolderParams) => {
@@ -208,6 +213,20 @@ const createFolderData = (parentFolderData: SubFolderGetData | null, folderName:
   } as RootFolderCreateData;
 };
 
+const handleCreateSecuredFolderData = async (params: HandleCreateSecuredFolderData) => {
+  const { folderId, userId } = params;
+  const payload: SecurredFolderData = {
+    folderId,
+    userId,
+    isSecuredFolderActive: false,
+    createdAt: serverTimestamp(),
+    updatedAt: null,
+  };
+
+  const securedFolderRef = doc(db, "secured-folder", `${userId}_${folderId}`);
+  await setDoc(securedFolderRef, payload);
+};
+
 const useAddFolder = () => {
   /**
    * hooks
@@ -230,44 +249,48 @@ const useAddFolder = () => {
     if (!folderData) return;
 
     try {
+      const loadingKey = `add-folder-${folderData.folder_id}`;
       message.open({
         type: "loading",
-        content: `adding ${abbreviateText(folderName, 15)} folder...`,
+        content: `Adding ${abbreviateText(folderName, 15)} folder...`,
         className: "text-sm font-archivo",
-        key: `add-folder-${folderData.folder_id}`,
+        key: loadingKey,
         duration: 0,
       });
 
+      // Fetch parent collaborators if parentFolderData exists
       const parentCollaboratorsData = parentFolderData ? await handleGetParentCollaboratorsData(parentFolderData) : undefined;
+
       const collaboratorsData = createCollaboratorsData(folderData.folder_id, parentCollaboratorsData);
       const general = createGeneralAccessData(folderData.folder_id);
 
-      await saveFolderToFirestore(folderData);
-      await saveGeneraAccessDataToFirestore(general);
-      await saveCollaboratorsToFirestore(collaboratorsData);
+      // Use Promise.all for parallel execution of async tasks
+      await Promise.all([
+        saveFolderToFirestore(folderData),
+        saveGeneraAccessDataToFirestore(general),
+        saveCollaboratorsToFirestore(collaboratorsData),
+        handleCreateSecuredFolderData({ folderId: folderData.folder_id, userId: user!.uid }),
+        handleAddActivityCreatedFolder({
+          type: "create-folder-activity",
+          activityId: uuidv4(),
 
-      await handleAddActivityCreatedFolder({
-        type: "create-folder-activity",
-        activityId: uuidv4(),
+          folderId: folderData.folder_id,
+          folderName: folderData.folder_name,
 
-        folderId: folderData.folder_id,
-        folderName: folderData.folder_name,
+          rootFolderId: folderData.root_folder_id,
+          rootFolderOwnerUserId: folderData.root_folder_user_id,
 
-        rootFolderId: folderData.root_folder_id,
-        rootFolderOwnerUserId: folderData.root_folder_user_id,
+          parentFolderId: folderData.parent_folder_id ?? null,
+          parentFolderName: parentFolderData?.folder_name ?? null,
 
-        parentFolderId: folderData.parent_folder_id ?? null,
-        parentFolderName: parentFolderData?.folder_name ?? null,
+          activityByUserId: user!.uid,
+          activityDate: serverTimestamp(),
+        }),
+      ]);
 
-        activityByUserId: user!.uid,
-        activityDate: serverTimestamp(),
-      });
-
-      /**
-       * reset folder name state and destroy loading message and show success message
-       */
+      // Reset folder name state and show success message
       setFolderName("");
-      message.destroy(`add-folder-${folderData.folder_id}`);
+      message.destroy(loadingKey);
       message.open({
         type: "success",
         content: `Folder ${abbreviateText(folderName, 15)} successfully added.`,

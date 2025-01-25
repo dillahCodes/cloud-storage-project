@@ -11,4 +11,13 @@ interface FolderPermission {
   canManageAccess: boolean;
 }
 
+interface FolderPermissionDataDetails {
+  isOwner: boolean;
+  isCollaboratorButOnlyViewer: boolean;
+  isCollaboratorAndEditor: boolean;
+  isParentFolderMine: boolean;
+  isFolderPublic: boolean;
+  isGeneralAccessCanEdit: boolean;
+}
+
 type FetchPermissionStatus = "loading" | "succeeded" | "failed" | "idle";

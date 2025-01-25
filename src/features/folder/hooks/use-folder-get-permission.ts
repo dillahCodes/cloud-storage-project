@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CollaboratorUserData, GeneralAccessDataSerialized } from "../folder-collaborator";
 
 interface UseFolderGetPermissionsProps {
@@ -9,12 +9,6 @@ interface UseFolderGetPermissionsProps {
   shouldProcessPermission: boolean;
 }
 
-export interface Permissions {
-  canCRUD: boolean;
-  canView: boolean;
-  canManageAccess: boolean;
-}
-
 const useFolderGetPermission = ({
   userId,
   collaboratorsUserData,
@@ -23,8 +17,10 @@ const useFolderGetPermission = ({
   shouldProcessPermission,
 }: UseFolderGetPermissionsProps) => {
   /** Utility: Role Checking */
-  const hasRole = useMemo(
-    () => (role: string) => collaboratorsUserData?.some((collaborator) => collaborator.userId === userId && collaborator.role === role) || false,
+  const hasRole = useCallback(
+    (role: string): boolean => {
+      return !!collaboratorsUserData?.some((collaborator) => collaborator.userId === userId && collaborator.role === role);
+    },
     [collaboratorsUserData, userId]
   );
 
@@ -60,11 +56,35 @@ const useFolderGetPermission = ({
     return isFolderPublic || isCollaboratorButOnlyViewer || canCRUD || canManageAccess;
   }, [isCollaboratorButOnlyViewer, isFolderPublic, canCRUD, canManageAccess]);
 
-  const [permissions, setPermissions] = useState<Permissions>({
+  const [permissions, setPermissions] = useState<FolderPermission>({
     canCRUD: true,
     canView: true,
     canManageAccess: true,
   });
+
+  const [permissionDataDetails, setPermissionDataDetails] = useState<FolderPermissionDataDetails>({
+    isCollaboratorAndEditor: false,
+    isCollaboratorButOnlyViewer: false,
+    isOwner: false,
+    isParentFolderMine: false,
+    isFolderPublic: false,
+    isGeneralAccessCanEdit: false,
+  });
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setPermissionDataDetails({
+        isCollaboratorAndEditor: isCollaboratorAndEditor,
+        isCollaboratorButOnlyViewer: isCollaboratorButOnlyViewer,
+        isOwner: isOwner,
+        isParentFolderMine: isParentFolderMine,
+        isFolderPublic: isFolderPublic,
+        isGeneralAccessCanEdit: isGeneralAccessCanEdit,
+      });
+    }, 50);
+
+    return () => clearTimeout(timeout);
+  }, [isCollaboratorAndEditor, isCollaboratorButOnlyViewer, isOwner, isParentFolderMine, isFolderPublic, isGeneralAccessCanEdit]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -73,7 +93,7 @@ const useFolderGetPermission = ({
     return () => clearTimeout(timeout);
   }, [canCRUD, canView, canManageAccess, shouldProcessPermission]);
 
-  return { permissions };
+  return { permissions, permissionDataDetails };
 };
 
 export default useFolderGetPermission;
