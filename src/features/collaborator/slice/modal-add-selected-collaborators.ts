@@ -1,11 +1,7 @@
 import { UserDataDb } from "@/features/auth/auth";
 import { RootState } from "@/store/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-interface ModalAddSelectedCollaboratorsState {
-  collaboratorsData: UserDataDb[] | null;
-  message: string;
-}
+import { ModalAddSelectedCollaboratorsState } from "../collaborator";
 
 const initialState: ModalAddSelectedCollaboratorsState = {
   collaboratorsData: null,
@@ -17,11 +13,11 @@ export const modalAddSelectedCollaboratorsSlice = createSlice({
   initialState,
   reducers: {
     addCollaborators: (state, action: PayloadAction<UserDataDb>) => {
-      const isUserExist = state.collaboratorsData?.find((user) => user.uid === action.payload.uid);
+      const isUserExist = state.collaboratorsData?.find((user: UserDataDb) => user.uid === action.payload.uid);
       !isUserExist && (state.collaboratorsData = [...(state.collaboratorsData || []), action.payload]);
     },
     removeSelectedUser: (state, action: PayloadAction<string>) => {
-      const newUsers = state.collaboratorsData?.filter((user) => user.uid !== action.payload);
+      const newUsers = state.collaboratorsData?.filter((user: UserDataDb) => user.uid !== action.payload);
       state.collaboratorsData = newUsers || [];
     },
     setMessage: (state, action: PayloadAction<string>) => {
@@ -33,8 +29,6 @@ export const modalAddSelectedCollaboratorsSlice = createSlice({
   },
 });
 
-export const { addCollaborators, setMessage, removeSelectedUser, resetCollaboratorsState } =
-  modalAddSelectedCollaboratorsSlice.actions;
-export const modalAddSelectedCollaboratorsSelector = (state: RootState) =>
-  state.modalAddSelectedCollaborators;
+export const { addCollaborators, setMessage, removeSelectedUser, resetCollaboratorsState } = modalAddSelectedCollaboratorsSlice.actions;
+export const modalAddSelectedCollaboratorsSelector = (state: RootState) => state.modalAddSelectedCollaborators;
 export default modalAddSelectedCollaboratorsSlice.reducer;

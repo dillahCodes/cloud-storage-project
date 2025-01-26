@@ -1,7 +1,6 @@
 import useAddCollaboratorsSelectedToState from "@/features/folder/hooks/use-add-collaborators-selected-to-state";
 import useGetCollaboratorsByNameOrEmail from "@/features/folder/hooks/use-get-collaborators-by-name-or-email";
-import useModalManageAccessContentSetState from "@/features/folder/hooks/use-modal-manage-access-content-setstate";
-import useModalManageAccessContentState from "@/features/folder/hooks/use-modal-manage-access-content-state";
+import useModalManageAccessContentSetState from "@/features/collaborator/hooks/use-modal-manage-access-content-setstate";
 import { neoBrutalBorderVariants } from "@/theme/antd-theme";
 import copyToClipboard from "@/util/copy-to-clipboard";
 import { withDynamicFloatingElement } from "@components/hoc/with-dynamic-floating-element";
@@ -13,8 +12,10 @@ import GeneralAccess from "./general-access";
 import PeopleWithAcess from "./people-with-acess";
 import UsersFloatingDataList from "./users-floating-list";
 import SecureFolder from "./secure-folder";
-import useOnSecuredFolderChange from "@/features/folder/hooks/use-secured-folder-on-data-change";
-import useSecuredFoldertoggleHandler from "@/features/folder/hooks/use-secured-folder-toggle-handler";
+import useOnSecuredFolderChange from "@/features/collaborator/hooks/use-secured-folder-on-data-change";
+import useSecuredFoldertoggleHandler from "@/features/collaborator/hooks/use-secured-folder-toggle-handler";
+import { modalManageAccessContentSelector } from "@/features/collaborator/slice/modal-manage-access-content-slice";
+import { useSelector } from "react-redux";
 
 const { Text } = Typography;
 const InputWithFloatingElement = withDynamicFloatingElement(Input);
@@ -26,7 +27,7 @@ const ManageAccessModalComponent: React.FC = () => {
    */
   const { setModalOpen } = useModalManageAccessContentSetState({});
   const { handleAddCollaborator } = useAddCollaboratorsSelectedToState();
-  const { folderData, collaboratorsUserData, generalData } = useModalManageAccessContentState();
+  const { folderData, collaboratorsUserData, generalData } = useSelector(modalManageAccessContentSelector);
   const folderId = useMemo(() => folderData?.folder_id ?? "", [folderData]);
 
   /**
@@ -73,7 +74,6 @@ const ManageAccessModalComponent: React.FC = () => {
       <Text className="text-lg line-clamp-1 w-full">Share "{folderData?.folder_name}"</Text>
       <InputWithFloatingElement
         isFloatingOpen={isCollaboratorValid}
-        neoBrutalVariant="small"
         onChange={handleInputSearchUserChange}
         value={inputSearchUser}
         floatingElClassName="z-10"

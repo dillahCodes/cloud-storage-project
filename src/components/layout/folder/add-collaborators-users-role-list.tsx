@@ -1,10 +1,11 @@
 import useUser from "@/features/auth/hooks/use-user";
+import { GeneralAccessRole } from "@/features/collaborator/collaborator";
+import { modalManageAccessContentSelector } from "@/features/collaborator/slice/modal-manage-access-content-slice";
 import { addCollaboratorsMenu } from "@/features/folder/collaborator-menu";
-import { GeneralAccessRole } from "@/features/folder/folder-collaborator";
-import useModalManageAccessContentState from "@/features/folder/hooks/use-modal-manage-access-content-state";
 import { Flex, Typography } from "antd";
 import classNames from "classnames";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 
 interface AddCollaboratorsUsersRoleListProps {
   handleRoleCallback?: (role: GeneralAccessRole) => void;
@@ -16,7 +17,7 @@ const AddCollaboratorsUsersRoleList: React.FC<AddCollaboratorsUsersRoleListProps
   const [selectedRole, setSelectedRole] = useState<GeneralAccessRole>(selectedUsersRole || "viewer");
 
   const { user } = useUser();
-  const { collaboratorsUserData } = useModalManageAccessContentState();
+  const { collaboratorsUserData } = useSelector(modalManageAccessContentSelector);
 
   const isRoleAssigner = !!collaboratorsUserData?.find(
     (collaborator) => collaborator.userId === user?.uid && (collaborator.role === "owner" || collaborator.role === "editor")
@@ -41,9 +42,7 @@ const AddCollaboratorsUsersRoleList: React.FC<AddCollaboratorsUsersRoleListProps
           key={item.key}
           onClick={() => handleChange(item.label)}
         >
-          <Text className={classNames("text-sm font-archivo", { "text-[#fff1ff]": selectedRole === item.label.toLowerCase() })}>
-            {item.label}
-          </Text>
+          <Text className={classNames("text-sm font-archivo", { "text-[#fff1ff]": selectedRole === item.label.toLowerCase() })}>{item.label}</Text>
         </Flex>
       ))}
     </Flex>

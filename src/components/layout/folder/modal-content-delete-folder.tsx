@@ -2,7 +2,7 @@ import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 import useDeleteFolder from "@/features/folder/hooks/use-delete-folder";
 import { resetFolderOptions, setFolderOptionsAction } from "@/features/folder/slice/folder-options-slice";
 import Button from "@components/ui/button";
-import { Flex, Modal, Typography } from "antd";
+import { Flex, Typography } from "antd";
 import { LuTrash } from "react-icons/lu";
 import { useDispatch } from "react-redux";
 

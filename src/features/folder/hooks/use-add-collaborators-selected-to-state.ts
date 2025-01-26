@@ -1,10 +1,14 @@
 import { useDispatch, useSelector } from "react-redux";
-import useModalManageAccessContentState from "./use-modal-manage-access-content-state";
 import { UserDataDb } from "@/features/auth/auth";
-import { addCollaborators, modalAddSelectedCollaboratorsSelector, removeSelectedUser } from "../slice/modal-add-selected-collaborators";
-import useModalManageAccessContentSetState from "./use-modal-manage-access-content-setstate";
+import {
+  addCollaborators,
+  modalAddSelectedCollaboratorsSelector,
+  removeSelectedUser,
+} from "../../collaborator/slice/modal-add-selected-collaborators";
+import useModalManageAccessContentSetState from "../../collaborator/hooks/use-modal-manage-access-content-setstate";
 import { useCallback } from "react";
 import { message } from "antd";
+import { modalManageAccessContentSelector } from "@/features/collaborator/slice/modal-manage-access-content-slice";
 
 interface UseAddCollaboratorsSelectedToStateParams {
   inputRef?: React.RefObject<HTMLInputElement>;
@@ -13,7 +17,7 @@ interface UseAddCollaboratorsSelectedToStateParams {
 const useAddCollaboratorsSelectedToState = ({ inputRef }: UseAddCollaboratorsSelectedToStateParams = {}) => {
   const dispatch = useDispatch();
   const { collaboratorsData: collaboratosListWillAdd } = useSelector(modalAddSelectedCollaboratorsSelector);
-  const { collaboratorsUserData } = useModalManageAccessContentState();
+  const { collaboratorsUserData } = useSelector(modalManageAccessContentSelector);
 
   const { setModalContentWillRender } = useModalManageAccessContentSetState({});
 

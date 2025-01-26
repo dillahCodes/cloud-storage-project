@@ -1,7 +1,5 @@
-import { GeneralAccessRole } from "@/features/folder/folder-collaborator";
-import useModalManageAccessContentSetState from "@/features/folder/hooks/use-modal-manage-access-content-setstate";
-import useModalManageAccessContentState from "@/features/folder/hooks/use-modal-manage-access-content-state";
-import { modalAddSelectedCollaboratorsSelector, resetCollaboratorsState } from "@/features/folder/slice/modal-add-selected-collaborators";
+import useModalManageAccessContentSetState from "@/features/collaborator/hooks/use-modal-manage-access-content-setstate";
+import { modalAddSelectedCollaboratorsSelector, resetCollaboratorsState } from "@/features/collaborator/slice/modal-add-selected-collaborators";
 import { neoBrutalBorderVariants } from "@/theme/antd-theme";
 import Button from "@components/ui/button";
 import { Checkbox, CheckboxProps, Flex, message, Typography } from "antd";
@@ -11,6 +9,8 @@ import AddCollaboratorsInputWithCollaboratorsWillAdded from "./add-collaborators
 import AddCollaboratorsUsersRoleList from "./add-collaborators-users-role-list";
 import AddCollaboratorsUserRoleDropDownWithDynamicFloatingElement from "./add-collaboratos-user-role-dropdown";
 import useAddCollaboratorsSelectedToDb from "@/features/folder/hooks/use-add-collaborators-selected-to-db";
+import { GeneralAccessRole } from "@/features/collaborator/collaborator";
+import { modalManageAccessContentSelector } from "@/features/collaborator/slice/modal-manage-access-content-slice";
 
 interface WithMessageState {
   withMessage: boolean;
@@ -20,7 +20,7 @@ interface WithMessageState {
 const { Text } = Typography;
 const AddCollaboratorsModalComponent = () => {
   const dispatch = useDispatch();
-  const { folderData } = useModalManageAccessContentState();
+  const { folderData } = useSelector(modalManageAccessContentSelector);
 
   const [selectedRole, setSelectedRole] = useState<GeneralAccessRole>("viewer");
   const [withMessage, setWithMessage] = useState<WithMessageState>({
@@ -94,7 +94,6 @@ const AddCollaboratorsModalComponent = () => {
           selectedRole={selectedRole}
           wraperClassName="w-1/4 h-[35px] z-10"
           floatingContent={<AddCollaboratorsUsersRoleList handleRoleCallback={setSelectedRole} selectedUsersRole={selectedRole} />}
-          neoBrutalVariant="small"
         />
       </Flex>
 

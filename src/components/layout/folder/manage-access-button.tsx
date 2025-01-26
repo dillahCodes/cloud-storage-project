@@ -1,13 +1,13 @@
-import useModalManageAccessContentSetState from "@/features/folder/hooks/use-modal-manage-access-content-setstate";
-import useModalManageAccessContentState from "@/features/folder/hooks/use-modal-manage-access-content-state";
-import { resetCollaboratorsState } from "@/features/folder/slice/modal-add-selected-collaborators";
+import useModalManageAccessContentSetState from "@/features/collaborator/hooks/use-modal-manage-access-content-setstate";
+import { resetCollaboratorsState } from "@/features/collaborator/slice/modal-add-selected-collaborators";
 import withModal from "@components/hoc/with-modal";
 import Button from "@components/ui/button";
 import { Typography } from "antd";
 import { GrGlobe } from "react-icons/gr";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import AddCollaboratorsModalComponent from "./add-collaborators-modal-component";
 import ManageAccessModalComponent from "./manage-access-modal";
+import { modalManageAccessContentSelector } from "@/features/collaborator/slice/modal-manage-access-content-slice";
 
 interface ManageAccessButtonProps {
   disabledButton?: boolean;
@@ -19,7 +19,7 @@ const { Text } = Typography;
 const ManageAccessButton: React.FC<ManageAccessButtonProps> = ({ disabledButton }) => {
   const dispatch = useDispatch();
 
-  const { contentWillRender, isModalManageAccessOpen } = useModalManageAccessContentState();
+  const { contentWillRender, isModalManageAccessOpen } = useSelector(modalManageAccessContentSelector);
   const { setModalContentWillRender } = useModalManageAccessContentSetState({});
 
   const { setModalOpen } = useModalManageAccessContentSetState({});

@@ -15,7 +15,7 @@ export const parentFolderSlice = createSlice({
     setParentFolderStatus: (state, action: PayloadAction<ParentFolderData["status"]>) => {
       state.status = action.payload;
     },
-    setParentFolder: (state, action: PayloadAction<ParentFolderData>) => {
+    setParentFolder: (state, action: PayloadAction<Pick<ParentFolderData, "isValidParentFolder" | "parentFolderData">>) => {
       state.isValidParentFolder = action.payload.isValidParentFolder;
       state.parentFolderData = action.payload.parentFolderData;
       state.status = "succeeded";

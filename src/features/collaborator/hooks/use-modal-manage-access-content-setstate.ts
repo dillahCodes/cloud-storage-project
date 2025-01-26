@@ -1,15 +1,15 @@
 import { useCallback, useEffect } from "react";
 import { useDispatch } from "react-redux";
+import { RootFolderGetData, SubFolderGetData } from "../../folder/folder";
+import { CollaboratorUserData, GeneralAccessData, ModalManageAccessContentState } from "@/features/collaborator/collaborator";
 import {
-  ModalManageAccessContentState,
   setCollaboratorsUserData,
   setContentWillRender,
   setFolderData,
   setGeneralData,
+  setIsSecuredFolderActive,
   setModalManageAccess,
-} from "../slice/modal-manage-access-content-slice";
-import { RootFolderGetData, SubFolderGetData } from "../folder";
-import { CollaboratorUserData, GeneralAccessDataSerialized } from "../folder-collaborator";
+} from "@/features/collaborator/slice/modal-manage-access-content-slice";
 
 interface UseModalManageAccessContentSetStateParams {
   withUseEffect?: {
@@ -17,6 +17,7 @@ interface UseModalManageAccessContentSetStateParams {
     setModalFolderData?: ModalManageAccessContentState["folderData"];
     setModalGeneralData?: ModalManageAccessContentState["generalData"];
     setModalCollaboratorsUserData?: ModalManageAccessContentState["collaboratorsUserData"];
+    setIsSecuredFolderActive?: ModalManageAccessContentState["isSecuredFolderActive"];
   };
 }
 const useModalManageAccessContentSetState = ({ withUseEffect }: UseModalManageAccessContentSetStateParams) => {
@@ -28,11 +29,9 @@ const useModalManageAccessContentSetState = ({ withUseEffect }: UseModalManageAc
     [dispatch]
   );
   const setModalFolderData = useCallback((data: RootFolderGetData | SubFolderGetData) => dispatch(setFolderData(data)), [dispatch]);
-  const setModalGeneralData = useCallback((data: GeneralAccessDataSerialized) => dispatch(setGeneralData(data)), [dispatch]);
-  const setModalCollaboratorsUserData = useCallback(
-    (data: CollaboratorUserData[] | null) => dispatch(setCollaboratorsUserData(data)),
-    [dispatch]
-  );
+  const setModalGeneralData = useCallback((data: GeneralAccessData) => dispatch(setGeneralData(data)), [dispatch]);
+  const setModalCollaboratorsUserData = useCallback((data: CollaboratorUserData[] | null) => dispatch(setCollaboratorsUserData(data)), [dispatch]);
+  const setSecuredFolderActive = useCallback((data: boolean) => dispatch(setIsSecuredFolderActive(data)), [dispatch]);
 
   /**
    * set data with useEffect
@@ -43,7 +42,8 @@ const useModalManageAccessContentSetState = ({ withUseEffect }: UseModalManageAc
     withUseEffect.setModalFolderData && setModalFolderData(withUseEffect.setModalFolderData);
     withUseEffect.setModalGeneralData && setModalGeneralData(withUseEffect.setModalGeneralData);
     withUseEffect.setModalCollaboratorsUserData && setModalCollaboratorsUserData(withUseEffect.setModalCollaboratorsUserData);
-  }, [setModalContentWillRender, setModalFolderData, setModalGeneralData, setModalCollaboratorsUserData, withUseEffect]);
+    withUseEffect.setIsSecuredFolderActive && setSecuredFolderActive(withUseEffect.setIsSecuredFolderActive);
+  }, [setModalContentWillRender, setModalFolderData, setModalGeneralData, setModalCollaboratorsUserData, withUseEffect, setSecuredFolderActive]);
 
   return {
     setModalOpen,

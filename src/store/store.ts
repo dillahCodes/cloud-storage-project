@@ -9,8 +9,7 @@ import { folderActivitySlice } from "@/features/folder/slice/folder-activity-sli
 import { folderPermissionSlice } from "@/features/folder/slice/folder-permission-slice";
 import { folderSortingTypeSlice } from "@/features/folder/slice/folder-sorting-type";
 import { mappingFolderTypeSlice } from "@/features/folder/slice/mapping-folder-type-slice";
-import { modalAddSelectedCollaboratorsSlice } from "@/features/folder/slice/modal-add-selected-collaborators";
-import { modalManageAccessContentSlice } from "@/features/folder/slice/modal-manage-access-content-slice";
+import { modalAddSelectedCollaboratorsSlice } from "@/features/collaborator/slice/modal-add-selected-collaborators";
 import { parentFolderSlice } from "@/features/folder/slice/parent-folder-slice";
 import { currentMessageSlice } from "@/features/message/slice/current-message-slice";
 import { messageSlice } from "@/features/message/slice/message-slice";
@@ -29,6 +28,8 @@ import { siderSlice } from "./slice/sider-slice";
 import { fileOptionsSlice } from "@/features/file/slice/file-options-slice";
 import { folderOptionsSlice } from "@/features/folder/slice/folder-options-slice";
 import { userStorageSlice } from "@/features/storage/slice/user-storage-slice";
+import { parentFolderPermissionSlice } from "@/features/permissions/slice/parent-folder-permission";
+import { modalManageAccessContentSlice } from "@/features/collaborator/slice/modal-manage-access-content-slice";
 
 const { createReduxHistory, routerMiddleware, routerReducer } = createReduxHistoryContext({
   history: createBrowserHistory(),
@@ -57,9 +58,12 @@ export const store = configureStore({
     fileUploading: fileUploadingSlice.reducer,
     folderActivity: folderActivitySlice.reducer,
 
-    // file and folder options11
+    // file and folder options
     fileOptions: fileOptionsSlice.reducer,
     folderOptions: folderOptionsSlice.reducer,
+
+    // folder permissions
+    parentFolderPermission: parentFolderPermissionSlice.reducer,
 
     // storage
     userStorage: userStorageSlice.reducer,

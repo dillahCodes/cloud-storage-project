@@ -1,8 +1,9 @@
-import { CollaboratorUserData } from "@/features/folder/folder-collaborator";
+import { CollaboratorUserData } from "@/features/collaborator/collaborator";
+import useGetCollabolatorsByFolderId from "@/features/collaborator/hooks/use-get-collaborators.-by-folderId";
+import useGetGeneralAccessDataByFolderId from "@/features/collaborator/hooks/use-get-general-access.-by-folderId";
+import useSecuredFolderOnDataChange from "@/features/collaborator/hooks/use-secured-folder-on-data-change";
 import useFolderDetails from "@/features/folder/hooks/use-folder-details";
-import useFolderPermissionState from "@/features/folder/hooks/use-folder-permission-state";
-import useGetCollaborators from "@/features/folder/hooks/use-get-collaborators";
-import useGetGeneralAccess from "@/features/folder/hooks/use-get-general-access";
+import useCreateDetailsFolderPermissions from "@/features/permissions/hooks/use-create-details-folder-permissions";
 import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
 import Button from "@components/ui/button";
 import { Flex, Spin, Typography } from "antd";
@@ -12,9 +13,7 @@ import { IoIosArrowBack } from "react-icons/io";
 import { MdFolderOpen } from "react-icons/md";
 import FolderCollaboratorsAvatar from "./folder-collaborators-avatar";
 import ManageAccessButton from "./manage-access-button";
-import useUser from "@/features/auth/hooks/use-user";
-import useFolderGetPermission from "@/features/folder/hooks/use-folder-get-permission";
-import useModalManageAccessContentSetState from "@/features/folder/hooks/use-modal-manage-access-content-setstate";
+import useModalManageAccessContentSetState from "@/features/collaborator/hooks/use-modal-manage-access-content-setstate";
 
 const generateCollaboratorsNameInfo = (collaborators: CollaboratorUserData[] | null, isFolderPrivate: boolean): string => {
   if (!collaborators || collaborators.length === 0) return "";
@@ -32,57 +31,97 @@ const generateCollaboratorsNameInfo = (collaborators: CollaboratorUserData[] | n
 
 const { Text } = Typography;
 const FolderDetails = () => {
-  const { user } = useUser();
-  const { isRootFolder } = useFolderPermissionState();
   const { isDesktopDevice } = useGetClientScreenWidth();
   const { folderDetailsData, handleNavigateToFolderLocation, folderStatus, handleBack, folderData } = useFolderDetails();
 
   /**
-   * fetch collaborators data
+   * if parent folder is not exists its mean this folder is root folder
    */
-  const { fetchCollaboratorsUserDataStatus, collaboratorsUserData } = useGetCollaborators({
-    folderId: folderData?.folder_id,
-    shouldFetch: Boolean(folderData?.folder_id),
-    shoudFetchUserCollaboratorsData: Boolean(folderData?.folder_id),
-  });
-  const { fetchStatus, generalAccessDataState } = useGetGeneralAccess({
-    folderId: folderData?.folder_id,
-    shouldFetch: Boolean(folderData?.folder_id),
-  });
-
-  const isLoading = useMemo(() => {
-    return folderStatus === "loading" || fetchCollaboratorsUserDataStatus === "loading" || fetchStatus === "loading";
-  }, [fetchCollaboratorsUserDataStatus, fetchStatus, folderStatus]);
+  const isRootFolder = useMemo(() => !folderData?.parent_folder_id, [folderData?.parent_folder_id]);
 
   /**
-   * set data to store
+   * if is root folder return folder id else return parent folder id
+   */
+  const folderId = useMemo(() => {
+    if (isRootFolder) return folderData?.folder_id || null;
+    return folderData?.parent_folder_id || null;
+  }, [folderData?.folder_id, folderData?.parent_folder_id, isRootFolder]);
+
+  /**
+   * condition to fetch collaborators and general access
+   */
+  const shouldFetchCollaboratorsAndGenralAccess = useMemo(() => {
+    return folderStatus === "succeeded" && Boolean(folderId);
+  }, [folderId, folderStatus]);
+
+  /**
+   * fetch collaborators data
+   */
+  const { collaborators, collaboratorsStatus } = useGetCollabolatorsByFolderId({
+    folderId,
+    shouldFetch: shouldFetchCollaboratorsAndGenralAccess,
+  });
+
+  /**
+   * fetch general access data
+   */
+  const { generalAccess, generalAccessStatus } = useGetGeneralAccessDataByFolderId({
+    folderId,
+    shouldFetch: shouldFetchCollaboratorsAndGenralAccess,
+  });
+
+  /**
+   * watch folder secured condition true or false
+   */
+  const { isSecuredFolderActive } = useSecuredFolderOnDataChange({ folderId });
+
+  /**
+   * set general access data and collaborators data
+   * to manage access modal state
    */
   useModalManageAccessContentSetState({
     withUseEffect: {
-      setModalCollaboratorsUserData: collaboratorsUserData,
-      setModalGeneralData: generalAccessDataState,
+      setModalCollaboratorsUserData: collaborators,
+      setModalGeneralData: generalAccess,
       setModalFolderData: folderData,
+      setIsSecuredFolderActive: isSecuredFolderActive,
     },
   });
 
   /**
-   * get permission based on collaborators data
+   * create details folder permissions based on
+   * collaborators, general access and secured folder data
    */
-  const { permissions, permissionDataDetails } = useFolderGetPermission({
-    userId: user ? user.uid : null,
-    collaboratorsUserData: collaboratorsUserData ?? null,
-    generalAccessDataState: generalAccessDataState ?? null,
-    parentFolderOwnerId: null,
-    shouldProcessPermission: isLoading,
+  const permissions = useCreateDetailsFolderPermissions({
+    collaboratorsData: collaborators,
+    collaboratorsStatus,
+    generalAccess,
+    generalAccessStatus,
+    isSecuredFolderActive,
   });
 
-  console.log({ permissions, permissionDataDetails });
+  /**
+   * logic button manage access disabled
+   */
+  const disabledButton = useMemo(() => {
+    return !permissions.actionPermissions.canCRUD && permissions.permissionsDetails.isSubFolderLocation;
+  }, [permissions]);
 
-  const isFolderPrivate = generalAccessDataState?.type === "private";
+  /**
+   * logic loading page
+   */
+  const isFolderLoading = useMemo(() => folderStatus === "loading", [folderStatus]);
+  const isCollaboratorLoading = useMemo(() => collaboratorsStatus === "loading", [collaboratorsStatus]);
+  const isGeneralAccessLoading = useMemo(() => generalAccessStatus === "loading", [generalAccessStatus]);
+  const isLoading = useMemo(() => {
+    return isFolderLoading || isCollaboratorLoading || isGeneralAccessLoading;
+  }, [isFolderLoading, isCollaboratorLoading, isGeneralAccessLoading]);
+
+  const isFolderPrivate = generalAccess?.type === "private";
 
   const collaboratorsNameInfo = useMemo(() => {
-    return generateCollaboratorsNameInfo(collaboratorsUserData, isFolderPrivate);
-  }, [collaboratorsUserData, isFolderPrivate]);
+    return generateCollaboratorsNameInfo(collaborators, isFolderPrivate);
+  }, [collaborators, isFolderPrivate]);
 
   if (isLoading) {
     return (
@@ -142,9 +181,9 @@ const FolderDetails = () => {
         <Text className="text-base font-archivo font-bold text-center  capitalize">Who has access</Text>
 
         <Flex vertical gap="small">
-          <FolderCollaboratorsAvatar collaborators={collaboratorsUserData} generalAccessData={generalAccessDataState} />
+          <FolderCollaboratorsAvatar collaborators={collaborators} generalAccessData={generalAccess} />
           <Text className="text-sm font-archivo">{collaboratorsNameInfo}</Text>
-          <ManageAccessButton disabledButton={!permissions.canManageAccess && !isRootFolder} />
+          <ManageAccessButton disabledButton={disabledButton} />
         </Flex>
       </Flex>
     </div>

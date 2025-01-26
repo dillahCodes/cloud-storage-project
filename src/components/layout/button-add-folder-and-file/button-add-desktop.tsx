@@ -1,12 +1,12 @@
 import useAddFile from "@/features/file/hooks/use-add-file";
 import useAddFolder from "@/features/folder/hooks/use-add-folder";
-import useParentFolder from "@/features/folder/hooks/use-parent-folder";
+import { parentFolderSelector } from "@/features/folder/slice/parent-folder-slice";
 import withModal from "@components/hoc/with-modal";
 import Button from "@components/ui/button";
 import { Flex, Typography } from "antd";
 import { useCallback, useMemo, useState } from "react";
 import { RiFolderAddLine } from "react-icons/ri";
-import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import ModalAddContent from "./modal-add-content";
 import ModalAddFolderContent from "./modal-add-folder-content";
 
@@ -18,12 +18,8 @@ const { Text } = Typography;
 const ButtonWithModal = withModal(Button);
 
 const ButtonAddDesktop: React.FC<ButtonWithModalProps> = ({ showText = false }) => {
-  const { folderId } = useParams<{ folderId: string }>();
-  const { parentFolderState } = useParentFolder({
-    fetchParentFolderDataOnMount: false,
-    resetParentFolderDataOnMount: false,
-    folderId,
-  });
+  const parentFolderState = useSelector(parentFolderSelector);
+
   const { folderName, handleSetFolderName, handleConfirmAddFolder } = useAddFolder();
   const { handleSetAndUploadFile } = useAddFile();
 

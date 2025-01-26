@@ -3,6 +3,8 @@
   "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
   "compilerOptions": {
     // import absolute path
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
 
     "strict": true,
     "baseUrl": ".",

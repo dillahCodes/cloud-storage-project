@@ -1,4 +1,4 @@
-import { neoBrutalBorderVariants, NeoBrutalVariant } from "@/theme/antd-theme";
+import { neoBrutalBorderVariants } from "@/theme/antd-theme";
 import { Flex } from "antd";
 import classNames from "classnames";
 import { useEffect, useRef, useState } from "react";
@@ -9,7 +9,6 @@ interface ElementRef {
 }
 
 interface WithFloatingElementProps {
-  neoBrutalVariant: NeoBrutalVariant; // neo brutal variant
   floatingContent: React.ReactNode; // floating element
   isFloatingOpen?: boolean; // if true, the floating element will be open
   isOriginalComponentExcluded?: boolean; // if true, the original component will be included and triger oudside click will not work
@@ -17,12 +16,9 @@ interface WithFloatingElementProps {
   floatingElClassName?: string;
 }
 
-export const withDynamicFloatingElement = <OriginalComponentProps extends object>(
-  Component: React.ComponentType<OriginalComponentProps>
-) => {
+export const withDynamicFloatingElement = <OriginalComponentProps extends object>(Component: React.ComponentType<OriginalComponentProps>) => {
   const WrappedComponent: React.FC<OriginalComponentProps & WithFloatingElementProps> = ({
     floatingContent,
-    neoBrutalVariant,
     isFloatingOpen,
     isOriginalComponentExcluded,
     wraperClassName,

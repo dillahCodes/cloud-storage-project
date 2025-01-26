@@ -1,8 +1,9 @@
 import useIsValidParams from "@/features/folder/hooks/use-isvalid-params";
-import useParentFolder from "@/features/folder/hooks/use-parent-folder";
+import { parentFolderSelector } from "@/features/folder/slice/parent-folder-slice";
 import { auth, db } from "@/firebase/firebase-services";
 import { collection, onSnapshot, orderBy, Query, query, where } from "firebase/firestore";
 import { useCallback, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import useFilesSetState from "./use-files-setstate";
 
@@ -14,11 +15,8 @@ interface UseGetFilesProps {
 const useGetFiles = ({ isRoot, shouldFetchInMount }: UseGetFilesProps) => {
   const { folderId: parent_folder_id } = useParams<{ folderId: string }>();
 
-  const { parentFolderState } = useParentFolder({
-    fetchParentFolderDataOnMount: false,
-    resetParentFolderDataOnMount: false,
-    folderId: parent_folder_id,
-  });
+  const parentFolderState = useSelector(parentFolderSelector);
+
   const { isValidParentFolder } = parentFolderState;
   const { isValidSearchParams } = useIsValidParams();
 

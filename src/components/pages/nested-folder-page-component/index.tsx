@@ -4,22 +4,25 @@ import useAddBreadcrumbItems from "@/features/breadcrumb/hooks/use-addbreadcrumb
 import useAutoDeleteUnusedBreadcrumbItems from "@/features/breadcrumb/hooks/use-auto-delete-unused-breadcrumb-items";
 import useBreadcrumbState from "@/features/breadcrumb/hooks/use-breadcrumb-state";
 import useSubFolderAutoGetBreadcrums from "@/features/breadcrumb/hooks/use-sub-folder-auto-get-breadcrumbs";
+import useGetGeneralAccessDataByFolderId from "@/features/collaborator/hooks/use-get-general-access.-by-folderId";
+import useGetIsCollaboratorByUserIdAndFolderId from "@/features/collaborator/hooks/use-get-is-collaborator-by-userId-and-folderId";
 import useFilesState from "@/features/file/hooks/use-files-state";
 import useGetFiles from "@/features/file/hooks/use-get-files";
 import useAddSharedWithMeFolderData from "@/features/folder/hooks/use-add-shared-with-me-folder-data";
 import useCurrentFolderState from "@/features/folder/hooks/use-current-folder-state";
 import useDeleteSharedFolder from "@/features/folder/hooks/use-detete-shared-folder";
-import useFolderGetPermission from "@/features/folder/hooks/use-folder-get-permission";
-import useFolderPermissionSetState from "@/features/folder/hooks/use-folder-permission-setstate";
-import useGetCollaborators from "@/features/folder/hooks/use-get-collaborators";
 import useGetFolder from "@/features/folder/hooks/use-get-folder";
-import useGetGeneralAccess from "@/features/folder/hooks/use-get-general-access";
-import useParentFolder from "@/features/folder/hooks/use-parent-folder";
+import useGetParentFolder from "@/features/folder/hooks/use-get-parent-folder";
+import { parentFolderSelector } from "@/features/folder/slice/parent-folder-slice";
+import useCreateParentFolderPermissions from "@/features/permissions/hooks/use-create-parent-folder-permissions";
+import { parentFolderPermissionSelector } from "@/features/permissions/slice/parent-folder-permission";
+import useDetectLocation from "@/hooks/use-detect-location";
 import useMobileHeaderTitle from "@/hooks/use-mobile-header-title";
 import MainLayout from "@components/layout/main-layout";
 import { Layout, Spin } from "antd";
-import { useMemo, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useMemo } from "react";
+import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 import MappingFiles from "./mapping-files";
 import MappingFolders from "./mapping-folders";
 
@@ -28,73 +31,88 @@ const NestedFolderPageComponent: React.FC = () => {
 
   const { user } = useUser();
   const { folderId } = useParams<{ folderId: string }>();
+  const { isSubSharedWithMeLocation, isSubMyStorageLocation } = useDetectLocation();
 
-  const { "0": urlSearchParams } = useSearchParams();
-  const [params] = useState((urlSearchParams.get("st") as NestedBreadcrumbType) || "my-storage");
+  /**
+   * hooks get parent folder
+   */
+  useGetParentFolder({ shouldFetch: Boolean(folderId), folderId });
 
-  // parent folder state
-  const { parentFolderState } = useParentFolder({
-    fetchParentFolderDataOnMount: true,
-    resetParentFolderDataOnMount: true,
-    folderId,
-  });
+  /**
+   * parent folder state
+   */
+  const parentFolderState = useSelector(parentFolderSelector);
   const { status: parentFolderStatus } = parentFolderState;
+  const isParentFolderFetchSuccess = useMemo(() => parentFolderStatus === "succeeded", [parentFolderStatus]);
 
-  // get parent folder collaborators and general access data
-  const { collaboratorsUserData, fetchCollaboratorsUserDataStatus } = useGetCollaborators({
-    shouldFetch: parentFolderState.isValidParentFolder,
-    folderId,
-    shoudFetchUserCollaboratorsData: parentFolderState.isValidParentFolder,
-  });
-  const { generalAccessDataState, fetchStatus } = useGetGeneralAccess({
-    shouldFetch: parentFolderState.isValidParentFolder,
-    folderId,
-  });
-  const isGetPermissionSuccess = useMemo(() => {
-    return fetchCollaboratorsUserDataStatus === "succeeded" && fetchStatus === "succeeded" && parentFolderStatus === "succeeded";
-  }, [fetchCollaboratorsUserDataStatus, fetchStatus, parentFolderStatus]);
+  /**
+   * get user is collaborator in this parent folder is current user
+   * collaborator or not
+   */
+  const shouldFetchCollaborator = useMemo(() => {
+    return Boolean(parentFolderState.parentFolderData?.folder_id && user?.uid && isParentFolderFetchSuccess);
+  }, [user?.uid, parentFolderState.parentFolderData?.folder_id, isParentFolderFetchSuccess]);
 
-  // get permission in this sub folder
-  const { permissions, permissionDataDetails } = useFolderGetPermission({
-    userId: user ? user.uid : null,
-    collaboratorsUserData: collaboratorsUserData ?? null,
-    generalAccessDataState: generalAccessDataState ?? null,
-    parentFolderOwnerId: parentFolderState.parentFolderData?.owner_user_id ?? null,
-    shouldProcessPermission: isGetPermissionSuccess,
+  const { collaboratorData, collaboratorStatus } = useGetIsCollaboratorByUserIdAndFolderId({
+    folderId: parentFolderState.parentFolderData?.folder_id ?? null,
+    shouldFetch: shouldFetchCollaborator,
+    userId: user?.uid ?? null,
   });
 
-  // console.log(permissionDataDetails);
+  /**
+   * get general access data in this parent folder
+   */
+  const shouldFetchGeneralAccess = useMemo(() => {
+    return Boolean(parentFolderState.parentFolderData?.folder_id && isParentFolderFetchSuccess);
+  }, [parentFolderState.parentFolderData?.folder_id, isParentFolderFetchSuccess]);
 
-  // // set folder permission to state
-  useFolderPermissionSetState({
-    isRootFolder: false,
-
-    subFolderPermissions: permissions,
-    detailsFolderPermissions: null,
-
-    permissionsStatus: isGetPermissionSuccess ? "succeeded" : "loading",
-    shouldProceed: isGetPermissionSuccess,
+  const { generalAccess, generalAccessStatus } = useGetGeneralAccessDataByFolderId({
+    folderId: parentFolderState.parentFolderData?.folder_id ?? null,
+    shouldFetch: shouldFetchGeneralAccess,
   });
 
-  // delete shared folder if user can't view
-  const shouldDeleteSharedFolder =
-    parentFolderState.parentFolderData?.root_folder_user_id !== user?.uid && !permissions.canView && isGetPermissionSuccess;
+  /**
+   * create parent folder permission based on collaborator and general access
+   * and store to global state
+   */
+  useCreateParentFolderPermissions({
+    collaboratorData,
+    collaboratorStatus,
+    generalAccess,
+    generalAccessStatus,
+  });
+
+  /**
+   * parent folder permission state
+   */
+  const { actionPermissions, isFetchPermissionSuccess, permissionsDetails } = useSelector(parentFolderPermissionSelector);
+
+  /**
+   * delete shared folder if user can't view
+   */
+  const shouldDeleteSharedFolder = useMemo(() => {
+    return !actionPermissions.canView && isFetchPermissionSuccess;
+  }, [actionPermissions.canView, isFetchPermissionSuccess]);
+
   useDeleteSharedFolder({
     parentFolderId: parentFolderState.parentFolderData?.folder_id,
     shouldFetch: shouldDeleteSharedFolder,
   });
 
-  // if is shared-with me params then add save parentFolder id to firestore
+  /**
+   *  if current user in sub shared with me location and is not owner of this folder
+   *  save folder in shared folder
+   */
   const shouldSaveSharedFolder = useMemo(() => {
     return (
-      params === "shared-with-me" &&
-      parentFolderState.parentFolderData?.root_folder_user_id !== user?.uid &&
+      isSubSharedWithMeLocation &&
+      !permissionsDetails.isOwner &&
       parentFolderState.isValidParentFolder &&
-      permissions.canView
+      actionPermissions.canView &&
+      isFetchPermissionSuccess
     );
-  }, [params, parentFolderState, user, permissions]);
+  }, [parentFolderState, actionPermissions.canView, isSubSharedWithMeLocation, isFetchPermissionSuccess, permissionsDetails]);
 
-  // add shared with me folder data
   useAddSharedWithMeFolderData({
     shouldAdd: shouldSaveSharedFolder,
   });
@@ -103,10 +121,10 @@ const NestedFolderPageComponent: React.FC = () => {
   useAddFirstBreadcrumbItem({
     addInMount: true,
     breadcrumbItem: {
-      label: params === "my-storage" ? "my storage" : "shared with me",
+      label: isSubMyStorageLocation ? "my storage" : "shared with me",
       path: "/storage/my-storage",
-      key: params === "my-storage" ? "my storage" : "shared with me",
-      icon: params === "my-storage" ? "storage" : "share",
+      key: isSubMyStorageLocation ? "my storage" : "shared with me",
+      icon: isSubMyStorageLocation ? "storage" : "share",
     },
   });
 
@@ -132,43 +150,61 @@ const NestedFolderPageComponent: React.FC = () => {
     status: fetchBreadcrumbStatus,
   });
 
-  // get folders data
+  /**
+   * get current folder data
+   */
+  const shouldFetchCurrentFoldersData = useMemo(() => {
+    return isFetchPermissionSuccess && isParentFolderFetchSuccess;
+  }, [isFetchPermissionSuccess, isParentFolderFetchSuccess]);
   useGetFolder({
     isRoot: false,
-    shouldFetchInMount: isGetPermissionSuccess,
+    shouldFetchInMount: shouldFetchCurrentFoldersData,
   });
 
-  // folders state
+  /**
+   * current folders state
+   */
   const { status: folderStatus, folders } = useCurrentFolderState();
 
+  const shouldFetchFiles = useMemo(() => {
+    return isFetchPermissionSuccess && isParentFolderFetchSuccess;
+  }, [isFetchPermissionSuccess, isParentFolderFetchSuccess]);
   useGetFiles({
     isRoot: false,
-    shouldFetchInMount: isGetPermissionSuccess,
+    shouldFetchInMount: shouldFetchFiles,
   });
 
-  // files state
+  /**
+   * current files state
+   */
   const { files, status: fileStatus } = useFilesState();
 
-  const isLoading = useMemo(() => {
-    return fileStatus === "loading" || folderStatus === "loading" || fetchCollaboratorsUserDataStatus === "loading" || fetchStatus === "loading";
-  }, [fetchCollaboratorsUserDataStatus, fetchStatus, fileStatus, folderStatus]);
+  /**
+   * check if all data is loading
+   */
+  const isFetchFilesLoading = useMemo(() => fileStatus === "loading", [fileStatus]);
+  const isFetchFoldersLoading = useMemo(() => folderStatus === "loading", [folderStatus]);
+  const isFetchParentFolderLoading = useMemo(() => parentFolderStatus === "loading", [parentFolderStatus]);
+  const isFetchParentFolderPermissionLoading = useMemo(() => !isFetchPermissionSuccess, [isFetchPermissionSuccess]);
+
+  const isAllPromisesLoading = useMemo(() => {
+    return isFetchFilesLoading || isFetchFoldersLoading || isFetchParentFolderLoading || isFetchParentFolderPermissionLoading;
+  }, [isFetchFilesLoading, isFetchFoldersLoading, isFetchParentFolderLoading, isFetchParentFolderPermissionLoading]);
+
+  /**
+   * check parent folder is success and get permissions parent folder is success,
+   * but files and folders is empty
+   */
+  const isFilesEmpty = useMemo(() => files.length === 0 && fileStatus !== "loading" && fileStatus !== "idle", [files.length, fileStatus]);
+  const isFoldersEmpty = useMemo(() => folders.length === 0 && folderStatus !== "loading" && folderStatus !== "idle", [folders.length, folderStatus]);
 
   const isAllDataEmpty = useMemo(() => {
-    return (
-      files.length === 0 &&
-      fileStatus !== "loading" &&
-      fileStatus !== "idle" &&
-      folders.length === 0 &&
-      folderStatus !== "loading" &&
-      folderStatus !== "idle" &&
-      parentFolderStatus !== "loading" &&
-      parentFolderStatus !== "idle"
-    );
-  }, [fileStatus, folderStatus, files.length, folders.length, parentFolderStatus]);
+    return isParentFolderFetchSuccess && isFetchPermissionSuccess && isFilesEmpty && isFoldersEmpty;
+  }, [isFetchPermissionSuccess, isFilesEmpty, isFoldersEmpty, isParentFolderFetchSuccess]);
 
   return (
     <MainLayout showAddButton showPasteButton>
-      {isLoading ? (
+      {isAllPromisesLoading ? (
         <Layout className="h-screen w-full flex justify-center items-center">
           <Spin size="large" />
         </Layout>

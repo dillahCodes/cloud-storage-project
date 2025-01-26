@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
-import { doc, onSnapshot, DocumentReference } from "firebase/firestore";
+import useUser from "@/features/auth/hooks/use-user";
+import { SecuredFolderStatus, SecurredFolderData } from "@/features/collaborator/collaborator";
 import { auth, db } from "@/firebase/firebase-services";
-import { SecuredFolderStatus, SecurredFolderData } from "../folder";
+import { doc, DocumentReference, onSnapshot } from "firebase/firestore";
+import { useEffect, useState } from "react";
 
 interface UseSecuredFolderOnDataChange {
-  folderId: string;
+  folderId: string | null;
 }
 
 interface SubscribeToSecuredFolderParams {
@@ -58,12 +59,10 @@ const subscribeToSecuredFolder = ({ setStatus, folderId, setIsSecuredFolderActiv
 const useSecuredFolderOnDataChange = ({ folderId }: UseSecuredFolderOnDataChange) => {
   const [isSecuredFolderActive, setIsSecuredFolderActive] = useState<boolean>(false);
   const [statusFetch, setStatusFetch] = useState<SecuredFolderStatus>("idle");
+  const { user } = useUser();
 
   useEffect(() => {
-    if (!folderId || !auth.currentUser) {
-      console.warn("Invalid folder ID or user is not authenticated.");
-      return;
-    }
+    if (!folderId || !user) return;
 
     const unsubscribe = subscribeToSecuredFolder({
       folderId,
@@ -72,7 +71,7 @@ const useSecuredFolderOnDataChange = ({ folderId }: UseSecuredFolderOnDataChange
     });
 
     return () => unsubscribe();
-  }, [folderId]);
+  }, [folderId, user]);
 
   return { isSecuredFolderActive, statusFetch };
 };

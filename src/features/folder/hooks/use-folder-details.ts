@@ -18,6 +18,29 @@ interface FolderDetailsData {
   folderModifiedByName: string;
 }
 
+// Helper Functions
+const getFolderOwnerName = async (ownerUserId: string, isMyFolder: boolean): Promise<string> => {
+  return isMyFolder ? "Me" : await getUserDataInDb(ownerUserId).then((data) => data?.displayName ?? "Unknown User");
+};
+
+const getFolderLocationName = async (parentFolderId: string | null, isSubFolder: boolean): Promise<string> => {
+  if (!isSubFolder || !parentFolderId) return "My Storage";
+  return await getFolderById(parentFolderId).then((data) => data?.folder_name ?? "Unknown Location");
+};
+
+const getFolderCreatorName = async (ownerUserId: string, isMyFolder: boolean): Promise<string> => {
+  return isMyFolder ? "Me" : await getUserDataInDb(ownerUserId).then((data) => data?.displayName ?? "Unknown User");
+};
+
+const getFolderModifiedAt = (updatedAt: { seconds: number } | null, isFolderModified: boolean): string => {
+  return isFolderModified && updatedAt ? translateEpochToDate(updatedAt.seconds) : "-";
+};
+
+const getFolderModifiedByName = async (updatedBy: string | null, isModifiedByMe: boolean): Promise<string> => {
+  if (!updatedBy) return "-";
+  return isModifiedByMe ? "Me" : await getUserDataInDb(updatedBy).then((data) => data?.displayName ?? "Unknown User");
+};
+
 const useFolderDetails = () => {
   const [folderDetailsData, setFolderDetailsData] = useState<FolderDetailsData>({
     folderName: "",
@@ -83,30 +106,7 @@ const useFolderDetails = () => {
     fetchFolderDetails();
   }, [folderData, isMyFolder, isSubFolder, isFolderModified, isModifiedByMe]);
 
-  return { folderDetailsData, handleNavigateToFolderLocation, handleBack, folderStatus: status, folderData };
-};
-
-// Helper Functions
-const getFolderOwnerName = async (ownerUserId: string, isMyFolder: boolean): Promise<string> => {
-  return isMyFolder ? "Me" : await getUserDataInDb(ownerUserId).then((data) => data?.displayName ?? "Unknown User");
-};
-
-const getFolderLocationName = async (parentFolderId: string | null, isSubFolder: boolean): Promise<string> => {
-  if (!isSubFolder || !parentFolderId) return "My Storage";
-  return await getFolderById(parentFolderId).then((data) => data?.folder_name ?? "Unknown Location");
-};
-
-const getFolderCreatorName = async (ownerUserId: string, isMyFolder: boolean): Promise<string> => {
-  return isMyFolder ? "Me" : await getUserDataInDb(ownerUserId).then((data) => data?.displayName ?? "Unknown User");
-};
-
-const getFolderModifiedAt = (updatedAt: { seconds: number } | null, isFolderModified: boolean): string => {
-  return isFolderModified && updatedAt ? translateEpochToDate(updatedAt.seconds) : "-";
-};
-
-const getFolderModifiedByName = async (updatedBy: string | null, isModifiedByMe: boolean): Promise<string> => {
-  if (!updatedBy) return "-";
-  return isModifiedByMe ? "Me" : await getUserDataInDb(updatedBy).then((data) => data?.displayName ?? "Unknown User");
+  return { folderDetailsData, handleNavigateToFolderLocation, handleBack, folderStatus: status, folderData, activeFolderId };
 };
 
 export default useFolderDetails;

@@ -1,4 +1,4 @@
-import { modalAddSelectedCollaboratorsSelector } from "@/features/folder/slice/modal-add-selected-collaborators";
+import { modalAddSelectedCollaboratorsSelector } from "@/features/collaborator/slice/modal-add-selected-collaborators";
 import { neoBrutalBorderVariants } from "@/theme/antd-theme";
 import { withDynamicFloatingElement } from "@components/hoc/with-dynamic-floating-element";
 import { Flex } from "antd";
@@ -7,8 +7,8 @@ import { useSelector } from "react-redux";
 import AddCollaboratorsUserComponent from "./add-collaborators-user-component";
 import useGetCollaboratorsByNameOrEmail from "@/features/folder/hooks/use-get-collaborators-by-name-or-email";
 import UsersFloatingDataList from "./users-floating-list";
-import useModalManageAccessContentState from "@/features/folder/hooks/use-modal-manage-access-content-state";
 import useAddCollaboratorsSelectedToState from "@/features/folder/hooks/use-add-collaborators-selected-to-state";
+import { modalManageAccessContentSelector } from "@/features/collaborator/slice/modal-manage-access-content-slice";
 
 const FlexWithDynamicFloatingElement = withDynamicFloatingElement(Flex);
 
@@ -19,7 +19,7 @@ const AddCollaboratorsInputWithCollaboratorsWillAdded: React.FC = () => {
    * states
    */
   const [inputValue, setInputValue] = useState<string>("");
-  const { folderData } = useModalManageAccessContentState();
+  const { folderData } = useSelector(modalManageAccessContentSelector);
   const { collaboratorsData: collaboratosListWillAdd } = useSelector(modalAddSelectedCollaboratorsSelector);
 
   /**
@@ -51,7 +51,6 @@ const AddCollaboratorsInputWithCollaboratorsWillAdded: React.FC = () => {
       floatingElClassName="z-10"
       isOriginalComponentExcluded
       isFloatingOpen={fetchStatus === "success"}
-      neoBrutalVariant="small"
       floatingContent={
         isCollaboratosValid ? (
           <UsersFloatingDataList

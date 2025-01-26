@@ -4,7 +4,7 @@ import { useState } from "react";
 import { RootFolderGetData, SubFolderGetData } from "../folder";
 import useAddActivityRenamedFolder from "./use-add-activity-renamed-folder";
 import { v4 as uuidv4 } from "uuid";
-import useParentFolder from "./use-parent-folder";
+import useParentFolder from "./use-get-parent-folder";
 import { message } from "antd";
 
 const useChangeFolderName = (folderData: RootFolderGetData | SubFolderGetData) => {

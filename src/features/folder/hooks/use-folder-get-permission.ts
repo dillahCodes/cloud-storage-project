@@ -1,10 +1,10 @@
+import { CollaboratorUserData, GeneralAccessData } from "@/features/collaborator/collaborator";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CollaboratorUserData, GeneralAccessDataSerialized } from "../folder-collaborator";
 
 interface UseFolderGetPermissionsProps {
   userId: string | null;
   collaboratorsUserData: CollaboratorUserData[] | null;
-  generalAccessDataState: GeneralAccessDataSerialized | null;
+  generalAccessDataState: GeneralAccessData | null;
   parentFolderOwnerId: string | null;
   shouldProcessPermission: boolean;
 }

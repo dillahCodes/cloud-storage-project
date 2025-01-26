@@ -3,8 +3,8 @@ import handleSendCollaborationInvitation from "@/features/message/send-collabora
 import { message } from "antd";
 import { serverTimestamp } from "firebase/firestore";
 import { useCallback } from "react";
-import { GeneralAccessRole } from "../folder-collaborator";
 import handleAddCollabortaror from "../handle-add-collaborator";
+import { GeneralAccessRole } from "@/features/collaborator/collaborator";
 
 interface UseAddCollaboratorsSelectedToDbParams {
   role: GeneralAccessRole;
