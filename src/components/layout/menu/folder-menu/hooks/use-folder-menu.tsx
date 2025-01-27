@@ -40,9 +40,11 @@ const useFolderOptionsMenu = (folderData: RootFolderGetData | SubFolderGetData) 
   const { handleClipboard, handleMoveFolder } = useHandleActionFolderMenu();
   const { addFolderToStarred } = useAddFolderStarred();
 
-  // Folder menu list
-  const initialMenu = useMemo(
-    () => [
+  /**
+   * folder menu list
+   */
+  const initialMenu = useMemo(() => {
+    return [
       createMenuItem("rename", <LuPenLine />, "Rename", () => dispatch(setFolderOptionsAction("rename"))),
       createMenuItem("delete", <LuTrash />, "Delete", () => dispatch(setFolderOptionsAction("delete"))),
       createMenuItem("share link", <LuLink />, "Share Link", () => handleClipboard(folderData)),
@@ -56,9 +58,8 @@ const useFolderOptionsMenu = (folderData: RootFolderGetData | SubFolderGetData) 
         createMenuItem("details", <LuInfo />, "Details", () => handleFolderDetails(folderData)),
         createMenuItem("activity", <LuActivity />, "Activity", () => handleFolderActivity(folderData)),
       ]),
-    ],
-    [folderData, handleClipboard, handleMoveFolder, addFolderToStarred, handleFolderDetails, handleFolderActivity, dispatch]
-  );
+    ];
+  }, [folderData, handleClipboard, handleMoveFolder, addFolderToStarred, handleFolderDetails, handleFolderActivity, dispatch]);
 
   const [folderMenuList, setFolderMenuList] = useState<MenuItem[]>(initialMenu);
 

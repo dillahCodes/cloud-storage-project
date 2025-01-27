@@ -1,4 +1,3 @@
-import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 import { db } from "@/firebase/firebase-services";
 import useDetectLocation from "@/hooks/use-detect-location";
 import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
@@ -9,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { mobileMoveSelector } from "../slice/mobile-move-slice";
 import { moveFoldersAndFilesDataSelector, setMoveParentFolderData, setMoveParentFolderStatus } from "../slice/move-folders-and-files-data-slice";
+import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 
 /**
  * handle get parentFolderId

@@ -1,7 +1,7 @@
+import { Collaborator, CollaboratorUserData } from "@/features/collaborator/collaborator";
 import { db } from "@/firebase/firebase-services";
 import { collection, doc, DocumentData, DocumentSnapshot, getDoc, onSnapshot, query, QueryDocumentSnapshot, where } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
-import { Collaborator, CollaboratorUserData } from "../folder-collaborator";
 
 interface UseGetCollaboratorsParams {
   folderId?: string;

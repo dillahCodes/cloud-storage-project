@@ -1,6 +1,6 @@
+import { CollaboratorUserData } from "@/features/collaborator/collaborator";
 import { CollaboratorMenuItem } from "@/features/folder/collaborator-menu";
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
-import { CollaboratorUserData } from "@/features/folder/folder-collaborator";
 import { neoBrutalBorderVariants, themeColors } from "@/theme/antd-theme";
 import { Flex, Typography } from "antd";
 import { MdCheck } from "react-icons/md";
@@ -28,12 +28,7 @@ const CollaboratorRoleDropdown: React.FC<CollaboratorRoleDropdownProps> = ({
   };
 
   return (
-    <Flex
-      className="p-3 border-2 border-black rounded-sm"
-      vertical
-      gap="small"
-      style={{ ...neoBrutalBorderVariants.medium, background: "white" }}
-    >
+    <Flex className="p-3 border-2 border-black rounded-sm" vertical gap="small" style={{ ...neoBrutalBorderVariants.medium, background: "white" }}>
       {roleList.map((role) => (
         <Flex
           key={role.key}

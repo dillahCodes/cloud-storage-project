@@ -17,6 +17,15 @@
       ]
     ],
     [
+      "../collaborator",
+      [
+        "src\\features\\collaborator\\slice\\modal-add-selected-collaborators.ts",
+        "src\\features\\collaborator\\hooks\\use-get-collaborators-by-folderId.ts",
+        "src\\features\\collaborator\\hooks\\use-get-general-access-by-folderId.ts",
+        "src\\features\\collaborator\\hooks\\use-get-is-collaborator-by-userId-and-folderId.ts"
+      ]
+    ],
+    [
       "../current-folders",
       [
         "src\\features\\folder\\slice\\current-folders-slice.ts",
@@ -43,6 +52,24 @@
         "src\\features\\folder\\hooks\\use-delete-folder.ts",
         "src\\features\\folder\\hooks\\use-change-folder-name.ts",
         "src\\features\\folder\\hooks\\use-add-shared-with-me-folder-data.ts",
+        "src\\features\\folder\\hooks\\use-get-shared-with-me-folder-data.ts",
+        "src\\features\\folder\\hooks\\use-get-starred-folders.ts"
+      ]
+    ],
+    [
+      "../folder",
+      [
+        "src\\features\\folder\\slice\\parent-folder-slice.ts",
+        "src\\features\\folder\\hooks\\use-get-folder-byid.ts",
+        "src\\features\\folder\\hooks\\use-add-folder.ts",
+        "src\\features\\folder\\hooks\\use-get-folder.ts",
+        "src\\features\\folder\\hooks\\use-folder-sort-options.ts",
+        "src\\features\\folder\\hooks\\use-handle-click-folder.ts",
+        "src\\features\\folder\\hooks\\use-add-folder-starred.ts",
+        "src\\features\\folder\\hooks\\use-delete-folder.ts",
+        "src\\features\\folder\\hooks\\use-change-folder-name.ts",
+        "src\\features\\folder\\hooks\\use-add-shared-with-me-folder-data.ts",
+        "src\\features\\folder\\hooks\\use-get-parent-folder.ts",
         "src\\features\\folder\\hooks\\use-get-shared-with-me-folder-data.ts",
         "src\\features\\folder\\hooks\\use-get-starred-folders.ts"
       ]
@@ -140,6 +167,35 @@
     [
       "@/features/auth/auth",
       [
+        "src\\features\\collaborator\\slice\\modal-add-selected-collaborators.ts",
+        "src\\components\\layout\\form\\login-form.tsx",
+        "src\\features\\folder\\hooks\\use-get-folder-activity.ts",
+        "src\\components\\pages\\activity-folder-page-component\\activity-profile-card.tsx",
+        "src\\features\\collaborator\\hooks\\use-get-collaborators-by-folderId.ts",
+        "src\\components\\layout\\folder\\add-collaborators-user-component.tsx",
+        "src\\features\\folder\\hooks\\use-get-collaborators-by-name-or-email.ts",
+        "src\\components\\layout\\folder\\users-floating-list.tsx",
+        "src\\features\\folder\\hooks\\use-add-collaborators-selected-to-state.ts",
+        "src\\features\\folder\\hooks\\use-add-collaborators-selected-to-db.ts",
+        "src\\components\\layout\\header\\desktop-profile-header.tsx",
+        "src\\features\\file\\hooks\\use-add-file.ts",
+        "src\\features\\folder\\hooks\\use-add-folder.ts",
+        "src\\features\\move-folder-or-file\\hooks\\use-confirm-dekstop-move-file.ts",
+        "src\\features\\move-folder-or-file\\hooks\\use-confirm-dekstop-move-folder.ts",
+        "src\\features\\move-folder-or-file\\hooks\\use-confirm-mobile-move-folder.ts",
+        "src\\features\\move-folder-or-file\\hooks\\use-confirm-mobile-move-file.ts",
+        "src\\components\\pages\\profile-page-component\\user-info.tsx",
+        "src\\components\\layout\\form\\register-form.tsx",
+        "src\\router\\protected.tsx",
+        "src\\features\\folder\\hooks\\use-get-folder.ts",
+        "src\\features\\file\\hooks\\use-get-file-owner.ts",
+        "src\\features\\folder\\hooks\\use-add-shared-with-me-folder-data.ts",
+        "src\\features\\message\\hooks\\use-get-current-message.ts"
+      ]
+    ],
+    [
+      "@/features/auth/auth",
+      [
         "src\\features\\folder\\slice\\modal-add-selected-collaborators.ts",
         "src\\components\\layout\\form\\login-form.tsx",
         "src\\features\\folder\\hooks\\use-get-folder-activity.ts",
@@ -167,11 +223,71 @@
       ]
     ],
     [
+      "@/features/collaborator/collaborator",
+      [
+        "src\\features\\collaborator\\slice\\modal-manage-access-content-slice.ts",
+        "src\\components\\layout\\folder\\folder-details.tsx",
+        "src\\features\\collaborator\\hooks\\use-modal-manage-access-content-setstate.ts",
+        "src\\features\\collaborator\\hooks\\use-secured-folder-on-data-change.ts",
+        "src\\features\\permissions\\hooks\\use-create-details-folder-permissions.ts",
+        "src\\features\\permissions\\hooks\\use-create-parent-folder-permissions.ts",
+        "src\\components\\layout\\folder\\folder-collaborators-avatar.tsx",
+        "src\\components\\layout\\folder\\add-collaborators-users-role-list.tsx",
+        "src\\components\\layout\\folder\\add-collaboratos-user-role-dropdown.tsx",
+        "src\\features\\folder\\hooks\\use-add-collaborators-selected-to-db.ts",
+        "src\\components\\layout\\folder\\add-collaborators-modal-component.tsx",
+        "src\\components\\layout\\folder\\general-access-role-component.tsx",
+        "src\\components\\layout\\folder\\general-access-type.tsx",
+        "src\\components\\layout\\folder\\general-access.tsx",
+        "src\\components\\layout\\folder\\collabolator-role-dropdown.tsx",
+        "src\\components\\layout\\folder\\collabolator-list.tsx",
+        "src\\components\\layout\\folder\\people-with-acess.tsx",
+        "src\\features\\collaborator\\hooks\\use-secured-folder-toggle-handler.ts",
+        "src\\features\\folder\\hooks\\use-add-folder.ts",
+        "src\\features\\folder\\hooks\\use-folder-get-permission.ts",
+        "src\\features\\folder\\hooks\\use-get-collaborators.ts",
+        "src\\features\\folder\\hooks\\use-get-general-access.ts"
+      ]
+    ],
+    [
       "@/features/folder/folder",
       [
         "src\\components\\layout\\folder\\collabolator-list.tsx",
         "src\\components\\layout\\folder\\collabolator-role-dropdown.tsx",
         "src\\components\\layout\\folder\\people-with-acess.tsx",
+        "src\\features\\file\\hooks\\use-add-file.ts",
+        "src\\features\\move-folder-or-file\\hooks\\use-get-folders-dektop-move-folder-or-file.ts",
+        "src\\features\\move-folder-or-file\\hooks\\use-get-parent-folder-dekstop-move-folder-or-file.ts",
+        "src\\features\\move-folder-or-file\\hooks\\use-confirm-dekstop-move-file.ts",
+        "src\\features\\move-folder-or-file\\hooks\\use-confirm-dekstop-move-folder.ts",
+        "src\\components\\layout\\modal\\dekstop-move-mapping-folders-and-files-modal-content.tsx",
+        "src\\features\\move-folder-or-file\\hooks\\use-confirm-mobile-move-folder.ts",
+        "src\\features\\move-folder-or-file\\hooks\\use-confirm-mobile-move-file.ts",
+        "src\\features\\file\\hooks\\use-get-file-location.ts",
+        "src\\components\\layout\\folder\\root-folder-mapping.tsx",
+        "src\\components\\layout\\folder\\dekstop-folder.tsx",
+        "src\\components\\layout\\menu\\folder-menu\\hooks\\use-folder-menu.tsx",
+        "src\\components\\layout\\menu\\folder-menu\\hooks\\use-handle-action-folder-menu.ts",
+        "src\\components\\layout\\menu\\folder-menu\\hooks\\use-handle-navigation-folder-menu.ts",
+        "src\\components\\layout\\folder\\mobile-folder.tsx",
+        "src\\components\\layout\\folder\\modal-content-delete-folder.tsx",
+        "src\\components\\layout\\folder\\modal-content-rename-folder.tsx",
+        "src\\features\\breadcrumb\\hooks\\use-sub-folder-auto-get-breadcrumbs.ts",
+        "src\\components\\layout\\folder\\sub-folder-mapping.tsx",
+        "src\\components\\layout\\folder\\all-type-folder-mapping.tsx",
+        "src\\features\\move-folder-or-file\\hooks\\use-get-folders-for-move-folder-or-file.ts",
+        "src\\features\\move-folder-or-file\\hooks\\use-get-parent-folder-data-move-folder-or-file.ts"
+      ]
+    ],
+    [
+      "@/features/folder/folder",
+      [
+        "src\\features\\collaborator\\hooks\\use-modal-manage-access-content-setstate.ts",
+        "src\\features\\permissions\\hooks\\use-create-details-folder-permissions.ts",
+        "src\\components\\layout\\folder\\collabolator-list.tsx",
+        "src\\components\\layout\\folder\\collabolator-role-dropdown.tsx",
+        "src\\components\\layout\\folder\\people-with-acess.tsx",
+        "src\\features\\collaborator\\hooks\\use-secured-folder-toggle-handler.ts",
         "src\\features\\file\\hooks\\use-add-file.ts",
         "src\\features\\move-folder-or-file\\hooks\\use-get-folders-dektop-move-folder-or-file.ts",
         "src\\features\\move-folder-or-file\\hooks\\use-get-parent-folder-dekstop-move-folder-or-file.ts",

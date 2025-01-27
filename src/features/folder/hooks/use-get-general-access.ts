@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { GeneralAccessData, GeneralAccessDataSerialized } from "../folder-collaborator";
 import { doc, DocumentData, DocumentReference, onSnapshot } from "firebase/firestore";
 import { db } from "@/firebase/firebase-services";
+import { GeneralAccessData } from "@/features/collaborator/collaborator";
 
 interface UserGetGeneralAccessParams {
   folderId: string | undefined;
@@ -11,7 +11,7 @@ interface UserGetGeneralAccessParams {
 export type GeneralAccessStatusFetch = "loading" | "succeeded" | "failed" | "idle";
 
 const useGetGeneralAccess = ({ folderId, shouldFetch }: UserGetGeneralAccessParams) => {
-  const [generalAccessDataState, setGeneralAccessDataState] = useState<GeneralAccessDataSerialized | null>(null);
+  const [generalAccessDataState, setGeneralAccessDataState] = useState<GeneralAccessData | null>(null);
   const [fetchStatus, setFetchStatus] = useState<GeneralAccessStatusFetch>("idle");
 
   useEffect(() => {
@@ -40,7 +40,7 @@ const buildQuery = (folderId: string): DocumentReference<DocumentData, DocumentD
 
 const subscribeToGeneralAccess = (
   generalAccessDataRef: DocumentReference<DocumentData, DocumentData>,
-  setGeneralAccessDataState: (data: GeneralAccessDataSerialized | null) => void,
+  setGeneralAccessDataState: (data: GeneralAccessData | null) => void,
   setFetchStatus: (status: GeneralAccessStatusFetch) => void
 ) => {
   const unsubscribe = onSnapshot(
@@ -67,7 +67,7 @@ const subscribeToGeneralAccess = (
   return unsubscribe;
 };
 
-const serializeGeneralAccessData = (generalAccessData: GeneralAccessData): GeneralAccessDataSerialized => {
+const serializeGeneralAccessData = (generalAccessData: GeneralAccessData): GeneralAccessData => {
   return {
     ...generalAccessData,
     createAt: JSON.parse(JSON.stringify(generalAccessData.createAt)),

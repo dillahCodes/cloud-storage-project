@@ -1,6 +1,6 @@
-import { UserDataDb } from "@/features/auth/auth";
 import { RootState } from "@/store/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { UserDataDb } from "@/features/auth/auth";
 import { ModalAddSelectedCollaboratorsState } from "../collaborator";
 
 const initialState: ModalAddSelectedCollaboratorsState = {

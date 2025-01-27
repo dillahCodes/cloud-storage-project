@@ -1,9 +1,9 @@
 import { SecurredFolderData } from "@/features/collaborator/collaborator";
+import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 import { db } from "@/firebase/firebase-services";
 import { message } from "antd";
 import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { useCallback } from "react";
-import { RootFolderGetData, SubFolderGetData } from "../../folder/folder";
 
 interface SecuredFolderToggleHandlerProps {
   isSecuredFolderActive: boolean;

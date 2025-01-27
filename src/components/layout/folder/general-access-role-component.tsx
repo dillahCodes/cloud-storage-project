@@ -1,5 +1,5 @@
+import { GeneralAccessRole } from "@/features/collaborator/collaborator";
 import handleChangeGeneralAccessRole from "@/features/folder/change-general-access-role";
-import { GeneralAccessRole } from "@/features/folder/folder-collaborator";
 import { neoBrutalBorderVariants, themeColors } from "@/theme/antd-theme";
 import { Flex, Typography } from "antd";
 import { useState } from "react";
@@ -36,9 +36,7 @@ const GeneralAccessRoleComponent: React.FC<GeneralAccessRoleComponentProps> = ({
       {generalAccessRole.map((generalAccessRole) => (
         <Flex
           key={generalAccessRole}
-          className={`min-w-[120px] group hover:bg-[#ff87a6]   cursor-pointer ${
-            generalAccessRole === selectedRoleGeneralAccess ? "" : "pl-[26px]"
-          }`}
+          className={`min-w-[120px] group hover:bg-[#ff87a6]   cursor-pointer ${generalAccessRole === selectedRoleGeneralAccess ? "" : "pl-[26px]"}`}
           align="center"
           gap="small"
           onClick={() => handleSetRoleGeneralAccess(generalAccessRole)}

@@ -1,4 +1,4 @@
-import { GeneralAccess, GeneralAccessDataSerialized } from "@/features/folder/folder-collaborator";
+// import { GeneralAccess, GeneralAccessDataSerialized } from "@/features/folder/folder-collaborator";
 import { withFloatingElement } from "@components/hoc/with-floating-element";
 import { Flex, Typography } from "antd";
 import { HiOutlineLockClosed } from "react-icons/hi";
@@ -7,12 +7,13 @@ import { TiArrowSortedDown } from "react-icons/ti";
 import AvatarOnlyIcon from "../avatar/avatar-only-icon";
 import GeneralAccessRoleComponent from "./general-access-role-component";
 import GeneralAccessTypeComponent from "./general-access-type";
+import { GeneralAccess, GeneralAccessData } from "@/features/collaborator/collaborator";
 
 const { Text } = Typography;
 const FlexWithFloatinElement = withFloatingElement(Flex);
 
 interface GeneralAccessProps {
-  generalData: GeneralAccessDataSerialized | null;
+  generalData: GeneralAccessData | null;
   folderId: string;
 }
 
@@ -39,11 +40,7 @@ const GeneralAccessComponent: React.FC<GeneralAccessProps> = ({ generalData, fol
         <Flex className="w-full" gap="middle" align="center" justify="space-between">
           <Flex align="center" gap="middle">
             <div>
-              {isPrivate ? (
-                <AvatarOnlyIcon icon={<HiOutlineLockClosed />} size={35} />
-              ) : (
-                <AvatarOnlyIcon icon={<IoEarthOutline />} size={35} />
-              )}
+              {isPrivate ? <AvatarOnlyIcon icon={<HiOutlineLockClosed />} size={35} /> : <AvatarOnlyIcon icon={<IoEarthOutline />} size={35} />}
             </div>
 
             <Flex vertical gap={3}>
@@ -52,9 +49,7 @@ const GeneralAccessComponent: React.FC<GeneralAccessProps> = ({ generalData, fol
                 gap="small"
                 className="w-fit"
                 parentFloatingElementClassName="rounded-sm z-10"
-                floatingElement={
-                  <GeneralAccessTypeComponent generalAccessSelected={generalData?.type} folderId={folderId} />
-                }
+                floatingElement={<GeneralAccessTypeComponent generalAccessSelected={generalData?.type} folderId={folderId} />}
               >
                 <Text className="text-sm ml-auto font-medium font-archivo">{generalData?.type}</Text>
                 <Text className="text-sm ml-auto font-medium font-archivo">
@@ -71,16 +66,9 @@ const GeneralAccessComponent: React.FC<GeneralAccessProps> = ({ generalData, fol
               gap="small"
               rightPosition={5}
               parentFloatingElementClassName="rounded-sm z-10"
-              floatingElement={
-                <GeneralAccessRoleComponent
-                  generalAccessRoleSelected={generalData?.role}
-                  folderId={folderId}
-                />
-              }
+              floatingElement={<GeneralAccessRoleComponent generalAccessRoleSelected={generalData?.role} folderId={folderId} />}
             >
-              <Text className="text-sm ml-auto min-w-fit font-medium font-archivo capitalize">
-                {generalData?.role}
-              </Text>
+              <Text className="text-sm ml-auto min-w-fit font-medium font-archivo capitalize">{generalData?.role}</Text>
               <Text className="text-sm ml-auto font-medium font-archivo">
                 <TiArrowSortedDown />
               </Text>

@@ -1,6 +1,5 @@
 import { useCallback, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { RootFolderGetData, SubFolderGetData } from "../../folder/folder";
 import { CollaboratorUserData, GeneralAccessData, ModalManageAccessContentState } from "@/features/collaborator/collaborator";
 import {
   setCollaboratorsUserData,
@@ -10,6 +9,7 @@ import {
   setIsSecuredFolderActive,
   setModalManageAccess,
 } from "@/features/collaborator/slice/modal-manage-access-content-slice";
+import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 
 interface UseModalManageAccessContentSetStateParams {
   withUseEffect?: {
