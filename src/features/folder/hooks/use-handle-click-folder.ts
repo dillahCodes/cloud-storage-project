@@ -1,14 +1,14 @@
 import useUser from "@/features/auth/hooks/use-user";
 import useBreadcrumbSetState from "@/features/breadcrumb/hooks/use-breadcrumb-setstate";
+import { parentFolderPermissionSelector } from "@/features/permissions/slice/parent-folder-permissions";
 import useDetectLocation from "@/hooks/use-detect-location";
 import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
+import { message } from "antd";
 import { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { RootFolderGetData, SubFolderGetData } from "../folder";
 import { resetFolderOptions, setFolderOptionsFolderData } from "../slice/folder-options-slice";
-import { folderPermissionSelector } from "../slice/folder-permission-slice";
-import { message } from "antd";
 
 const useHandleClickFolder = () => {
   /**
@@ -20,7 +20,7 @@ const useHandleClickFolder = () => {
   /**
    * states
    */
-  const { subFolderPermission } = useSelector(folderPermissionSelector);
+  const { actionPermissions, permissionsDetails } = useSelector(parentFolderPermissionSelector);
   const { user } = useUser();
   const [searchParams] = useSearchParams();
   const [params] = useState<string | null>(searchParams.get("st"));
@@ -117,7 +117,7 @@ const useHandleClickFolder = () => {
 
   const handleOpenDektopFolderSettings = useCallback(
     (folder: SubFolderGetData | RootFolderGetData) => {
-      if (subFolderPermission && !subFolderPermission.canCRUD) {
+      if (!actionPermissions.canCRUD && permissionsDetails.isSubFolderLocation) {
         message.open({
           type: "error",
           content: "Access Denied: The folder is read-only.",
@@ -129,7 +129,7 @@ const useHandleClickFolder = () => {
       dispatch(setFolderOptionsFolderData(folder));
       adjustFloatingPosition(folder);
     },
-    [dispatch, adjustFloatingPosition, subFolderPermission]
+    [dispatch, adjustFloatingPosition, actionPermissions, permissionsDetails]
   );
 
   const handleClickFolder = (folder: RootFolderGetData | SubFolderGetData, e: React.MouseEvent<HTMLElement>) => {
@@ -150,7 +150,7 @@ const useHandleClickFolder = () => {
   const handleClickMobileFolderOptions = useCallback(
     (folder: SubFolderGetData | RootFolderGetData, e: React.MouseEvent<HTMLElement>) => {
       e.stopPropagation();
-      if (subFolderPermission && !subFolderPermission.canCRUD) {
+      if (!actionPermissions.canCRUD && permissionsDetails.isSubFolderLocation) {
         message.open({
           type: "error",
           content: "Access Denied: The folder is read-only.",
@@ -161,7 +161,7 @@ const useHandleClickFolder = () => {
       }
       dispatch(setFolderOptionsFolderData(folder));
     },
-    [dispatch, subFolderPermission]
+    [dispatch, actionPermissions, permissionsDetails]
   );
 
   const handleCloseDrawerFolderMobileOptions = useCallback(

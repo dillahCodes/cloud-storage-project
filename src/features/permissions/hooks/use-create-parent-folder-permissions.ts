@@ -8,9 +8,10 @@ import {
   GeneralAccessRole,
 } from "@/features/collaborator/collaborator";
 import { useEffect, useMemo } from "react";
-import { useDispatch } from "react-redux";
-import { setIsFetchPermissionSuccess, setParentFolderActionPermissions, setParentFolderPermissionsDetails } from "../slice/parent-folder-permission";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsFetchPermissionSuccess, setParentFolderActionPermissions, setParentFolderPermissionsDetails } from "../slice/parent-folder-permissions";
 import useDetectLocation from "@/hooks/use-detect-location";
+import { parentFolderSelector } from "@/features/folder/slice/parent-folder-slice";
 
 interface UseCreateParentFolderPermissionsParams {
   collaboratorData: Collaborator | null;
@@ -27,6 +28,15 @@ const useCreateParentFolderPermissions = ({
 }: UseCreateParentFolderPermissionsParams) => {
   const { user } = useUser();
   const dispatch = useDispatch();
+
+  /**
+   * state
+   */
+  const { parentFolderData } = useSelector(parentFolderSelector);
+
+  /**
+   * detect location
+   */
   const { isSubMoveFolderOrFileLocation, isSubMyStorageLocation, isSubSharedWithMeLocation } = useDetectLocation();
   const isSubFolderLocation = isSubMoveFolderOrFileLocation || isSubMyStorageLocation || isSubSharedWithMeLocation;
 
@@ -72,7 +82,8 @@ const useCreateParentFolderPermissions = ({
    * Overall permission levels
    */
   const isOwner = isCollaborator("owner");
-  const isEditor = isCollaboratorCanEdit || isGeneralAccessPublicEditor;
+  const isRootFolderMine = parentFolderData?.root_folder_user_id === user?.uid;
+  const isEditor = isCollaboratorCanEdit || isGeneralAccessPublicEditor || isRootFolderMine;
   const isViewer = isCollaboratorOnlyViewer || isGeneralAccessPublicViewer || isGeneralAccessPublicEditor || isGeneralAccessPublic;
 
   /**
@@ -84,7 +95,7 @@ const useCreateParentFolderPermissions = ({
   /**
    * Final permissions object with detailed breakdown
    */
-  const parentFolderPermission: ParentFolderPermission = useMemo(() => {
+  const parentFolderPermission: ParentFolderPermissions = useMemo(() => {
     return {
       actionPermissions: {
         canCRUD,
@@ -92,6 +103,7 @@ const useCreateParentFolderPermissions = ({
       },
       permissionsDetails: {
         isOwner,
+        isRootFolderMine,
         isCollaboratorCanEdit,
         isGeneralAccessPublic,
         isGeneralAccessPublicEditor,
@@ -100,6 +112,7 @@ const useCreateParentFolderPermissions = ({
       isFetchPermissionSuccess,
     };
   }, [
+    isRootFolderMine,
     canCRUD,
     canView,
     isOwner,

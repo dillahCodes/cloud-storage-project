@@ -21,7 +21,7 @@ const buildQuery = (folderId: string): DocumentReference => {
   const { currentUser } = auth;
   if (!currentUser) throw new Error("User is not authenticated.");
 
-  return doc(db, "secured-folder", `${currentUser.uid}_${folderId}`);
+  return doc(db, "secured-folder", folderId);
 };
 
 /**
@@ -59,10 +59,9 @@ const subscribeToSecuredFolder = ({ setStatus, folderId, setIsSecuredFolderActiv
 const useSecuredFolderOnDataChange = ({ folderId }: UseSecuredFolderOnDataChange) => {
   const [isSecuredFolderActive, setIsSecuredFolderActive] = useState<boolean>(false);
   const [statusFetch, setStatusFetch] = useState<SecuredFolderStatus>("idle");
-  const { user } = useUser();
 
   useEffect(() => {
-    if (!folderId || !user) return;
+    if (!folderId) return;
 
     const unsubscribe = subscribeToSecuredFolder({
       folderId,
@@ -71,7 +70,7 @@ const useSecuredFolderOnDataChange = ({ folderId }: UseSecuredFolderOnDataChange
     });
 
     return () => unsubscribe();
-  }, [folderId, user]);
+  }, [folderId]);
 
   return { isSecuredFolderActive, statusFetch };
 };

@@ -1,18 +1,18 @@
-import { parentFolderPermissionSelector } from "@/features/permissions/slice/parent-folder-permission";
-import Alert from "@components/ui/alert";
+import { parentFolderPermissionSelector } from "@/features/permissions/slice/parent-folder-permissions";
 import Button from "@components/ui/button";
-import { Flex, Typography } from "antd";
+import { Flex } from "antd";
 import { useMemo, useRef } from "react";
 import { RiFileAddLine, RiFolderAddLine } from "react-icons/ri";
 import { useSelector } from "react-redux";
+import MoadlFolderPermissionDenied from "../modal/modal-folder-permission-content-denied";
 
 interface ModalAddContentProps {
   setModalStatus: React.Dispatch<React.SetStateAction<ModalStatus>>;
   setFile: () => void;
+  setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const { Text } = Typography;
-const ModalAddContent: React.FC<ModalAddContentProps> = ({ setModalStatus, setFile }) => {
+const ModalAddContent: React.FC<ModalAddContentProps> = ({ setModalStatus, setFile, setModalOpen }) => {
   const fileButtonRef = useRef(null);
 
   const { actionPermissions, permissionsDetails } = useSelector(parentFolderPermissionSelector);
@@ -20,6 +20,8 @@ const ModalAddContent: React.FC<ModalAddContentProps> = ({ setModalStatus, setFi
   const isHavePermission = useMemo(() => {
     return !permissionsDetails.isSubFolderLocation || (permissionsDetails.isSubFolderLocation && actionPermissions.canCRUD);
   }, [permissionsDetails.isSubFolderLocation, actionPermissions.canCRUD]);
+
+  const handleCloseModalPermissionDenied = () => setModalOpen(false);
 
   return (
     <Flex className="w-full" gap="middle" wrap>
@@ -48,13 +50,9 @@ const ModalAddContent: React.FC<ModalAddContentProps> = ({ setModalStatus, setFi
           </Button>
         </>
       ) : (
-        <Alert
-          className="w-full"
-          neoBrutalVariants="medium"
-          message={<Text className="font-archivo text-base font-medium">Restricted Access</Text>}
-          description={<Text className="font-archivo text-sm">You don't have permission to add folder or file in this folder.</Text>}
-          type="warning"
-          showIcon
+        <MoadlFolderPermissionDenied
+          description="You don't have permission to add folder or file in this folder."
+          closeModal={handleCloseModalPermissionDenied}
         />
       )}
     </Flex>

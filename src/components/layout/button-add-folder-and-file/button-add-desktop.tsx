@@ -64,8 +64,9 @@ const ButtonAddDesktop: React.FC<ButtonWithModalProps> = ({ showText = false }) 
       );
     }
 
-    return <ModalAddContent setModalStatus={setModalStatus} setFile={handleSetAndUploadFile} />;
+    return <ModalAddContent setModalStatus={setModalStatus} setFile={handleSetAndUploadFile} setModalOpen={toggleModalOpen} />;
   }, [
+    toggleModalOpen,
     folderName,
     handleAfterAddFolder,
     handleConfirmAddFolder,

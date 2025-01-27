@@ -16,6 +16,7 @@ import useOnSecuredFolderChange from "@/features/collaborator/hooks/use-secured-
 import useSecuredFoldertoggleHandler from "@/features/collaborator/hooks/use-secured-folder-toggle-handler";
 import { modalManageAccessContentSelector } from "@/features/collaborator/slice/modal-manage-access-content-slice";
 import { useSelector } from "react-redux";
+import { detailFolderPermissionsSelector } from "@/features/permissions/slice/details-folder-permissions";
 
 const { Text } = Typography;
 const InputWithFloatingElement = withDynamicFloatingElement(Input);
@@ -28,7 +29,20 @@ const ManageAccessModalComponent: React.FC = () => {
   const { setModalOpen } = useModalManageAccessContentSetState({});
   const { handleAddCollaborator } = useAddCollaboratorsSelectedToState();
   const { folderData, collaboratorsUserData, generalData } = useSelector(modalManageAccessContentSelector);
+  const detailsPermissions = useSelector(detailFolderPermissionsSelector);
+
+  /**
+   * logic get folder id
+   */
   const folderId = useMemo(() => folderData?.folder_id ?? "", [folderData]);
+
+  /**
+   * logic should show secured folder component:
+   * dont show if is root folder or cant CRUD
+   */
+  const dontShowSecuredFolder = useMemo(() => {
+    return !detailsPermissions.actionPermissions.canCRUD || !folderData?.parent_folder_id;
+  }, [detailsPermissions.actionPermissions.canCRUD, folderData?.parent_folder_id]);
 
   /**
    * get data from server
@@ -102,7 +116,9 @@ const ManageAccessModalComponent: React.FC = () => {
       <GeneralAccess generalData={generalData} folderId={folderData?.folder_id} />
 
       {/* secure folder */}
-      <SecureFolder isChecked={isSecuredFolderActive} isLoading={isSecuredFolderDataLoading} handleToggle={handleToggleSecuredFolder} />
+      {!dontShowSecuredFolder && (
+        <SecureFolder isChecked={isSecuredFolderActive} isLoading={isSecuredFolderDataLoading} handleToggle={handleToggleSecuredFolder} />
+      )}
 
       <Flex className="w-full" gap="small" justify="space-between">
         <Button

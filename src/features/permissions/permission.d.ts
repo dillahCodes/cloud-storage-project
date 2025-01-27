@@ -15,13 +15,14 @@ interface BaseFolderPermissions {
   canManageAccess: boolean;
 }
 
-interface ParentFolderPermission {
+interface ParentFolderPermissions {
   actionPermissions: {
     canCRUD: boolean;
     canView: boolean;
   };
   permissionsDetails: {
     isOwner: boolean;
+    isRootFolderMine: boolean;
     isCollaboratorCanEdit: boolean;
     isGeneralAccessPublic: boolean;
     isGeneralAccessPublicEditor: boolean;
@@ -30,14 +31,19 @@ interface ParentFolderPermission {
   isFetchPermissionSuccess: boolean;
 }
 
-// interface SubFolderPermissionsState {
-//   permissons: Pick<BaseFolderPermissions, "canCRUD" | "canView">;
-//   details: PermissionsDetailsData;
-//   status: FetchPermissionStatus;
-// }
-
-// interface FolderDetailsPermissionsState {
-//   permissons: Pick<BaseFolderPermissions, "canManageAccess">;
-//   details: PermissionsDetailsData;
-//   status: FetchPermissionStatus;
-// }
+interface DetailFolderPermissions {
+  actionPermissions: {
+    canCRUD: boolean;
+    canView: boolean;
+  };
+  permissionsDetails: {
+    isOwner: boolean;
+    isRootFolderMine: boolean;
+    isCollaboratorCanEdit: boolean;
+    isGeneralAccessPublic: boolean;
+    isGeneralAccessPublicEditor: boolean;
+    isSecuredFolderActive: boolean;
+    isSubFolderLocation: boolean;
+  };
+  isFetchPermissionSuccess: boolean;
+}

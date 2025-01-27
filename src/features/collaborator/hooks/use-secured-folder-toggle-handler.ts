@@ -1,11 +1,9 @@
-import { FirebaseUserData } from "@/features/auth/auth";
-import useUser from "@/features/auth/hooks/use-user";
+import { SecurredFolderData } from "@/features/collaborator/collaborator";
 import { db } from "@/firebase/firebase-services";
 import { message } from "antd";
 import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { useCallback } from "react";
 import { RootFolderGetData, SubFolderGetData } from "../../folder/folder";
-import { SecurredFolderData } from "@/features/collaborator/collaborator";
 
 interface SecuredFolderToggleHandlerProps {
   isSecuredFolderActive: boolean;
@@ -14,7 +12,6 @@ interface SecuredFolderToggleHandlerProps {
 }
 
 interface HandleValidateBeforeToggle {
-  user: FirebaseUserData | null;
   folderData: SubFolderGetData | RootFolderGetData | null;
 }
 
@@ -54,12 +51,11 @@ const handleCreatePayload = (params: HandleCreatePayload) => {
  */
 
 const handleValidateBeforeToggle = (params: HandleValidateBeforeToggle) => {
-  const { folderData, user } = params;
+  const { folderData } = params;
 
   const isRootFolder = folderData!.parent_folder_id === null;
 
   const validations = [
-    { condition: !user, message: "Please log in to continue." },
     { condition: !folderData, message: "Something went wrong, please try again." },
     { condition: isRootFolder, message: "You can't secure root folder" },
   ];
@@ -82,14 +78,12 @@ const handleValidateBeforeToggle = (params: HandleValidateBeforeToggle) => {
 };
 
 const useSecuredFoldertoggleHandler = ({ isSecuredFolderActive, folderId, folderData }: SecuredFolderToggleHandlerProps) => {
-  const { user } = useUser();
-
   const handleToggleSecuredFolder = useCallback(async () => {
     try {
-      const validateBeforeToggle = handleValidateBeforeToggle({ user, folderData });
+      const validateBeforeToggle = handleValidateBeforeToggle({ folderData });
       if (!validateBeforeToggle) return;
 
-      const securedFolderRef = doc(db, "secured-folder", `${user!.uid}_${folderId}`);
+      const securedFolderRef = doc(db, "secured-folder", folderId);
       const payload = handleCreatePayload({ isSecuredFolderActive, updatedAt: serverTimestamp() });
 
       await updateDoc(securedFolderRef, payload);
@@ -101,7 +95,7 @@ const useSecuredFoldertoggleHandler = ({ isSecuredFolderActive, folderId, folder
     } catch (error) {
       console.error("Error toggling secured folder:", error instanceof Error ? error.message : "An unknown error occurred.");
     }
-  }, [folderId, isSecuredFolderActive, user, folderData]);
+  }, [folderId, isSecuredFolderActive, folderData]);
 
   return { handleToggleSecuredFolder };
 };

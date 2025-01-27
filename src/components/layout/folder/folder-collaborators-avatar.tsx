@@ -1,23 +1,20 @@
-import { CollaboratorUserData, GeneralAccessDataSerialized } from "@/features/folder/folder-collaborator";
 import withModal from "@components/hoc/with-modal";
 import { Flex, Typography } from "antd";
 import { IoIosMore } from "react-icons/io";
 import { IoEarthOutline } from "react-icons/io5";
 import AvatarOnlyIcon from "../avatar/avatar-only-icon";
 import AvatarWithUserPhoto from "../avatar/avatar-with-user-photo";
+import { CollaboratorUserData, GeneralAccessData } from "@/features/collaborator/collaborator";
 
 interface FolderCollaboratorsAvatarProps {
   collaborators: CollaboratorUserData[] | null;
-  generalAccessData: GeneralAccessDataSerialized | null;
+  generalAccessData: GeneralAccessData | null;
 }
 
 const AvatarOnlyIconWIthModal = withModal(AvatarOnlyIcon);
 const { Title } = Typography;
 
-const FolderCollaboratorsAvatar: React.FC<FolderCollaboratorsAvatarProps> = ({
-  collaborators,
-  generalAccessData,
-}) => {
+const FolderCollaboratorsAvatar: React.FC<FolderCollaboratorsAvatarProps> = ({ collaborators, generalAccessData }) => {
   const isFolderPrivate = generalAccessData?.type === "private";
 
   const ownerData = collaborators?.find((collaborator) => collaborator.role === "owner");
@@ -31,9 +28,7 @@ const FolderCollaboratorsAvatar: React.FC<FolderCollaboratorsAvatarProps> = ({
       <RenderCollaboratorAvatar photoUrl={ownerData?.photoUrl} />
 
       {!isFolderPrivate && otherCollaborators && <div className="w-[2px] h-10 rounded-full bg-black" />}
-      {isFolderPrivate && otherCollaborators && otherCollaborators?.length > 0 && (
-        <div className="w-[2px] h-10 rounded-full bg-black" />
-      )}
+      {isFolderPrivate && otherCollaborators && otherCollaborators?.length > 0 && <div className="w-[2px] h-10 rounded-full bg-black" />}
 
       <Flex align="center" gap="small" wrap>
         {!isFolderPrivate && <AvatarOnlyIcon icon={<IoEarthOutline />} size={35} />}
@@ -68,11 +63,7 @@ interface ModalOtherCollaboratorsProps {
   isFolderPrivate: boolean;
   otherCollaborators: CollaboratorUserData[] | undefined;
 }
-const ModalOtherCollaborators: React.FC<ModalOtherCollaboratorsProps> = ({
-  ownerPhotoUrl,
-  isFolderPrivate,
-  otherCollaborators,
-}) => {
+const ModalOtherCollaborators: React.FC<ModalOtherCollaboratorsProps> = ({ ownerPhotoUrl, isFolderPrivate, otherCollaborators }) => {
   return (
     <Flex vertical className="h-fit" gap="middle">
       <Title level={1} className="text-base">
@@ -96,7 +87,5 @@ interface RenderCollaboratorAvatarProps {
 }
 
 const RenderCollaboratorAvatar: React.FC<RenderCollaboratorAvatarProps> = ({ photoUrl }) => {
-  return (
-    <div>{photoUrl ? <AvatarWithUserPhoto src={photoUrl} size={35} /> : <AvatarOnlyIcon size={35} />}</div>
-  );
+  return <div>{photoUrl ? <AvatarWithUserPhoto src={photoUrl} size={35} /> : <AvatarOnlyIcon size={35} />}</div>;
 };

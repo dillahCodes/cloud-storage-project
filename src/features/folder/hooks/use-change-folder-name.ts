@@ -4,17 +4,14 @@ import { useState } from "react";
 import { RootFolderGetData, SubFolderGetData } from "../folder";
 import useAddActivityRenamedFolder from "./use-add-activity-renamed-folder";
 import { v4 as uuidv4 } from "uuid";
-import useParentFolder from "./use-get-parent-folder";
 import { message } from "antd";
+import { useSelector } from "react-redux";
+import { parentFolderSelector } from "../slice/parent-folder-slice";
 
 const useChangeFolderName = (folderData: RootFolderGetData | SubFolderGetData) => {
   const { handleAddActivityRenamedFolder } = useAddActivityRenamedFolder();
 
-  const { parentFolderState } = useParentFolder({
-    fetchParentFolderDataOnMount: false,
-    resetParentFolderDataOnMount: false,
-    folderId: folderData.folder_id,
-  });
+  const parentFolderState = useSelector(parentFolderSelector);
   const [newFolderNameValue, setNewFolderNameValue] = useState<string>(folderData.folder_name || "");
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -50,7 +50,7 @@ const ButtonAddMobile: React.FC = () => {
           />
         );
       default:
-        return <ModalAddContent setModalStatus={setModalStatus} setFile={handleSetAndUploadFile} />;
+        return <ModalAddContent setModalStatus={setModalStatus} setFile={handleSetAndUploadFile} setModalOpen={setModalOpen} />;
     }
   };
 

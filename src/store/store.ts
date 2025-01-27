@@ -28,8 +28,9 @@ import { siderSlice } from "./slice/sider-slice";
 import { fileOptionsSlice } from "@/features/file/slice/file-options-slice";
 import { folderOptionsSlice } from "@/features/folder/slice/folder-options-slice";
 import { userStorageSlice } from "@/features/storage/slice/user-storage-slice";
-import { parentFolderPermissionSlice } from "@/features/permissions/slice/parent-folder-permission";
+import { parentFolderPermissionSlice } from "@/features/permissions/slice/parent-folder-permissions";
 import { modalManageAccessContentSlice } from "@/features/collaborator/slice/modal-manage-access-content-slice";
+import { detailFolderPermissionSlice } from "@/features/permissions/slice/details-folder-permissions";
 
 const { createReduxHistory, routerMiddleware, routerReducer } = createReduxHistoryContext({
   history: createBrowserHistory(),
@@ -64,6 +65,7 @@ export const store = configureStore({
 
     // folder permissions
     parentFolderPermission: parentFolderPermissionSlice.reducer,
+    detailFolderPermission: detailFolderPermissionSlice.reducer,
 
     // storage
     userStorage: userStorageSlice.reducer,

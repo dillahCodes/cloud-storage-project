@@ -1,7 +1,7 @@
 import { RootState } from "@/store/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState: ParentFolderPermission = {
+const initialState: ParentFolderPermissions = {
   actionPermissions: { canCRUD: false, canView: false },
   permissionsDetails: {
     isOwner: false,
@@ -17,13 +17,13 @@ export const parentFolderPermissionSlice = createSlice({
   name: "parentFolderPermission",
   initialState,
   reducers: {
-    setParentFolderActionPermissions: (state, action: PayloadAction<ParentFolderPermission["actionPermissions"]>) => {
+    setParentFolderActionPermissions: (state, action: PayloadAction<ParentFolderPermissions["actionPermissions"]>) => {
       state.actionPermissions = action.payload;
     },
-    setParentFolderPermissionsDetails: (state, action: PayloadAction<ParentFolderPermission["permissionsDetails"]>) => {
+    setParentFolderPermissionsDetails: (state, action: PayloadAction<ParentFolderPermissions["permissionsDetails"]>) => {
       state.permissionsDetails = action.payload;
     },
-    setIsFetchPermissionSuccess: (state, action: PayloadAction<ParentFolderPermission["isFetchPermissionSuccess"]>) => {
+    setIsFetchPermissionSuccess: (state, action: PayloadAction<ParentFolderPermissions["isFetchPermissionSuccess"]>) => {
       state.isFetchPermissionSuccess = action.payload;
     },
     resetStateParentFolderPermission: () => initialState,

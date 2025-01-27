@@ -4,11 +4,11 @@ import { auth, db } from "@/firebase/firebase-services";
 import { collection, doc, getDocs, query, serverTimestamp, setDoc, where } from "firebase/firestore";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { RootFolderCreateData, SecurredFolderData, SubFolderCreateData, SubFolderGetData } from "../folder";
-import { Collaborator, CollaboratorRole, GeneralAccessData } from "../folder-collaborator";
+import { RootFolderCreateData, SubFolderCreateData, SubFolderGetData } from "../folder";
 import useAddActivityCreatedFolder from "./use-add-activity-created-folder";
 import { message } from "antd";
 import abbreviateText from "@/util/abbreviate-text";
+import { Collaborator, CollaboratorRole, GeneralAccessData, SecurredFolderData } from "@/features/collaborator/collaborator";
 
 export interface HandleConfirmAddFolder {
   parentFolderData: SubFolderGetData | null;
@@ -22,7 +22,6 @@ interface HandleValidateAddFolderParams {
 
 interface HandleCreateSecuredFolderData {
   folderId: string;
-  userId: string;
 }
 
 const handleValitdateAddFolder = ({ folderName, user }: HandleValidateAddFolderParams) => {
@@ -213,17 +212,23 @@ const createFolderData = (parentFolderData: SubFolderGetData | null, folderName:
   } as RootFolderCreateData;
 };
 
+/**
+ * Creates and stores a secured folder data object in Firestore.
+ *
+ * @param {HandleCreateSecuredFolderData} params - Contains the folder ID and user ID.
+ * @returns {Promise<void>} A promise that resolves when the secured folder data is successfully saved.
+ */
+
 const handleCreateSecuredFolderData = async (params: HandleCreateSecuredFolderData) => {
-  const { folderId, userId } = params;
+  const { folderId } = params;
   const payload: SecurredFolderData = {
     folderId,
-    userId,
     isSecuredFolderActive: false,
     createdAt: serverTimestamp(),
     updatedAt: null,
   };
 
-  const securedFolderRef = doc(db, "secured-folder", `${userId}_${folderId}`);
+  const securedFolderRef = doc(db, "secured-folder", folderId);
   await setDoc(securedFolderRef, payload);
 };
 
@@ -269,7 +274,7 @@ const useAddFolder = () => {
         saveFolderToFirestore(folderData),
         saveGeneraAccessDataToFirestore(general),
         saveCollaboratorsToFirestore(collaboratorsData),
-        handleCreateSecuredFolderData({ folderId: folderData.folder_id, userId: user!.uid }),
+        handleCreateSecuredFolderData({ folderId: folderData.folder_id }),
         handleAddActivityCreatedFolder({
           type: "create-folder-activity",
           activityId: uuidv4(),

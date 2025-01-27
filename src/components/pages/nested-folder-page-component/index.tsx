@@ -4,7 +4,7 @@ import useAddBreadcrumbItems from "@/features/breadcrumb/hooks/use-addbreadcrumb
 import useAutoDeleteUnusedBreadcrumbItems from "@/features/breadcrumb/hooks/use-auto-delete-unused-breadcrumb-items";
 import useBreadcrumbState from "@/features/breadcrumb/hooks/use-breadcrumb-state";
 import useSubFolderAutoGetBreadcrums from "@/features/breadcrumb/hooks/use-sub-folder-auto-get-breadcrumbs";
-import useGetGeneralAccessDataByFolderId from "@/features/collaborator/hooks/use-get-general-access.-by-folderId";
+import useGetGeneralAccessDataByFolderId from "@/features/collaborator/hooks/use-get-general-access-by-folderId";
 import useGetIsCollaboratorByUserIdAndFolderId from "@/features/collaborator/hooks/use-get-is-collaborator-by-userId-and-folderId";
 import useFilesState from "@/features/file/hooks/use-files-state";
 import useGetFiles from "@/features/file/hooks/use-get-files";
@@ -15,7 +15,7 @@ import useGetFolder from "@/features/folder/hooks/use-get-folder";
 import useGetParentFolder from "@/features/folder/hooks/use-get-parent-folder";
 import { parentFolderSelector } from "@/features/folder/slice/parent-folder-slice";
 import useCreateParentFolderPermissions from "@/features/permissions/hooks/use-create-parent-folder-permissions";
-import { parentFolderPermissionSelector } from "@/features/permissions/slice/parent-folder-permission";
+import { parentFolderPermissionSelector } from "@/features/permissions/slice/parent-folder-permissions";
 import useDetectLocation from "@/hooks/use-detect-location";
 import useMobileHeaderTitle from "@/hooks/use-mobile-header-title";
 import MainLayout from "@components/layout/main-layout";
@@ -166,6 +166,9 @@ const NestedFolderPageComponent: React.FC = () => {
    */
   const { status: folderStatus, folders } = useCurrentFolderState();
 
+  /**
+   * Fetch files data
+   */
   const shouldFetchFiles = useMemo(() => {
     return isFetchPermissionSuccess && isParentFolderFetchSuccess;
   }, [isFetchPermissionSuccess, isParentFolderFetchSuccess]);

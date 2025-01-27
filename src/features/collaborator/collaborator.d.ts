@@ -46,7 +46,6 @@ interface ParentFolderCollaboratorsDataState {
 
 interface SecurredFolderData {
   folderId: string;
-  userId: string;
   isSecuredFolderActive: boolean;
   createdAt: TimestampValue | FieldValue;
   updatedAt: TimestampValue | FieldValue | null;
