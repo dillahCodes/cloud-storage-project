@@ -27,9 +27,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, showAddButton, withFo
   const renderMobileMoveMessage = useMemo(() => (isMoveFile ? "Moving File..." : "Moving Folder..."), [isMoveFile]);
   const renderDektopMoveMessage = useMemo(() => (isDekstopMoveFile ? "Moving File..." : "Moving Folder..."), [isDekstopMoveFile]);
 
-  const { isMobileDevice } = useGetClientScreenWidth();
+  const { isMobileDevice, isTabletDevice } = useGetClientScreenWidth();
 
-  return isMobileDevice ? (
+  return isMobileDevice || isTabletDevice ? (
     <MobileMainLayoutWithOverlayLoading
       loadingText={renderMobileMoveMessage}
       opacity={0.7}

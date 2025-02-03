@@ -1,5 +1,5 @@
+import handleChangeGeneralAccessRole from "@/features/collaborator/change-general-access-role";
 import { GeneralAccessRole } from "@/features/collaborator/collaborator";
-import handleChangeGeneralAccessRole from "@/features/folder/change-general-access-role";
 import { neoBrutalBorderVariants, themeColors } from "@/theme/antd-theme";
 import { Flex, Typography } from "antd";
 import { useState } from "react";

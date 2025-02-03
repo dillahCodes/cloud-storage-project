@@ -43,6 +43,7 @@ const handleValitdateAddFolder = ({ folderName, user }: HandleValidateAddFolderP
       type: "error",
       content: failedValidation.message,
       className: "text-sm font-archivo",
+      key: "folder-add-error-message",
     });
     return false;
   }

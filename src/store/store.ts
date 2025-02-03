@@ -6,7 +6,6 @@ import { fileUploadingSlice } from "@/features/file/slice/file-uploading-slice";
 import { mappingFileTypeSlice } from "@/features/file/slice/mapping-file-type-slice";
 import { currentFoldersSlice } from "@/features/folder/slice/current-folders-slice";
 import { folderActivitySlice } from "@/features/folder/slice/folder-activity-slice";
-import { folderPermissionSlice } from "@/features/folder/slice/folder-permission-slice";
 import { folderSortingTypeSlice } from "@/features/folder/slice/folder-sorting-type";
 import { mappingFolderTypeSlice } from "@/features/folder/slice/mapping-folder-type-slice";
 import { modalAddSelectedCollaboratorsSlice } from "@/features/collaborator/slice/modal-add-selected-collaborators";
@@ -31,6 +30,8 @@ import { userStorageSlice } from "@/features/storage/slice/user-storage-slice";
 import { parentFolderPermissionSlice } from "@/features/permissions/slice/parent-folder-permissions";
 import { modalManageAccessContentSlice } from "@/features/collaborator/slice/modal-manage-access-content-slice";
 import { detailFolderPermissionSlice } from "@/features/permissions/slice/details-folder-permissions";
+import { searchBarSlice } from "@/features/search-folder-or-file/slice/search-bar-slice";
+import { resultSearchSlice } from "@/features/search-folder-or-file/slice/result-search-slice";
 
 const { createReduxHistory, routerMiddleware, routerReducer } = createReduxHistoryContext({
   history: createBrowserHistory(),
@@ -53,7 +54,6 @@ export const store = configureStore({
 
     // file and folder
     currentFolders: currentFoldersSlice.reducer,
-    folderPermission: folderPermissionSlice.reducer,
     parentFolder: parentFolderSlice.reducer,
     file: fileSlice.reducer,
     fileUploading: fileUploadingSlice.reducer,
@@ -74,6 +74,10 @@ export const store = configureStore({
     mobileMove: mobileMoveSlice.reducer,
     moveFoldersAndFilesData: moveFoldersAndFilesDataSlice.reducer,
     dekstopMove: dekstopMoveSlice.reducer,
+
+    // search state
+    searchBar: searchBarSlice.reducer,
+    resultSearch: resultSearchSlice.reducer,
 
     // mapping type
     mappingFolderType: mappingFolderTypeSlice.reducer,

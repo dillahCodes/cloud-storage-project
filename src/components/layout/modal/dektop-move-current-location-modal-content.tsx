@@ -10,10 +10,9 @@ const { Text } = Typography;
 const DektopMoveCurrentLocationModalContent: React.FC = () => {
   const { locationParentFolderId, locationParentFolderName } = useSelector(dekstopMoveSelector);
 
-  const renderCurrentLocation = useMemo(
-    () => ({ folderId: locationParentFolderId || null, folderName: locationParentFolderName || "my storage" }),
-    [locationParentFolderId, locationParentFolderName]
-  );
+  const renderCurrentLocation = useMemo(() => {
+    return { folderId: locationParentFolderId || null, folderName: locationParentFolderName || "my storage" };
+  }, [locationParentFolderId, locationParentFolderName]);
 
   const renderIcon = () => {
     switch (renderCurrentLocation.folderName) {

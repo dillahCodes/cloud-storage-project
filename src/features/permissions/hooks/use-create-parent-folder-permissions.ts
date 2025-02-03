@@ -9,11 +9,13 @@ import {
 } from "@/features/collaborator/collaborator";
 import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setIsFetchPermissionSuccess, setParentFolderActionPermissions, setParentFolderPermissionsDetails } from "../slice/parent-folder-permissions";
 import useDetectLocation from "@/hooks/use-detect-location";
 import { parentFolderSelector } from "@/features/folder/slice/parent-folder-slice";
+import { resetStateParentFolderPermission, setParentFolderPermissions } from "../slice/parent-folder-permissions";
+import { history } from "@/store/store";
 
 interface UseCreateParentFolderPermissionsParams {
+  isParentSecuredFolderActive: boolean;
   collaboratorData: Collaborator | null;
   generalAccess: GeneralAccessData | null;
   collaboratorStatus: CollaboratorsStatus;
@@ -21,6 +23,7 @@ interface UseCreateParentFolderPermissionsParams {
 }
 
 const useCreateParentFolderPermissions = ({
+  isParentSecuredFolderActive,
   collaboratorData,
   collaboratorStatus,
   generalAccess,
@@ -83,7 +86,14 @@ const useCreateParentFolderPermissions = ({
    */
   const isOwner = isCollaborator("owner");
   const isRootFolderMine = parentFolderData?.root_folder_user_id === user?.uid;
-  const isEditor = isCollaboratorCanEdit || isGeneralAccessPublicEditor || isRootFolderMine;
+
+  const isEditor = useMemo(() => {
+    const isEditorWhenSecuredFolderNotActive = isCollaboratorCanEdit || isGeneralAccessPublicEditor || isRootFolderMine || isOwner;
+    const isEditorWhenSecuredFolderActive = isCollaboratorCanEdit || isRootFolderMine || isOwner;
+
+    return isParentSecuredFolderActive ? isEditorWhenSecuredFolderActive : isEditorWhenSecuredFolderNotActive;
+  }, [isCollaboratorCanEdit, isGeneralAccessPublicEditor, isOwner, isParentSecuredFolderActive, isRootFolderMine]);
+
   const isViewer = isCollaboratorOnlyViewer || isGeneralAccessPublicViewer || isGeneralAccessPublicEditor || isGeneralAccessPublic;
 
   /**
@@ -102,6 +112,7 @@ const useCreateParentFolderPermissions = ({
         canView,
       },
       permissionsDetails: {
+        isParentSecuredFolderActive,
         isOwner,
         isRootFolderMine,
         isCollaboratorCanEdit,
@@ -112,6 +123,7 @@ const useCreateParentFolderPermissions = ({
       isFetchPermissionSuccess,
     };
   }, [
+    isParentSecuredFolderActive,
     isRootFolderMine,
     canCRUD,
     canView,
@@ -127,12 +139,16 @@ const useCreateParentFolderPermissions = ({
    * set value to global state
    */
   useEffect(() => {
-    if (isFetchPermissionSuccess) {
-      dispatch(setParentFolderActionPermissions(parentFolderPermission.actionPermissions));
-      dispatch(setParentFolderPermissionsDetails(parentFolderPermission.permissionsDetails));
-      dispatch(setIsFetchPermissionSuccess(isFetchPermissionSuccess));
-    }
+    if (isFetchPermissionSuccess) dispatch(setParentFolderPermissions(parentFolderPermission));
   }, [isFetchPermissionSuccess, parentFolderPermission, dispatch]);
+
+  /**
+   * listen location change and reset state
+   */
+  useEffect(() => {
+    const nextLocation = history.listen(() => dispatch(resetStateParentFolderPermission()));
+    return () => nextLocation();
+  }, [dispatch]);
 
   return parentFolderPermission;
 };

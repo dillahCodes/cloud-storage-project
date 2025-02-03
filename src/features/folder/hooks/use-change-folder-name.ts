@@ -7,9 +7,11 @@ import { v4 as uuidv4 } from "uuid";
 import { message } from "antd";
 import { useSelector } from "react-redux";
 import { parentFolderSelector } from "../slice/parent-folder-slice";
+import useSecuredFolderFolderActions from "@/features/permissions/hooks/use-secured-folder-folder-actions";
 
 const useChangeFolderName = (folderData: RootFolderGetData | SubFolderGetData) => {
   const { handleAddActivityRenamedFolder } = useAddActivityRenamedFolder();
+  const { handleCheckIsUserCanDoThisAction } = useSecuredFolderFolderActions();
 
   const parentFolderState = useSelector(parentFolderSelector);
   const [newFolderNameValue, setNewFolderNameValue] = useState<string>(folderData.folder_name || "");
@@ -23,6 +25,9 @@ const useChangeFolderName = (folderData: RootFolderGetData | SubFolderGetData) =
     const { currentUser } = auth;
 
     try {
+      const isValidateSecuredFolderPass = await handleCheckIsUserCanDoThisAction(folderData.folder_id, "rename");
+      if (!isValidateSecuredFolderPass) return;
+
       message.open({
         type: "loading",
         content: "Updating folder name...",
@@ -62,6 +67,7 @@ const useChangeFolderName = (folderData: RootFolderGetData | SubFolderGetData) =
         className: "font-archivo text-sm",
         key: "folder-name-update-success",
       });
+      setTimeout(() => message.destroy("folder-name-update-success"), 3000);
     } catch (error) {
       message.open({
         type: "error",

@@ -4,7 +4,9 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 const initialState: ParentFolderPermissions = {
   actionPermissions: { canCRUD: false, canView: false },
   permissionsDetails: {
+    isRootFolderMine: false,
     isOwner: false,
+    isParentSecuredFolderActive: false,
     isCollaboratorCanEdit: false,
     isGeneralAccessPublic: false,
     isGeneralAccessPublicEditor: false,
@@ -17,19 +19,25 @@ export const parentFolderPermissionSlice = createSlice({
   name: "parentFolderPermission",
   initialState,
   reducers: {
-    setParentFolderActionPermissions: (state, action: PayloadAction<ParentFolderPermissions["actionPermissions"]>) => {
-      state.actionPermissions = action.payload;
+    setParentFolderPermissions: (state, action: PayloadAction<ParentFolderPermissions>) => {
+      state.actionPermissions = action.payload.actionPermissions;
+      state.permissionsDetails = action.payload.permissionsDetails;
+      state.isFetchPermissionSuccess = action.payload.isFetchPermissionSuccess;
     },
-    setParentFolderPermissionsDetails: (state, action: PayloadAction<ParentFolderPermissions["permissionsDetails"]>) => {
-      state.permissionsDetails = action.payload;
+    resetStateParentFolderPermission: (state) => {
+      state.actionPermissions = { canCRUD: false, canView: false };
+      state.permissionsDetails = {
+        isRootFolderMine: false,
+        isOwner: false,
+        isParentSecuredFolderActive: false,
+        isCollaboratorCanEdit: false,
+        isGeneralAccessPublic: false,
+        isGeneralAccessPublicEditor: false,
+        isSubFolderLocation: false,
+      };
     },
-    setIsFetchPermissionSuccess: (state, action: PayloadAction<ParentFolderPermissions["isFetchPermissionSuccess"]>) => {
-      state.isFetchPermissionSuccess = action.payload;
-    },
-    resetStateParentFolderPermission: () => initialState,
   },
 });
 
-export const { setParentFolderActionPermissions, setParentFolderPermissionsDetails, setIsFetchPermissionSuccess, resetStateParentFolderPermission } =
-  parentFolderPermissionSlice.actions;
+export const { setParentFolderPermissions, resetStateParentFolderPermission } = parentFolderPermissionSlice.actions;
 export const parentFolderPermissionSelector = (state: RootState) => state.parentFolderPermission;

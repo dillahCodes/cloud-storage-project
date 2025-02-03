@@ -3,20 +3,21 @@ import useFileUploading from "@/features/file/hooks/use-file-uploading";
 import useDrawer from "@/hooks/use-drawer";
 import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
 import { themeColors } from "@/theme/antd-theme";
+import withLoadingOverlay from "@components/hoc/with-loading-overlay";
 import { Flex, Layout } from "antd";
 import { Footer } from "antd/es/layout/layout";
 import classNames from "classnames";
 import { MainLayoutProps } from ".";
 import Breadcrumb from "../breadcrumb/breadcrumb";
+import ButtonMoveWithModal from "../button-move/button-move-with-modal";
 import ButtonUploadStatusModal from "../button-upload-status/buttton-upload-status-modal";
 import DesktopDrawer from "../drawer/dekstop-drawer";
 import DesktopDrawerActivity from "../drawer/desktop-drawer-activity";
 import DesktopDrawerNotification from "../drawer/desktop-drawer-notification";
 import FolderDetails from "../folder/folder-details";
 import DekstopHeader from "../header/desktop-header";
-import DesktopSider from "../sider/desktop-sider";
 import DektopMoveModal from "../modal/dektop-move-modal";
-import withLoadingOverlay from "@components/hoc/with-loading-overlay";
+import DesktopSider from "../sider/desktop-sider";
 
 const DesktopMainLayout: React.FC<Omit<MainLayoutProps, "showAddButton" | "showPasteButton">> = ({ children, withFooter = true, withBreadcrumb }) => {
   const { isTabletDevice, isDesktopDevice } = useGetClientScreenWidth();

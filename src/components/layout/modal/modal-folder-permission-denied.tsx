@@ -1,4 +1,4 @@
-import useHandleFolderAccessModal from "@/features/folder/hooks/use-handle-folder-access-modal";
+import useHandleFolderAccessModal from "@/features/permissions/hooks/use-handle-folder-access-modal";
 import { Modal } from "antd";
 import MoadlFolderPermissionDenied from "./modal-folder-permission-content-denied";
 

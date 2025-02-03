@@ -1,5 +1,4 @@
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
-import { folderPermissionSelector } from "@/features/folder/slice/folder-permission-slice";
 import { parentFolderSelector } from "@/features/folder/slice/parent-folder-slice";
 import {
   dekstopMoveSetFolderData,
@@ -12,6 +11,7 @@ import {
   setMobileMoveFolderName,
   setMobileMoveFromLocationPath,
 } from "@/features/move-folder-or-file/slice/mobile-move-slice";
+import useSecuredFolderFolderActions from "@/features/permissions/hooks/use-secured-folder-folder-actions";
 import useDetectLocation from "@/hooks/use-detect-location";
 import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
 import copyToClipboard from "@/util/copy-to-clipboard";
@@ -25,10 +25,12 @@ const useHandleActionFolderMenu = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { subFolderPermission } = useSelector(folderPermissionSelector);
+  // const { actionPermissions: subFolderPermission } = useSelector(parentFolderPermissionSelector);
   const parentFolderState = useSelector(parentFolderSelector);
-  const { isDesktopDevice, isTabletDevice, isMobileDevice } = useGetClientScreenWidth();
+  const { isDesktopDevice } = useGetClientScreenWidth();
   const { isSubSharedWithMeLocation, isMystorageLocation, isSubMyStorageLocation } = useDetectLocation();
+
+  const { handleCheckIsUserCanDoThisAction } = useSecuredFolderFolderActions();
 
   /**
    * handle copy to clipboard
@@ -82,16 +84,6 @@ const useHandleActionFolderMenu = () => {
    */
   const prepareForMobileMove = useCallback(
     (folderId: string, folderName: string) => {
-      if (subFolderPermission && !subFolderPermission.canCRUD) {
-        message.open({
-          type: "error",
-          content: "You don't have permission to move this folder.",
-          className: "font-archivo text-sm",
-          key: "folder-move-error-message",
-        });
-        return;
-      }
-
       const fullPath = `${location.pathname}${location.search}`;
 
       dispatch(setMobileMoveFolderName(folderName));
@@ -111,7 +103,7 @@ const useHandleActionFolderMenu = () => {
         });
       }
     },
-    [subFolderPermission, location.pathname, location.search, dispatch, navigate, handleNavigateList]
+    [location.pathname, location.search, dispatch, navigate, handleNavigateList]
   );
 
   /**
@@ -119,16 +111,6 @@ const useHandleActionFolderMenu = () => {
    */
   const prepareForDektopMove = useCallback(
     (folderId: string, folderName: string) => {
-      if (subFolderPermission && !subFolderPermission.canCRUD) {
-        message.open({
-          type: "error",
-          content: "You don't have permission to move this folder.",
-          className: "font-archivo text-sm",
-          key: "folder-move-error-message",
-        });
-        return;
-      }
-
       dispatch(openModal());
       dispatch(dekstopMoveSetFolderData({ folderId, folderName }));
       dispatch(
@@ -140,18 +122,25 @@ const useHandleActionFolderMenu = () => {
 
       dispatch(setMoveParentFolderId(parentFolderState.parentFolderData?.folder_id ?? null));
     },
-    [dispatch, parentFolderState.parentFolderData, subFolderPermission]
+    [dispatch, parentFolderState.parentFolderData]
   );
 
   /**
    * handle move folder
    */
   const handleMoveFolder = useCallback(
-    (folderId: string, folderName: string) => {
-      if (isDesktopDevice || isTabletDevice) prepareForDektopMove(folderId, folderName);
-      if (isMobileDevice) prepareForMobileMove(folderId, folderName);
+    async (folderId: string, folderName: string) => {
+      try {
+        const isValidateSecuredFolderPass = await handleCheckIsUserCanDoThisAction(folderId, "move");
+        if (!isValidateSecuredFolderPass) return;
+
+        if (isDesktopDevice) prepareForDektopMove(folderId, folderName);
+        else prepareForMobileMove(folderId, folderName);
+      } catch (error) {
+        console.error("error when move folder: ", error instanceof Error ? error.message : "an unknown error occurred");
+      }
     },
-    [isDesktopDevice, isTabletDevice, isMobileDevice, prepareForMobileMove, prepareForDektopMove]
+    [isDesktopDevice, prepareForMobileMove, prepareForDektopMove, handleCheckIsUserCanDoThisAction]
   );
 
   return { handleClipboard, handleMoveFolder };

@@ -19,6 +19,7 @@ interface RootFileCreateData {
   file_id: string;
   owner_user_id: FirebaseUserData["uid"];
   root_folder_user_id: string;
+  root_folder_id: string | null;
   parent_folder_id: null;
   file_name: string;
   file_size: string;
@@ -32,6 +33,7 @@ interface RootFileGetData {
   file_id: string;
   owner_user_id: FirebaseUserData["uid"];
   root_folder_user_id: string;
+  root_folder_id: string | null;
   parent_folder_id: null;
   file_name: string;
   file_size: string;

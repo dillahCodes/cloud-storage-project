@@ -1,5 +1,5 @@
 import useDekstopMoveValidation from "@/features/move-folder-or-file/hooks/use-desktop-move-validation";
-import useGetDektopMovePermissionFolder from "@/features/move-folder-or-file/hooks/use-get-dektop-move-permission-folder";
+import useGetDektopMovePermissionFolder from "@/features/permissions/hooks/use-get-dektop-move-permission-folder";
 import useGetFilesDekstopMoveFolderOrFile from "@/features/move-folder-or-file/hooks/use-get-files-dekstop-move-folder-or-file";
 import useGetFodlersDektopMoveFolderOrFile from "@/features/move-folder-or-file/hooks/use-get-folders-dektop-move-folder-or-file";
 import useGetParentFolderDataMoveFolderOrFileDekstop from "@/features/move-folder-or-file/hooks/use-get-parent-folder-dekstop-move-folder-or-file";
@@ -21,8 +21,8 @@ const DektopMoveModal = () => {
    * state and dispatch hooks
    */
   const dispatch = useDispatch();
-  const { isModalOpen, folderName, parentFolderId, fileName } = useSelector(dekstopMoveSelector);
-  const isMoveFile = useMemo(() => Boolean(fileName), [fileName]);
+  const { isModalOpen, folderName, parentFolderId, fileName, fileId } = useSelector(dekstopMoveSelector);
+  const isMoveFile = useMemo(() => Boolean(fileName && fileId), [fileName, fileId]);
 
   /**
    * validation move button
@@ -32,7 +32,7 @@ const DektopMoveModal = () => {
   /**
    * get permission
    */
-  const { isGetPermissionSuccess } = useGetDektopMovePermissionFolder();
+  const { isFetchPermissionSuccess } = useGetDektopMovePermissionFolder();
 
   /**
    * fetch parent folder data
@@ -43,19 +43,17 @@ const DektopMoveModal = () => {
   /**
    * fetch folders data
    */
-  const shouldFetchFolders = useMemo(
-    () => (isModalOpen && isGetPermissionSuccess) || (isMystorageLocation && isModalOpen),
-    [isModalOpen, isGetPermissionSuccess, isMystorageLocation]
-  );
+  const shouldFetchFolders = useMemo(() => {
+    return (isModalOpen && isFetchPermissionSuccess) || (isMystorageLocation && isModalOpen);
+  }, [isModalOpen, isFetchPermissionSuccess, isMystorageLocation]);
   useGetFodlersDektopMoveFolderOrFile({ shouldFetch: shouldFetchFolders });
 
   /**
    * fetch files data
    */
-  const shouldFetchFiles = useMemo(
-    () => (isModalOpen && isGetPermissionSuccess) || (isMystorageLocation && isModalOpen),
-    [isModalOpen, isGetPermissionSuccess, isMystorageLocation]
-  );
+  const shouldFetchFiles = useMemo(() => {
+    return (isModalOpen && isFetchPermissionSuccess) || (isMystorageLocation && isModalOpen);
+  }, [isModalOpen, isFetchPermissionSuccess, isMystorageLocation]);
   useGetFilesDekstopMoveFolderOrFile({ shouldFetch: shouldFetchFiles });
 
   const handleCloseModal = () => dispatch(resetDektopMoveState());

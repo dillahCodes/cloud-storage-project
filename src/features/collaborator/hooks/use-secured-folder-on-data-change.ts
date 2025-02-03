@@ -1,4 +1,3 @@
-import useUser from "@/features/auth/hooks/use-user";
 import { SecuredFolderStatus, SecurredFolderData } from "@/features/collaborator/collaborator";
 import { auth, db } from "@/firebase/firebase-services";
 import { doc, DocumentReference, onSnapshot } from "firebase/firestore";

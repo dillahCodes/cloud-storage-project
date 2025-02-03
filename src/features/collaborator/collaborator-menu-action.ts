@@ -1,8 +1,8 @@
 import handleChangeCollaboratorRole from "./change-collabrator-role";
-import { RootFolderGetData, SubFolderGetData } from "./folder";
-import { CollaboratorRole } from "./folder-collaborator";
+import { RootFolderGetData, SubFolderGetData } from "../folder/folder";
 import handleRemoveCollaborator from "./remove-collaborator";
 import handleTransferCollaboratorFolderOwner from "./transfer-collaborator-folder-owner";
+import { CollaboratorRole } from "./collaborator";
 
 interface HandleCollaboratorMenuActionParams {
   userId: string;

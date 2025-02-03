@@ -5,6 +5,7 @@ import { getDownloadURL, ref } from "firebase/storage";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setActiveAction } from "../slice/file-options-slice";
+import useSecuredFolderFileActions from "@/features/permissions/hooks/use-secured-folder-file-actions";
 
 interface UseHandleDowloadFile {
   fileData: SubFileGetData | RootFileGetData | null;
@@ -37,6 +38,8 @@ const addRecentFileData = async ({ fileId, userId }: AddRecentFileDataParams) =>
 const useHandleDowloadFile = ({ fileData }: UseHandleDowloadFile) => {
   const dispatch = useDispatch();
   const { user } = useUser();
+
+  const { handleCheckIsUserCanDoThisAction } = useSecuredFolderFileActions();
   const [isDownloadLoading, setIsDownloadLoading] = useState<boolean>(false);
 
   const handleCancelDowloadFile = useCallback(() => {
@@ -46,6 +49,9 @@ const useHandleDowloadFile = ({ fileData }: UseHandleDowloadFile) => {
   const handleConfirmDownlaodFile = useCallback(async () => {
     if (!fileData || !user) return;
     try {
+      const isUserCanDoThisAction = handleCheckIsUserCanDoThisAction("dowload");
+      if (!isUserCanDoThisAction) return;
+
       setIsDownloadLoading(true);
       const fileRef = ref(storage, `user-files/${fileData.file_id}/${fileData.file_name}`);
       const downloadUrl = await getDownloadURL(fileRef);
@@ -58,7 +64,7 @@ const useHandleDowloadFile = ({ fileData }: UseHandleDowloadFile) => {
     } catch (error) {
       console.error("Error downloading file:", error instanceof Error ? error.message : "An unknown error occurred.");
     }
-  }, [fileData, user]);
+  }, [fileData, user, handleCheckIsUserCanDoThisAction]);
 
   return { handleCancelDowloadFile, handleConfirmDownlaodFile, isDownloadLoading };
 };

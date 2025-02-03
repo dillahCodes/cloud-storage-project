@@ -19,6 +19,8 @@ import ButtonUploadStatusModal from "../button-upload-status/buttton-upload-stat
 import MobileDrawer from "../drawer/mobile-drawer";
 import MobileDrawerMenu from "../drawer/mobile-drawer-menu";
 import MobileHeder from "../header/mobile-header";
+import { searchBarSelector } from "@/features/search-folder-or-file/slice/search-bar-slice";
+import MobileSearchBar from "../searchbar/mobile-searchbar";
 
 const MobileMainLayout: React.FC<MainLayoutProps> = ({ children, showAddButton, withFooter = true, withBreadcrumb, showPasteButton }) => {
   useMoveMobileErroMessage();
@@ -27,22 +29,28 @@ const MobileMainLayout: React.FC<MainLayoutProps> = ({ children, showAddButton, 
   const { items } = useBreadcrumbState();
 
   const { isMoveFolderOrFileLocation } = useDetectLocation();
-  const { fileId, folderId } = useSelector(mobileMoveSelector);
 
-  const isPasteButtonVisible = useMemo(
-    () => (fileId || folderId) && isMoveFolderOrFileLocation && showPasteButton,
-    [fileId, folderId, isMoveFolderOrFileLocation, showPasteButton]
-  );
+  const { fileId, folderId } = useSelector(mobileMoveSelector);
+  const { isSearchbarOpen } = useSelector(searchBarSelector);
+
+  const isPasteButtonVisible = useMemo(() => {
+    return (fileId || folderId) && isMoveFolderOrFileLocation && showPasteButton;
+  }, [fileId, folderId, isMoveFolderOrFileLocation, showPasteButton]);
 
   return (
     <Layout className="min-w-[360px]">
-      <Headroom>
+      {/* header */}
+      <Headroom className="z-50">
         <MobileHeder />
       </Headroom>
 
+      {/* drawer */}
       <MobileDrawer>
         <MobileDrawerMenu />
       </MobileDrawer>
+
+      {/* search overlay */}
+      {isSearchbarOpen && <MobileSearchBar />}
 
       <Flex vertical gap="middle" className={classNames("fixed  z-10 bottom-5 right-5")}>
         {fileUploadingState.fileUploadingList.length > 0 && <ButtonUploadStatusModal />}

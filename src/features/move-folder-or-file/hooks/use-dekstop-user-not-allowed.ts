@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 
 const useDekstopUserNotAllowed = () => {
   const navigate = useNavigate();
-  const { isDesktopDevice, isTabletDevice } = useGetClientScreenWidth();
+  const { isDesktopDevice } = useGetClientScreenWidth();
 
   useEffect(() => {
-    if (isDesktopDevice || isTabletDevice) navigate("/storage/my-storage");
-  }, [isDesktopDevice, isTabletDevice, navigate]);
+    if (isDesktopDevice) navigate("/storage/my-storage");
+  }, [isDesktopDevice, navigate]);
 };
 
 export default useDekstopUserNotAllowed;

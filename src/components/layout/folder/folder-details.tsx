@@ -130,9 +130,14 @@ const FolderDetails = () => {
   });
 
   /**
+   * fetch parent folder secured folder data
+   */
+  const { isSecuredFolderActive } = useSecuredFolderOnDataChange({ folderId: getParentDetailsFolderParentFolderId });
+  /**
    * create permissions for parent folder
    */
   const parentFolderPermissions = useCreateParentFolderPermissions({
+    isParentSecuredFolderActive: isSecuredFolderActive,
     collaboratorData: parentFolderCollaboratorData,
     collaboratorStatus: parentFolderCollaboratorStatus,
     generalAccess: parentFolderGeneralAccess,

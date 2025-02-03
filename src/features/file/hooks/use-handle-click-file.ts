@@ -1,11 +1,8 @@
 import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fileSelector } from "../slice/file-slice";
-import { MappingFileType, mappingFileTypeSelector } from "../slice/mapping-file-type-slice";
 import { setActiveFileData } from "../slice/file-options-slice";
-import { folderPermissionSelector } from "@/features/folder/slice/folder-permission-slice";
-import { message } from "antd";
+import { MappingFileType, mappingFileTypeSelector } from "../slice/mapping-file-type-slice";
 
 interface HandleClickFileOptionsParams {
   e: React.MouseEvent<HTMLDivElement>;
@@ -20,13 +17,11 @@ interface HandleMappingOvervlowParams {
 
 interface PrepareForDektopClickParams {
   fileData: SubFileGetData | RootFileGetData;
-  filesData: SubFileGetData[] | RootFileGetData[];
   currentScrollHeight: number;
 }
 
 interface AdjustFloatingPositionParams {
   fileData: SubFileGetData | RootFileGetData;
-  filesData: SubFileGetData[] | RootFileGetData[];
   fileMappingType: MappingFileType;
   currentScrollHeight: number;
 }
@@ -37,6 +32,15 @@ interface HandleGridMappingOverFlow {
   floatingRect: DOMRect;
 }
 
+/**
+ * Handles the overflow of the file options floating element in the list mapping type
+ * by adjusting its position to either the top or bottom of the parent element based on
+ * whether the parent element is overflowing or not.
+ *
+ * @param {HTMLElement} floatingElement - The floating element to adjust
+ * @param {HTMLElement} parentElement - The parent element of the floating element
+ * @param {number} currentScrollHeight - The current scroll height of the parent element
+ */
 const handleListMappingOverflow = ({ floatingElement, parentElement, currentScrollHeight }: HandleMappingOvervlowParams) => {
   const isElOverflowBottom: boolean = parentElement.scrollHeight > currentScrollHeight;
 
@@ -109,10 +113,8 @@ const adjustFloatingPosition = ({ fileData, fileMappingType, currentScrollHeight
 const useHandleClickFile = () => {
   const dispatch = useDispatch();
 
-  const { files: filesData } = useSelector(fileSelector);
   const { mappingFileType: mappingType } = useSelector(mappingFileTypeSelector);
 
-  const { subFolderPermission } = useSelector(folderPermissionSelector);
   const { isDesktopDevice } = useGetClientScreenWidth();
   const [fileScrollHeight, setFileScrollHeight] = useState<number>(0);
 
@@ -131,8 +133,8 @@ const useHandleClickFile = () => {
    * helper: prepare for dektop click
    */
   const handlePrepareForDektopClick = useCallback(
-    ({ fileData, filesData, currentScrollHeight }: PrepareForDektopClickParams) => {
-      adjustFloatingPosition({ fileData, fileMappingType: mappingType, filesData, currentScrollHeight });
+    ({ fileData, currentScrollHeight }: PrepareForDektopClickParams) => {
+      adjustFloatingPosition({ fileData, fileMappingType: mappingType, currentScrollHeight });
     },
     [mappingType]
   );
@@ -144,23 +146,10 @@ const useHandleClickFile = () => {
        */
       !isDesktopDevice && e.stopPropagation();
 
-      /**
-       * validate permission
-       */
-      if (subFolderPermission && !subFolderPermission.canCRUD) {
-        message.open({
-          type: "error",
-          content: "Access Denied: The file is read-only.",
-          className: "font-archivo text-sm",
-          key: "file-move-error-message",
-        });
-        return;
-      }
-
-      isDesktopDevice && handlePrepareForDektopClick({ fileData, filesData, currentScrollHeight: fileScrollHeight });
+      isDesktopDevice && handlePrepareForDektopClick({ fileData, currentScrollHeight: fileScrollHeight });
       dispatch(setActiveFileData(fileData));
     },
-    [handlePrepareForDektopClick, isDesktopDevice, filesData, fileScrollHeight, dispatch, subFolderPermission]
+    [handlePrepareForDektopClick, isDesktopDevice, fileScrollHeight, dispatch]
   );
 
   return {

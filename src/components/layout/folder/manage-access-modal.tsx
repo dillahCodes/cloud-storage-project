@@ -1,5 +1,4 @@
-import useAddCollaboratorsSelectedToState from "@/features/folder/hooks/use-add-collaborators-selected-to-state";
-import useGetCollaboratorsByNameOrEmail from "@/features/folder/hooks/use-get-collaborators-by-name-or-email";
+import useGetCollaboratorsByNameOrEmail from "@/features/collaborator/hooks/use-get-collaborators-by-name-or-email";
 import useModalManageAccessContentSetState from "@/features/collaborator/hooks/use-modal-manage-access-content-setstate";
 import { neoBrutalBorderVariants } from "@/theme/antd-theme";
 import copyToClipboard from "@/util/copy-to-clipboard";
@@ -17,6 +16,7 @@ import useSecuredFoldertoggleHandler from "@/features/collaborator/hooks/use-sec
 import { modalManageAccessContentSelector } from "@/features/collaborator/slice/modal-manage-access-content-slice";
 import { useSelector } from "react-redux";
 import { detailFolderPermissionsSelector } from "@/features/permissions/slice/details-folder-permissions";
+import useAddCollaboratorsSelectedToState from "@/features/collaborator/hooks/use-add-collaborators-selected-to-state";
 
 const { Text } = Typography;
 const InputWithFloatingElement = withDynamicFloatingElement(Input);

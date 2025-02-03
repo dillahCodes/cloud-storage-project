@@ -54,6 +54,12 @@ const ButtonAddMobile: React.FC = () => {
     }
   };
 
+  const rentderIcon = () => (
+    <div className="animate-wiggle animate-infinite animate-duration-[5000ms] animate-ease-in animate-fill-both text-3xl">
+      <RiFolderAddLine className="text-3xl" />
+    </div>
+  );
+
   return (
     <ButtonWithModal
       modalContent={renderModalContent()}
@@ -63,11 +69,7 @@ const ButtonAddMobile: React.FC = () => {
       neoBrutalType="medium"
       size="large"
       className="text-black font-archivo rounded-sm border-2 bg-[#fff1ff] p-7"
-      icon={
-        <div className="animate-wiggle animate-infinite animate-duration-[5000ms] animate-ease-in animate-fill-both text-3xl">
-          <RiFolderAddLine className="text-3xl" />
-        </div>
-      }
+      icon={rentderIcon()}
     />
   );
 };

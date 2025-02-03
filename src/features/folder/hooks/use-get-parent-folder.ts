@@ -5,7 +5,8 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { SubFolderGetData } from "../folder";
-import { setParentFolder, setParentFolderStatus } from "../slice/parent-folder-slice";
+import { resetParentFolder, setParentFolder, setParentFolderStatus } from "../slice/parent-folder-slice";
+import { history } from "@/store/store";
 
 interface UseGetParentFolderProps {
   shouldFetch: boolean;
@@ -70,6 +71,14 @@ const useGetParentFolder = ({ shouldFetch, folderId }: UseGetParentFolderProps) 
   useEffect(() => {
     if (shouldFetch && isValidFolderId) handleProcessParentFolderData();
   }, [handleProcessParentFolderData, shouldFetch, isValidFolderId]);
+
+  /**
+   * listen location change, reset parent folder state
+   */
+  useEffect(() => {
+    const listenLocationChange = history.listen(() => dispatch(resetParentFolder()));
+    return () => listenLocationChange();
+  }, [dispatch]);
 };
 
 export default useGetParentFolder;

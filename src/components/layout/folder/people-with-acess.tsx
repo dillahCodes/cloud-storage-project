@@ -2,9 +2,9 @@ import { Flex, Typography } from "antd";
 import CollabolatorList from "./collabolator-list";
 import { memo } from "react";
 import useUser from "@/features/auth/hooks/use-user";
-import { collaboratorMenu } from "@/features/folder/collaborator-menu";
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 import { CollaboratorUserData } from "@/features/collaborator/collaborator";
+import { collaboratorMenu } from "@/features/collaborator/collaborator-menu";
 
 interface PeopleWithAcessProps {
   collabolators: CollaboratorUserData[] | null;

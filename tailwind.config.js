@@ -13,5 +13,21 @@ export default {
       colors: {},
     },
   },
-  plugins: [require("tailwindcss-animated")],
+  plugins: [
+    require("tailwindcss-animated"),
+    function ({ addUtilities }) {
+      addUtilities({
+        ".no-scrollbar": {
+          /* Chrome, Safari, Edge */
+          "&::-webkit-scrollbar": {
+            display: "none",
+          },
+          /* Firefox */
+          "scrollbar-width": "none",
+          /* IE & Edge */
+          "-ms-overflow-style": "none",
+        },
+      });
+    },
+  ],
 };

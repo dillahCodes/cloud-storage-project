@@ -22,6 +22,7 @@ interface ParentFolderPermissions {
   };
   permissionsDetails: {
     isOwner: boolean;
+    isParentSecuredFolderActive: boolean;
     isRootFolderMine: boolean;
     isCollaboratorCanEdit: boolean;
     isGeneralAccessPublic: boolean;

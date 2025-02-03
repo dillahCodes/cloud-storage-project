@@ -1,6 +1,18 @@
 import { auth, db, storage } from "@/firebase/firebase-services";
 import { RootFolderGetData, SubFolderGetData } from "../folder";
-import { collection, deleteDoc, doc, DocumentData, getDocs, query, QuerySnapshot, serverTimestamp, where } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  DocumentData,
+  getDocs,
+  increment,
+  query,
+  QuerySnapshot,
+  serverTimestamp,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
 import useDetectLocation from "@/hooks/use-detect-location";
 import useAddActivityDeletedFolder from "./use-add-activity-deleted-folder";
@@ -8,7 +20,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useCallback } from "react";
 import { DeleteFolderActivity } from "../folder-activity";
 import { message } from "antd";
-import { handleDecrementUserStorageUsage } from "@/features/file/hooks/use-handle-delete-file";
+import useSecuredFolderFolderActions from "@/features/permissions/hooks/use-secured-folder-folder-actions";
 
 interface DeleteFolderParams {
   folderId: string;
@@ -19,112 +31,15 @@ interface DeleteFolderParams {
 }
 
 /**
- * Handles folder deletion and activity tracking.
- * @param {RootFolderGetData | SubFolderGetData} folderData - Data of the folder to delete.
- * @returns {Object} Contains the `handleConfirmDeleteFolder` function.
- */
-const useDeleteFolder = (folderData: RootFolderGetData | SubFolderGetData) => {
-  const { currentUser } = auth;
-  const { isSharedWithMeLocation, isStarredLocation } = useDetectLocation();
-  const { handleAddActivityDeletedFolder } = useAddActivityDeletedFolder();
-
-  const handleDeleteRecursively = useCallback(
-    async (params: DeleteFolderParams) => {
-      const { folderId, folderName, parentFolderId, rootFolderId, rootFolderOwnerUserId } = params;
-      if (!currentUser) return;
-
-      try {
-        // Fetch and delete subfolders
-        const subFoldersSnapshot = await handleGetSubFoldersById(folderId);
-        if (!subFoldersSnapshot.empty) await deleteSubFoldersWithPromiseAllAndRecursion(subFoldersSnapshot, handleDeleteRecursively);
-
-        // Fetch and delete files
-        const subFileSnapshot = await handleGetFilesByParentFolderId(folderId);
-        await handleDeleteAllFiles(subFileSnapshot, handleAddActivityDeletedFolder, params, currentUser.uid);
-
-        // Fetch and delete collaborators
-        const collaboratorsSnapshot = await handleGetAllFolderCollaborators(folderId);
-        await handleDeleteAllCollaborators(collaboratorsSnapshot);
-
-        // Delete general access data and the folder itself
-        await handleDeleteFolderGeneralAccessData(folderId);
-        await handleDeleteFolderById(folderId);
-
-        // Track folder deletion activity
-        await handleAddActivityDeletedFolder({
-          type: "delete-folder-activity",
-          activityId: uuidv4(),
-          parentFolderId,
-          rootFolderId,
-          rootFolderOwnerUserId,
-          folderId,
-          folderName,
-          activityByUserId: currentUser?.uid as string,
-          activityDate: serverTimestamp(),
-        });
-      } catch (error) {
-        console.error(`Error during recursive deletion of folder ID ${folderId}: `, error instanceof Error ? error.message : "Unknown error.");
-        throw error;
-      }
-    },
-    [handleAddActivityDeletedFolder, currentUser]
-  );
-
-  const handleConfirmDeleteFolder = useCallback(async () => {
-    if (!currentUser) return;
-
-    try {
-      message.open({
-        type: "loading",
-        content: "Deleting folder...",
-        className: "font-archivo text-sm",
-        duration: 0,
-        key: "folder-delete-loading",
-      });
-
-      switch (true) {
-        case isSharedWithMeLocation:
-          await deleteSharedWithMeFolder(folderData.folder_id, currentUser.uid);
-          window.location.reload();
-          break;
-
-        case isStarredLocation:
-          await deleteStarredFolder(folderData.folder_id, currentUser.uid);
-          window.location.reload();
-          break;
-
-        default:
-          await handleDeleteRecursively({
-            folderId: folderData.folder_id,
-            folderName: folderData.folder_name,
-            parentFolderId: folderData.parent_folder_id,
-            rootFolderId: folderData.root_folder_id,
-            rootFolderOwnerUserId: folderData.root_folder_user_id,
-          });
-          break;
-      }
-
-      message.destroy("folder-delete-loading");
-      message.open({
-        type: "success",
-        content: "Folder deleted successfully.",
-        className: "font-archivo text-sm",
-        key: "folder-delete-success",
-        duration: 3,
-      });
-    } catch (error) {
-      console.error("Error confirming folder deletion: ", error instanceof Error ? error.message : "An unknown error occurred.");
-    }
-  }, [currentUser, folderData, isSharedWithMeLocation, isStarredLocation, handleDeleteRecursively]);
-
-  return { handleConfirmDeleteFolder };
-};
-
-export default useDeleteFolder;
-
-/**
  * Helper functions
  */
+
+const handleDecrementUserStorageUsage = async (userId: string, size: number) => {
+  const userStorageRef = doc(db, "users-storage", userId);
+  await updateDoc(userStorageRef, {
+    storageUsed: increment(-size),
+  });
+};
 
 /**
  * Deletes all subfolders of a given folder, using recursion and Promise.all
@@ -284,3 +199,117 @@ const handleGetSubFoldersById = async (folderId: string): Promise<QuerySnapshot<
   const subFoldersQuery = query(collection(db, "folders"), where("parent_folder_id", "==", folderId));
   return await getDocs(subFoldersQuery);
 };
+
+/**
+ * Handles folder deletion and activity tracking.
+ * @param {RootFolderGetData | SubFolderGetData} folderData - Data of the folder to delete.
+ * @returns {Object} Contains the `handleConfirmDeleteFolder` function.
+ */
+const useDeleteFolder = (folderData: RootFolderGetData | SubFolderGetData) => {
+  const { currentUser } = auth;
+  const { isSharedWithMeLocation, isStarredLocation } = useDetectLocation();
+  const { handleAddActivityDeletedFolder } = useAddActivityDeletedFolder();
+  const { handleCheckIsUserCanDoThisAction } = useSecuredFolderFolderActions();
+
+  const handleDeleteRecursively = useCallback(
+    async (params: DeleteFolderParams) => {
+      const { folderId, folderName, parentFolderId, rootFolderId, rootFolderOwnerUserId } = params;
+      if (!currentUser) return;
+
+      try {
+        // Fetch and delete subfolders
+        const subFoldersSnapshot = await handleGetSubFoldersById(folderId);
+        if (!subFoldersSnapshot.empty) await deleteSubFoldersWithPromiseAllAndRecursion(subFoldersSnapshot, handleDeleteRecursively);
+
+        // Fetch and delete files
+        const subFileSnapshot = await handleGetFilesByParentFolderId(folderId);
+        await handleDeleteAllFiles(subFileSnapshot, handleAddActivityDeletedFolder, params, currentUser.uid);
+
+        // Fetch and delete collaborators
+        const collaboratorsSnapshot = await handleGetAllFolderCollaborators(folderId);
+        await handleDeleteAllCollaborators(collaboratorsSnapshot);
+
+        // Delete general access data and the folder itself
+        await handleDeleteFolderGeneralAccessData(folderId);
+        await handleDeleteFolderById(folderId);
+
+        // Track folder deletion activity
+        await handleAddActivityDeletedFolder({
+          type: "delete-folder-activity",
+          activityId: uuidv4(),
+          parentFolderId,
+          rootFolderId,
+          rootFolderOwnerUserId,
+          folderId,
+          folderName,
+          activityByUserId: currentUser?.uid as string,
+          activityDate: serverTimestamp(),
+        });
+      } catch (error) {
+        console.error(`Error during recursive deletion of folder ID ${folderId}: `, error instanceof Error ? error.message : "Unknown error.");
+        throw error;
+      }
+    },
+    [handleAddActivityDeletedFolder, currentUser]
+  );
+
+  const handleConfirmDeleteFolder = useCallback(async () => {
+    if (!currentUser) return;
+
+    try {
+      /**
+       * Skip validation for the following cases:
+       * - Folder is shared with me
+       * - Folder is starred
+       */
+      const isSkipValidation = isSharedWithMeLocation || isStarredLocation;
+      const isValidateSecuredFolderPass = isSkipValidation ? true : await handleCheckIsUserCanDoThisAction(folderData.folder_id, "delete");
+      if (!isValidateSecuredFolderPass) return;
+
+      message.open({
+        type: "loading",
+        content: "Deleting folder...",
+        className: "font-archivo text-sm",
+        duration: 0,
+        key: "folder-delete-loading",
+      });
+
+      switch (true) {
+        case isSharedWithMeLocation:
+          await deleteSharedWithMeFolder(folderData.folder_id, currentUser.uid);
+          window.location.reload();
+          break;
+
+        case isStarredLocation:
+          await deleteStarredFolder(folderData.folder_id, currentUser.uid);
+          window.location.reload();
+          break;
+
+        default:
+          await handleDeleteRecursively({
+            folderId: folderData.folder_id,
+            folderName: folderData.folder_name,
+            parentFolderId: folderData.parent_folder_id,
+            rootFolderId: folderData.root_folder_id,
+            rootFolderOwnerUserId: folderData.root_folder_user_id,
+          });
+          break;
+      }
+
+      message.destroy("folder-delete-loading");
+      message.open({
+        type: "success",
+        content: "Folder deleted successfully.",
+        className: "font-archivo text-sm",
+        key: "folder-delete-success",
+        duration: 3,
+      });
+    } catch (error) {
+      console.error("Error confirming folder deletion: ", error instanceof Error ? error.message : "An unknown error occurred.");
+    }
+  }, [currentUser, folderData, isSharedWithMeLocation, isStarredLocation, handleDeleteRecursively, handleCheckIsUserCanDoThisAction]);
+
+  return { handleConfirmDeleteFolder };
+};
+
+export default useDeleteFolder;

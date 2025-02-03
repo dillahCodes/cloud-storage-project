@@ -4,6 +4,7 @@ import { message } from "antd";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { useCallback } from "react";
 import { StarredFolderData, StarredFolderDataSerialized } from "../folder";
+import useSecuredFolderFolderActions from "@/features/permissions/hooks/use-secured-folder-folder-actions";
 
 interface NotificationConfig {
   key: string;
@@ -21,11 +22,8 @@ interface NotificationParams {
  */
 const useAddFolderStarred = () => {
   const { currentUser } = auth;
+  const { handleCheckIsUserCanDoThisAction } = useSecuredFolderFolderActions();
 
-  /**
-   * Show a floating notification based on type and message
-   * @param {AddStaredFolderFloatingNotification} params - Notification parameters
-   */
   const showNotification = useCallback((params: NotificationParams) => {
     const { message: notificationMessage, type } = params;
 
@@ -86,6 +84,10 @@ const useAddFolderStarred = () => {
   const addFolderToStarred = useCallback(
     async (folderId: string, folderName: string): Promise<void> => {
       try {
+        // Check if the user can perform this action
+        const isValidateSecuredFolderPass = await handleCheckIsUserCanDoThisAction(folderId, "starred");
+        if (!isValidateSecuredFolderPass) return;
+
         // Notify the user that the process is starting
         showNotification({
           type: "loading",
@@ -135,7 +137,7 @@ const useAddFolderStarred = () => {
         console.error("Error adding folder to starred:", error instanceof Error ? error.message : "An unknown error occurred");
       }
     },
-    [currentUser, getStarredFolderData, showNotification]
+    [currentUser, getStarredFolderData, showNotification, handleCheckIsUserCanDoThisAction]
   );
 
   return { addFolderToStarred };

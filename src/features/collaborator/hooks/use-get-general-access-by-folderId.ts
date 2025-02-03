@@ -58,7 +58,7 @@ const handleGeneralAccessError = ({ error, setState }: HandleGeneralAccessErrorP
  * @prop {SetStateAction} setState The state setter to update the state with the fetched data.
  */
 const handleGeneralAccessSuccess = ({ data, setState }: HandleGeneralAccessSuccessParams) => {
-  const generalAccessSerialized = JSON.parse(JSON.stringify(data.data())) as GeneralAccessData;
+  const generalAccessSerialized = data.exists() ? (JSON.parse(JSON.stringify(data.data())) as GeneralAccessData) : null;
   setState({
     generalAccess: generalAccessSerialized,
     generalAccessStatus: "success",

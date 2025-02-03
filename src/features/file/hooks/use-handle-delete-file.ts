@@ -3,42 +3,26 @@ import { db, storage } from "@/firebase/firebase-services";
 import useDetectLocation from "@/hooks/use-detect-location";
 import { message } from "antd";
 import { deleteDoc, doc, increment, updateDoc } from "firebase/firestore";
-import { deleteObject, getMetadata, ref } from "firebase/storage";
+import { deleteObject, ref } from "firebase/storage";
 import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fileOptionsSelector, setActiveAction } from "../slice/file-options-slice";
-
-export interface FileCostumeMetadata {
-  "root-folder-owner": string;
-  "file-size": string;
-}
+import useSecuredFolderFileActions from "@/features/permissions/hooks/use-secured-folder-file-actions";
 
 /**
- * Deletes a file from the database and storage, and decrements the storage used by the file owner based on the file's custom metadata.
- *
- * @param {RootFileGetData | SubFileGetData} activeFileData The file data to delete.
- * @returns {Promise<void>} A promise that resolves when the file has been deleted and the storage has been decremented.
+ * Deletes a file from the Firestore database and the Firebase Storage bucket.
+ * @param {RootFileGetData | SubFileGetData} activeFileData - The data of the active file to be deleted.
+ * @returns {Promise<void>} A promise that resolves when the file is deleted.
  */
 export const handleDeleteFile = async (activeFileData: RootFileGetData | SubFileGetData) => {
   const fileDocRef = doc(db, "files", activeFileData.file_id);
   const fileStorageRef = ref(storage, `user-files/${activeFileData.file_id}/${activeFileData.file_name}`);
 
-  // Fetch metadata
-  const fileMetadata = await getMetadata(fileStorageRef);
-  const costumeMetadata = fileMetadata?.customMetadata;
-  const isValidCostumeMetadata = costumeMetadata?.["root-folder-owner"] && typeof costumeMetadata?.["file-size"] === "string";
+  const handleDecrementStorage = handleDecrementUserStorageUsage(activeFileData.root_folder_user_id, parseInt(activeFileData.file_size));
+  const handleDeleteFileMetadata = deleteDoc(fileDocRef);
+  const handleDeleteFileObject = deleteObject(fileStorageRef);
 
-  // decrement storage used by the file owner metadata
-  if (isValidCostumeMetadata) {
-    const fileCustomMetadata: FileCostumeMetadata = {
-      "root-folder-owner": costumeMetadata["root-folder-owner"],
-      "file-size": costumeMetadata["file-size"],
-    };
-    await handleDecrementUserStorageUsage(fileCustomMetadata["root-folder-owner"], parseInt(fileCustomMetadata["file-size"]));
-  }
-
-  // Perform deletion
-  await Promise.all([deleteDoc(fileDocRef), deleteObject(fileStorageRef)]);
+  await Promise.all([handleDecrementStorage, handleDeleteFileMetadata, handleDeleteFileObject]);
 };
 
 /**
@@ -46,7 +30,7 @@ export const handleDeleteFile = async (activeFileData: RootFileGetData | SubFile
  * @param {string} userId - The ID of the user whose storage data is to be updated.
  * @param {number} size - The size of the file to be deducted from the user's storage usage.
  */
-export const handleDecrementUserStorageUsage = async (userId: string, size: number) => {
+const handleDecrementUserStorageUsage = async (userId: string, size: number) => {
   const userStorageRef = doc(db, "users-storage", userId);
   await updateDoc(userStorageRef, {
     storageUsed: increment(-size),
@@ -71,6 +55,7 @@ const useHandleDeleteFile = () => {
   const { user } = useUser();
   const { activeFileData } = useSelector(fileOptionsSelector);
   const { isRecentlyViewedLocation } = useDetectLocation();
+  const { handleCheckIsUserCanDoThisAction } = useSecuredFolderFileActions();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -79,6 +64,9 @@ const useHandleDeleteFile = () => {
     if (!activeFileData || !user) return;
 
     try {
+      const isUserCanDoThisAction = handleCheckIsUserCanDoThisAction("dowload");
+      if (!isUserCanDoThisAction) return;
+
       setIsLoading(true);
       isRecentlyViewedLocation ? await handleDeleteRecentFile(activeFileData, user.uid) : await handleDeleteFile(activeFileData);
 
@@ -95,7 +83,7 @@ const useHandleDeleteFile = () => {
     } catch (error) {
       console.error("Error deleting file:", error instanceof Error ? error.message : "An unknown error occurred.");
     }
-  }, [activeFileData, dispatch, isRecentlyViewedLocation, user]);
+  }, [activeFileData, dispatch, isRecentlyViewedLocation, user, handleCheckIsUserCanDoThisAction]);
 
   return { handleCancel, handleConfirm, isLoading };
 };

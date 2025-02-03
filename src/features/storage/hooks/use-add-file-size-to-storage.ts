@@ -95,6 +95,7 @@ const useAddFileSizeToStorage = () => {
           className: "font-archivo text-sm",
           key: "not-enough-storage",
         });
+        setTimeout(() => message.destroy("not-enough-storage"), 3000);
         return false;
       }
 

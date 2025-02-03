@@ -1,4 +1,4 @@
-import { neoBrutalBorderVariants } from "@/theme/antd-theme";
+import { neoBrutalBorderVariants, NeoBrutalVariant } from "@/theme/antd-theme";
 import { Flex } from "antd";
 import classNames from "classnames";
 import { useEffect, useRef, useState } from "react";
@@ -14,6 +14,7 @@ interface WithFloatingElementProps {
   isOriginalComponentExcluded?: boolean; // if true, the original component will be included and triger oudside click will not work
   wraperClassName?: string;
   floatingElClassName?: string;
+  neobrutalType?: NeoBrutalVariant;
 }
 
 export const withDynamicFloatingElement = <OriginalComponentProps extends object>(Component: React.ComponentType<OriginalComponentProps>) => {
@@ -23,6 +24,7 @@ export const withDynamicFloatingElement = <OriginalComponentProps extends object
     isOriginalComponentExcluded,
     wraperClassName,
     floatingElClassName,
+    neobrutalType,
     ...originalProps
   }) => {
     const [isOpen, setIsOpen] = useState<boolean>(isFloatingOpen || false);
@@ -73,10 +75,10 @@ export const withDynamicFloatingElement = <OriginalComponentProps extends object
           <Flex
             ref={(ref) => (refs.current.floatingElementRef = ref as HTMLDivElement)}
             className={classNames(
-              "absolute max-h-[130px] overflow-y-auto bg-white text-black left-0 right-0 border-2 border-black  bottom-0  translate-y-[calc(100%+0.5rem)]",
+              "absolute max-h-[130px] w-fit overflow-y-auto bg-white text-black left-0 right-0 border-2 border-black  bottom-0  translate-y-[calc(100%+0.5rem)]",
               floatingElClassName
             )}
-            style={neoBrutalBorderVariants.small}
+            style={neoBrutalBorderVariants[neobrutalType || "small"]}
           >
             {floatingContent}
           </Flex>

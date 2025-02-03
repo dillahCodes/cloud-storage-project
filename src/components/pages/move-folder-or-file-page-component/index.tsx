@@ -1,14 +1,12 @@
 import useDekstopUserNotAllowed from "@/features/move-folder-or-file/hooks/use-dekstop-user-not-allowed";
 import useGetFilesForMoveFolderOrFile from "@/features/move-folder-or-file/hooks/use-get-files-for-move-folder-or-file";
 import useGetFoldersForMoveFolderOrFile from "@/features/move-folder-or-file/hooks/use-get-folders-for-move-folder-or-file";
-import useGetMobileMovePermissionFolder from "@/features/move-folder-or-file/hooks/use-get-mobile-move-permission-folder";
 import useGetMoveMobileStateFromLocalStorage from "@/features/move-folder-or-file/hooks/use-get-move-mobile-state-from-localstorage";
 import useGetParentFolderData from "@/features/move-folder-or-file/hooks/use-get-parent-folder-data-move-folder-or-file";
 import useListenMovePageMobileLocationChange from "@/features/move-folder-or-file/hooks/use-listen-move-page-mobile-location-change";
-import useMobileMovePermissionPage from "@/features/move-folder-or-file/hooks/use-mobile-move-permission-page";
 import useSaveMobileMoveStateToLocalStorage from "@/features/move-folder-or-file/hooks/use-save-mobile-move-state-to-localstorage";
-import { mobileMoveSelector } from "@/features/move-folder-or-file/slice/mobile-move-slice";
 import { moveFoldersAndFilesDataSelector } from "@/features/move-folder-or-file/slice/move-folders-and-files-data-slice";
+import useGetMobileParentFolderPermissions from "@/features/permissions/hooks/use-get-mobile-move-parent-folder-permissions";
 import useDetectLocation from "@/hooks/use-detect-location";
 import useMobileHeaderTitle from "@/hooks/use-mobile-header-title";
 import FolderEmpty from "@components/layout/folder/empty";
@@ -34,12 +32,7 @@ const MoveFolderOrFilePageComponent = () => {
   const isEmpty = useMemo(() => (!foldersData || foldersData.length === 0) && (!filesData || filesData.length === 0), [foldersData, filesData]);
 
   /**
-   * mobile move state
-   */
-  const { moveFromLocationPath } = useSelector(mobileMoveSelector);
-
-  /**
-   * dektop or tablet device not allowed open the move page
+   * dektop  device not allowed open the move page
    */
   useDekstopUserNotAllowed();
 
@@ -65,27 +58,15 @@ const MoveFolderOrFilePageComponent = () => {
   useGetParentFolderData();
 
   /**
-   * Get folder permisiion
+   * Get parent folder move permissions
    */
-  const { isGetPermissionSuccess, permissions } = useGetMobileMovePermissionFolder();
-
-  /**
-   * validate permission
-   */
-  useMobileMovePermissionPage({ isGetPermissionSuccess, permissions, moveFromLocationPath });
-
-  /**
-   * conditions can get file and folder
-   */
-  const canFetchFileAndFolder = useMemo(() => {
-    return (isGetPermissionSuccess && permissions.canCRUD) || isRootMoveFolderOrFileLocation;
-  }, [isGetPermissionSuccess, permissions.canCRUD, isRootMoveFolderOrFileLocation]);
+  const { isFetchPermissionSuccess } = useGetMobileParentFolderPermissions();
 
   /**
    * get folders and files
    */
-  useGetFoldersForMoveFolderOrFile({ shouldFetch: canFetchFileAndFolder });
-  useGetFilesForMoveFolderOrFile({ shouldFetch: canFetchFileAndFolder });
+  useGetFoldersForMoveFolderOrFile({ shouldFetch: isFetchPermissionSuccess || isRootMoveFolderOrFileLocation });
+  useGetFilesForMoveFolderOrFile({ shouldFetch: isFetchPermissionSuccess || isRootMoveFolderOrFileLocation });
 
   return (
     <MainLayout withBreadcrumb={false} showAddButton={false} showPasteButton>

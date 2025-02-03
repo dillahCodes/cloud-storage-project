@@ -2,11 +2,12 @@ import getUserDataInDb from "@/features/auth/get-user-data-in-db";
 import useUser from "@/features/auth/hooks/use-user";
 import useDrawer from "@/hooks/use-drawer";
 import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
-import translateEpochToDate from "@/util/convert-epoch-to-date";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import getFolderById from "../get-folder-by-id";
 import useGetFolderById from "./use-get-folder-byid";
+import { message } from "antd";
+import translateEpochToDate from "@/util/translateEpochToDate";
 
 interface FolderDetailsData {
   folderName: string;
@@ -58,12 +59,35 @@ const useFolderDetails = () => {
   const { isDesktopDevice } = useGetClientScreenWidth();
   const { folderId } = useParams();
 
+  /**
+   * dektop drawer
+   */
   const { drawerState } = useDrawer();
   const { desktopDrawerFolderId } = drawerState;
 
-  const activeFolderId = isDesktopDevice ? desktopDrawerFolderId || folderId : folderId;
+  /**
+   * crate current active folderId
+   * ant use it for fetching folder data
+   */
+  const activeFolderId = useMemo(() => {
+    if (isDesktopDevice) {
+      return desktopDrawerFolderId || folderId;
+    } else {
+      return folderId;
+    }
+  }, [desktopDrawerFolderId, folderId, isDesktopDevice]);
 
+  /**
+   * fetch folder details data
+   */
   const { folderData, status } = useGetFolderById(activeFolderId);
+
+  /**
+   * not found condition
+   */
+  const isFolderDataNotFound = useMemo(() => {
+    return !folderData && status === "succeeded";
+  }, [folderData, status]);
 
   const isMyFolder = folderData?.owner_user_id === user?.uid;
   const isMyRootFolder = folderData?.root_folder_user_id === user?.uid;
@@ -81,9 +105,11 @@ const useFolderDetails = () => {
 
   const handleBack = () => navigate(-1);
 
+  /**
+   * handle create folder details data
+   */
   useEffect(() => {
     if (!folderData) return;
-
     const fetchFolderDetails = async () => {
       const folderOwnerName = await getFolderOwnerName(folderData.owner_user_id, isMyFolder);
       const folderLocationName = await getFolderLocationName(folderData.parent_folder_id, isSubFolder);
@@ -105,6 +131,20 @@ const useFolderDetails = () => {
 
     fetchFolderDetails();
   }, [folderData, isMyFolder, isSubFolder, isFolderModified, isModifiedByMe]);
+
+  /**
+   * handle folder details not found
+   */
+  useEffect(() => {
+    if (isFolderDataNotFound) {
+      message.open({
+        type: "error",
+        content: "Folder details not found",
+        className: "font-archivo text-sm",
+      });
+      navigate("/storage/my-storage");
+    }
+  }, [isFolderDataNotFound, navigate]);
 
   return { folderDetailsData, handleNavigateToFolderLocation, handleBack, folderStatus: status, folderData, activeFolderId };
 };

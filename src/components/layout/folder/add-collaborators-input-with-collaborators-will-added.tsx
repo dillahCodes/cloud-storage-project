@@ -5,10 +5,10 @@ import { Flex } from "antd";
 import React, { useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import AddCollaboratorsUserComponent from "./add-collaborators-user-component";
-import useGetCollaboratorsByNameOrEmail from "@/features/folder/hooks/use-get-collaborators-by-name-or-email";
+import useGetCollaboratorsByNameOrEmail from "@/features/collaborator/hooks/use-get-collaborators-by-name-or-email";
 import UsersFloatingDataList from "./users-floating-list";
-import useAddCollaboratorsSelectedToState from "@/features/folder/hooks/use-add-collaborators-selected-to-state";
 import { modalManageAccessContentSelector } from "@/features/collaborator/slice/modal-manage-access-content-slice";
+import useAddCollaboratorsSelectedToState from "@/features/collaborator/hooks/use-add-collaborators-selected-to-state";
 
 const FlexWithDynamicFloatingElement = withDynamicFloatingElement(Flex);
 

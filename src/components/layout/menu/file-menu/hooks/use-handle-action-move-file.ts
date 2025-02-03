@@ -1,5 +1,4 @@
 import { fileOptionsSelector } from "@/features/file/slice/file-options-slice";
-import { folderPermissionSelector } from "@/features/folder/slice/folder-permission-slice";
 import { parentFolderSelector } from "@/features/folder/slice/parent-folder-slice";
 import {
   dekstopMoveSetFileData,
@@ -13,6 +12,7 @@ import {
   setMobileMoveFileType,
   setMobileMoveFromLocationPath,
 } from "@/features/move-folder-or-file/slice/mobile-move-slice";
+import useSecuredFolderFileActions from "@/features/permissions/hooks/use-secured-folder-file-actions";
 import useDetectLocation from "@/hooks/use-detect-location";
 import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
 import { message } from "antd";
@@ -27,8 +27,9 @@ const useHandleActionMoveFile = () => {
 
   const parentFolderState = useSelector(parentFolderSelector);
   const { activeFileData } = useSelector(fileOptionsSelector);
-  const { isMobileDevice, isDesktopDevice, isTabletDevice } = useGetClientScreenWidth();
-  const { subFolderPermission } = useSelector(folderPermissionSelector);
+
+  const { isDesktopDevice } = useGetClientScreenWidth();
+  const { handleCheckIsUserCanDoThisAction } = useSecuredFolderFileActions();
 
   const { isSubSharedWithMeLocation, isMystorageLocation, isSubMyStorageLocation } = useDetectLocation();
 
@@ -70,16 +71,6 @@ const useHandleActionMoveFile = () => {
    * handle for mobile device
    */
   const prepareForMobileDevice = useCallback(() => {
-    if (subFolderPermission && !subFolderPermission.canCRUD) {
-      message.open({
-        type: "error",
-        content: "You don't have permission to move this file.",
-        className: "font-archivo text-sm",
-        key: "file-move-error-message",
-      });
-      return;
-    }
-
     if (!activeFileData) {
       message.open({
         type: "error",
@@ -116,22 +107,12 @@ const useHandleActionMoveFile = () => {
         className: "font-archivo text-sm",
       });
     }
-  }, [location, subFolderPermission, dispatch, activeFileData, navigate, handleNavigateList]);
+  }, [location, dispatch, activeFileData, navigate, handleNavigateList]);
 
   /**
    * handle for desktop device
    */
   const prepareForDekstopDevice = useCallback(() => {
-    if (subFolderPermission && !subFolderPermission.canCRUD) {
-      message.open({
-        type: "error",
-        content: "You don't have permission to move this file.",
-        className: "font-archivo text-sm",
-        key: "file-move-error-message",
-      });
-      return;
-    }
-
     if (!activeFileData) {
       message.open({
         type: "error",
@@ -157,15 +138,18 @@ const useHandleActionMoveFile = () => {
         fileType: activeFileData.file_type,
       })
     );
-  }, [dispatch, subFolderPermission, activeFileData, parentFolderState]);
+  }, [dispatch, activeFileData, parentFolderState]);
 
   /**
    * triger when button file menu (move) click
    */
   const handleMoveFile = useCallback(() => {
-    if (isDesktopDevice || isTabletDevice) prepareForDekstopDevice();
-    if (isMobileDevice) prepareForMobileDevice();
-  }, [isDesktopDevice, isTabletDevice, isMobileDevice, prepareForDekstopDevice, prepareForMobileDevice]);
+    const validatePermission = handleCheckIsUserCanDoThisAction("move");
+    if (!validatePermission) return;
+
+    if (isDesktopDevice) prepareForDekstopDevice();
+    else prepareForMobileDevice();
+  }, [isDesktopDevice, prepareForDekstopDevice, prepareForMobileDevice, handleCheckIsUserCanDoThisAction]);
 
   return { handleMoveFile };
 };

@@ -1,7 +1,7 @@
 import useUser from "@/features/auth/hooks/use-user";
 import { GeneralAccessRole } from "@/features/collaborator/collaborator";
+import { addCollaboratorsMenu } from "@/features/collaborator/collaborator-menu";
 import { modalManageAccessContentSelector } from "@/features/collaborator/slice/modal-manage-access-content-slice";
-import { addCollaboratorsMenu } from "@/features/folder/collaborator-menu";
 import { Flex, Typography } from "antd";
 import classNames from "classnames";
 import { useState } from "react";

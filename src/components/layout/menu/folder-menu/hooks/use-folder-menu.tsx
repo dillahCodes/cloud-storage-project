@@ -68,6 +68,13 @@ const useFolderOptionsMenu = (folderData: RootFolderGetData | SubFolderGetData) 
     setFolderMenuList((prevMenuList) => updateMenuListVisibility(prevMenuList, key));
   };
 
+  /**
+   * Flatten the menu items recursively.
+   * This function takes a nested menu list and returns a flat list of menu items.
+   *
+   * @param menuList - The array of menu items to flatten.
+   * @returns The flattened array of menu items.
+   */
   const flattenMenuItems = useCallback((menuList: MenuItem[]): MenuItem[] => {
     return menuList.reduce<MenuItem[]>((acc, item) => {
       acc.push(item);

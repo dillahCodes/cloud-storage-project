@@ -8,9 +8,9 @@ import { useDispatch, useSelector } from "react-redux";
 import AddCollaboratorsInputWithCollaboratorsWillAdded from "./add-collaborators-input-with-collaborators-will-added";
 import AddCollaboratorsUsersRoleList from "./add-collaborators-users-role-list";
 import AddCollaboratorsUserRoleDropDownWithDynamicFloatingElement from "./add-collaboratos-user-role-dropdown";
-import useAddCollaboratorsSelectedToDb from "@/features/folder/hooks/use-add-collaborators-selected-to-db";
 import { GeneralAccessRole } from "@/features/collaborator/collaborator";
 import { modalManageAccessContentSelector } from "@/features/collaborator/slice/modal-manage-access-content-slice";
+import useAddCollaboratorsSelectedToDb from "@/features/collaborator/hooks/use-add-collaborators-selected-to-db";
 
 interface WithMessageState {
   withMessage: boolean;

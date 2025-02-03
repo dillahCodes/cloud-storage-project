@@ -33,12 +33,18 @@ const useGetParentFolderData = () => {
 
   const isParentLoading = useMemo(() => parentFolderStatus === "loading", [parentFolderStatus]);
 
+  /**
+   * handle get and update parentId
+   */
   const handleGetAndUpdateParentId = useCallback(() => {
     const newParentId = searchParams.get("parentId") || null;
     if (newParentId === parentId) return;
     setParentId(newParentId);
   }, [parentId, searchParams]);
 
+  /**
+   * handle fetch parent folder
+   */
   const handleFetch = useCallback(async () => {
     try {
       dispatch(setMoveParentFolderStatus("loading"));
@@ -65,6 +71,9 @@ const useGetParentFolderData = () => {
     }
   }, [parentId, dispatch]);
 
+  /**
+   * handle parent folder not found
+   */
   useEffect(() => {
     if (!moveFromLocationPath || isParentLoading || isMoveFolderOrFileLocation) return;
     if (isMobileDevice) navigate(moveFromLocationPath);
@@ -76,6 +85,9 @@ const useGetParentFolderData = () => {
     });
   }, [isMobileDevice, moveFromLocationPath, navigate, isParentLoading, isMoveFolderOrFileLocation]);
 
+  /**
+   * handle fetch in mount
+   */
   useEffect(() => {
     handleGetAndUpdateParentId();
   }, [handleGetAndUpdateParentId]);

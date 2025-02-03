@@ -10,13 +10,15 @@ import { Header } from "antd/es/layout/layout";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoMdClose } from "react-icons/io";
 import { IoSearchSharp } from "react-icons/io5";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import MobileProfileHeader from "./mobile-profile-header";
+import { setIsSearchbarOpen } from "@/features/search-folder-or-file/slice/search-bar-slice";
 
 const { Text } = Typography;
 
 const MobileHeder = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const { isMoveFolderOrFileLocation } = useDetectLocation();
@@ -27,6 +29,7 @@ const MobileHeder = () => {
   const { handleCancelMove } = useMobileMoveNavigate();
 
   const handleNavigateToProfile = () => navigate("/storage/profile", { replace: true });
+  const handleOpenSearchBar = () => dispatch(setIsSearchbarOpen(true));
 
   return (
     <Header className="">
@@ -71,7 +74,7 @@ const MobileHeder = () => {
            * profile and search button
            */
           <Flex gap="middle" className="h-full pr-4" align="center">
-            <div className="h-full flex items-center text-2xl">
+            <div className="h-full flex items-center text-2xl" onClick={handleOpenSearchBar}>
               <IoSearchSharp />
             </div>
 

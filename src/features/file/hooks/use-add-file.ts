@@ -122,6 +122,7 @@ const handleCreateFileData = (params: HandleCreateFileData) => {
     const fileData: SubFileCreateData = {
       file_id: fileId,
       owner_user_id: user.uid,
+      root_folder_id: parentFolderData.root_folder_id,
       root_folder_user_id: parentFolderData.root_folder_user_id,
       parent_folder_id: parentFolderData.folder_id,
       file_name: selectedFile.name,
@@ -136,6 +137,7 @@ const handleCreateFileData = (params: HandleCreateFileData) => {
   const fileData: RootFileCreateData = {
     file_id: fileId,
     owner_user_id: user.uid,
+    root_folder_id: null,
     root_folder_user_id: user.uid,
     parent_folder_id: null,
     file_name: selectedFile.name,
