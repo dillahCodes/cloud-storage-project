@@ -34,7 +34,8 @@ const AddCollaboratorsInputWithCollaboratorsWillAdded: React.FC = () => {
    * validations
    */
   const isCollaboratosValid = collaboratorsFetched && collaboratorsFetched.length > 0;
-  const isWrap: boolean = (collaboratosListWillAdd && collaboratosListWillAdd?.length > 1) || inputValue.length >= 6 ? true : false;
+  const isWrap: boolean =
+    (collaboratosListWillAdd && collaboratosListWillAdd?.length > 1) || inputValue.length >= 6 ? true : false;
 
   /*
    * handle input change

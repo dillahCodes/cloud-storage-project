@@ -32,6 +32,7 @@ import { modalManageAccessContentSlice } from "@/features/collaborator/slice/mod
 import { detailFolderPermissionSlice } from "@/features/permissions/slice/details-folder-permissions";
 import { searchBarSlice } from "@/features/search-folder-or-file/slice/search-bar-slice";
 import { resultSearchSlice } from "@/features/search-folder-or-file/slice/result-search-slice";
+import { selectedSearchResultSlice } from "@/features/search-folder-or-file/slice/selected-search-result-selector";
 
 const { createReduxHistory, routerMiddleware, routerReducer } = createReduxHistoryContext({
   history: createBrowserHistory(),
@@ -78,6 +79,7 @@ export const store = configureStore({
     // search state
     searchBar: searchBarSlice.reducer,
     resultSearch: resultSearchSlice.reducer,
+    selectedSearchResult: selectedSearchResultSlice.reducer,
 
     // mapping type
     mappingFolderType: mappingFolderTypeSlice.reducer,

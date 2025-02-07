@@ -12,6 +12,7 @@ interface LocationFilterProps {
   selectedLocationName: SearchState["selectedLocationName"];
   handleSetSearchLocation: (locationName: SearchState["selectedLocationName"]) => void;
 }
+
 export const LocationFilter: React.FC<LocationFilterProps> = ({ selectedLocationName, handleSetSearchLocation }) => {
   return (
     <Flex className="bg-[#FFB6C1] rounded-sm" style={neoBrutalBorderVariants.small}>
@@ -22,14 +23,14 @@ export const LocationFilter: React.FC<LocationFilterProps> = ({ selectedLocation
         wraperClassName="z-20"
         floatingElClassName="rounded-sm w-fit"
         floatingContent={
-          <Flex className="w-[170px] p-1 no-scrollbar overflow-y-auto rounded-sm" vertical>
+          <Flex className="w-[170px] p-1 no-scrollbar overflow-y-auto rounded-sm h-fit" vertical>
             {LOCATION_CATEGORY.map((item) => (
               <Flex
                 key={item.name}
                 align="center"
                 gap="middle"
                 onClick={() => handleSetSearchLocation(item.name)}
-                className={classNames("p-1", { "bg-[#ff87a6]": item.name === selectedLocationName })}
+                className={classNames("p-1 hover:bg-[#FFB6C1]", { "bg-[#ff87a6]": item.name === selectedLocationName })}
               >
                 <Text className="text-base">
                   <RenderSearchLocationIcon name={item.name} />

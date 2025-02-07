@@ -16,14 +16,14 @@ const { Text } = Typography;
 const UsersFloatingDataList: React.FC<UsersFloatingDataListProps> = ({ usersData, handleClick, withBorder = true }) => {
   return (
     <Flex
-      className={classNames("max-h-[200px] rounded-sm  p-2", {
+      className={classNames("max-h-[200px]  rounded-sm p-1", {
         "border-2 border-black": withBorder,
       })}
       vertical
       style={withBorder ? neoBrutalBorderVariants.small : {}}
     >
       {usersData.map((user) => (
-        <Flex key={user.uid} align="center" gap="middle" className="py-1" onClick={() => handleClick(user)}>
+        <Flex key={user.uid} align="center" gap="middle" onClick={() => handleClick(user)}>
           <div>{user.photoURL ? <AvatarWithUserPhoto src={user.photoURL} size={30} /> : <AvatarOnlyIcon size={30} />}</div>
 
           <Flex vertical>

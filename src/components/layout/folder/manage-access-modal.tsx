@@ -83,6 +83,17 @@ const ManageAccessModalComponent: React.FC = () => {
       </Flex>
     );
 
+  const UserListFloatingComponent = () => {
+    return isCollaboratorValid ? (
+      <UsersFloatingDataList
+        handleClick={handleAddCollaborator}
+        withBorder={false}
+        folderId={folderData?.folder_id}
+        usersData={collaboratorsFetched}
+      />
+    ) : null;
+  };
+
   return (
     <Flex className="w-full" vertical gap="middle">
       <Text className="text-lg line-clamp-1 w-full">Share "{folderData?.folder_name}"</Text>
@@ -90,17 +101,8 @@ const ManageAccessModalComponent: React.FC = () => {
         isFloatingOpen={isCollaboratorValid}
         onChange={handleInputSearchUserChange}
         value={inputSearchUser}
-        floatingElClassName="z-10"
-        floatingContent={
-          isCollaboratorValid ? (
-            <UsersFloatingDataList
-              handleClick={handleAddCollaborator}
-              withBorder={false}
-              folderId={folderData?.folder_id}
-              usersData={collaboratorsFetched}
-            />
-          ) : null
-        }
+        floatingElClassName="z-10 w-full"
+        floatingContent={<UserListFloatingComponent />}
         className="w-full border-2  border-black rounded-sm placeholder:text-sm placeholder:capitalize placeholder:font-archivo"
         name="email"
         type="email"
@@ -117,7 +119,11 @@ const ManageAccessModalComponent: React.FC = () => {
 
       {/* secure folder */}
       {!dontShowSecuredFolder && (
-        <SecureFolder isChecked={isSecuredFolderActive} isLoading={isSecuredFolderDataLoading} handleToggle={handleToggleSecuredFolder} />
+        <SecureFolder
+          isChecked={isSecuredFolderActive}
+          isLoading={isSecuredFolderDataLoading}
+          handleToggle={handleToggleSecuredFolder}
+        />
       )}
 
       <Flex className="w-full" gap="small" justify="space-between">

@@ -17,7 +17,11 @@ interface SortCategoryProps {
   sortCategoryMenuItems: ReadonlyArray<sortCategoryMenuItemsType>;
   handleSetSortCategory: (name: SORT_CATEGORY_NAME) => void;
 }
-export const SortCategory: React.FC<SortCategoryProps> = ({ selectedSortCategoryName, sortCategoryMenuItems, handleSetSortCategory }) => {
+export const SortCategory: React.FC<SortCategoryProps> = ({
+  selectedSortCategoryName,
+  sortCategoryMenuItems,
+  handleSetSortCategory,
+}) => {
   return (
     <Flex className="bg-[#FFB6C1] rounded-sm" style={neoBrutalBorderVariants.small}>
       <Text className="text-xl p-1 border-2 border-black border-r-0">
@@ -34,7 +38,7 @@ export const SortCategory: React.FC<SortCategoryProps> = ({ selectedSortCategory
                 align="center"
                 gap="middle"
                 onClick={() => handleSetSortCategory(item.name)}
-                className={classNames("p-1", { "bg-[#ff87a6]": item.name === selectedSortCategoryName })}
+                className={classNames("p-1 hover:bg-[#FFB6C1]", { "bg-[#ff87a6]": item.name === selectedSortCategoryName })}
               >
                 <Text className="text-base">
                   <RenderSortCategoryIcon name={item.name} />

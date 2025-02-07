@@ -7,7 +7,13 @@ import { RiArrowDownSFill } from "react-icons/ri";
 const { Text } = Typography;
 const AddCollaboratorsUserRoleDropDown: React.FC<{ selectedRole: GeneralAccessRole }> = ({ selectedRole }) => {
   return (
-    <Flex className="border-2 border-black w-full  min-h-[35px]" justify="center" align="center" gap="small" style={neoBrutalBorderVariants.small}>
+    <Flex
+      className="border-2 border-black w-full  min-h-[35px]"
+      justify="center"
+      align="center"
+      gap="small"
+      style={neoBrutalBorderVariants.small}
+    >
       <Text className="text-sm font-archivo capitalize">{selectedRole}</Text>
       <Text className="text-sm font-archivo font-bold">
         <RiArrowDownSFill />

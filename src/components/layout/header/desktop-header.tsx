@@ -3,12 +3,12 @@ import { messageSelector } from "@/features/message/slice/message-slice";
 import useDrawer from "@/hooks/use-drawer";
 import useSider from "@/hooks/use-sider";
 import { themeColors } from "@/theme/antd-theme";
-import Searchbar from "@components/ui/searchbar";
 import { Badge, Flex } from "antd";
 import { Header } from "antd/es/layout/layout";
 import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
 import { MdOutlineNotifications } from "react-icons/md";
 import { useSelector } from "react-redux";
+import DekstopSearchbar from "../searchbar/desktop-searchbar";
 import DesktopProfileHeader from "./desktop-profile-header";
 
 const DekstopHeader = () => {
@@ -24,16 +24,19 @@ const DekstopHeader = () => {
 
   return (
     <Header className="">
-      <Flex className="w-full h-[58px] border-b-2 px-5 bg-transparent border-black" align="center" gap="small" justify="space-between">
+      <Flex
+        className="w-full h-[58px] border-b-2 px-5 bg-transparent border-black"
+        align="center"
+        gap="small"
+        justify="space-between"
+      >
         <Flex gap="middle" align="center" className="h-full w-full">
           <div className="h-full flex items-center  text-2xl  pr-3  cursor-pointer" onClick={toggleSider}>
             {siderState.isSiderOpen ? <GoSidebarCollapse /> : <GoSidebarExpand />}
           </div>
 
           {/* searchbar */}
-          <div className="w-2/4 max-w-[400px]">
-            <Searchbar />
-          </div>
+          <DekstopSearchbar />
 
           <Flex align="center" gap="large" className="ml-auto">
             <Badge

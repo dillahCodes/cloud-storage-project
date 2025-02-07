@@ -51,7 +51,9 @@ const useFolderOptionsMenu = (folderData: RootFolderGetData | SubFolderGetData) 
 
       createMenuItem("organize", <MdFolderOpen />, "Organize", undefined, false, [
         createMenuItem("move", <LuFolderOutput />, "Move", () => handleMoveFolder(folderData.folder_id, folderData.folder_name)),
-        createMenuItem("starred", <PiFolderStarFill />, "Starred", () => addFolderToStarred(folderData.folder_id, folderData.folder_name)),
+        createMenuItem("starred", <PiFolderStarFill />, "Starred", () =>
+          addFolderToStarred(folderData.folder_id, folderData.folder_name)
+        ),
       ]),
 
       createMenuItem("folder information", <LuInfo />, "Folder Information", undefined, false, [
@@ -86,19 +88,12 @@ const useFolderOptionsMenu = (folderData: RootFolderGetData | SubFolderGetData) 
   }, []);
 
   const menuWillRender = useMemo(() => {
-    // Flatten the menu list to access nested keys
-    if (isSharedWithMeLocation) {
-      const flattenedMenu = flattenMenuItems(folderMenuList);
-      return flattenedMenu.filter((item) => ["delete", "starred"].includes(item.key));
+    if (isSharedWithMeLocation || isStarredLocation) {
+      const filteredMenuList = flattenMenuItems(folderMenuList).filter((item) => item.key === "delete");
+      return filteredMenuList;
     }
-
-    if (isStarredLocation) {
-      const flattenedMenu = flattenMenuItems(folderMenuList);
-      return flattenedMenu.filter((item) => ["delete"].includes(item.key));
-    }
-
     return folderMenuList;
-  }, [folderMenuList, isSharedWithMeLocation, flattenMenuItems, isStarredLocation]);
+  }, [folderMenuList, isSharedWithMeLocation, isStarredLocation, flattenMenuItems]);
 
   // Close all children menus and reset selection
   const handleCloseAllChildren = () => setFolderMenuList((prevMenuList) => closeAllChildren(prevMenuList));

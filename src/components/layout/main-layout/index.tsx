@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import ModalFolderPermissionDenied from "../modal/modal-folder-permission-denied";
 import { DektopMainLayoutWithOverlayLoading } from "./desktop-main-layout";
 import { MobileMainLayoutWithOverlayLoading } from "./mobile-main-layout";
+import FolderOrFileFindOverlay from "../folder-or-file-overlay/folder-or-file-find-overlay";
 
 export interface MainLayoutProps {
   children: React.ReactNode;
@@ -15,46 +16,61 @@ export interface MainLayoutProps {
   withBreadcrumb?: boolean;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children, showAddButton, withFooter, withBreadcrumb = true, showPasteButton }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({
+  children,
+  showAddButton,
+  withFooter,
+  withBreadcrumb = true,
+  showPasteButton,
+}) => {
   const moveMobileSelector = useSelector(mobileMoveSelector);
   const isMoveFile = useMemo(() => !!moveMobileSelector.fileId, [moveMobileSelector.fileId]);
   const isMobileMoveLoading = useMemo(() => moveMobileSelector.moveStatus === "loading", [moveMobileSelector.moveStatus]);
 
   const moveDektopSelector = useSelector(dekstopMoveSelector);
   const isDekstopMoveFile = useMemo(() => !!moveDektopSelector.fileId, [moveDektopSelector.fileId]);
-  const isDektopMoveLoading = useMemo(() => moveDektopSelector.dekstopMoveStatus === "loading", [moveDektopSelector.dekstopMoveStatus]);
+  const isDektopMoveLoading = useMemo(
+    () => moveDektopSelector.dekstopMoveStatus === "loading",
+    [moveDektopSelector.dekstopMoveStatus]
+  );
 
   const renderMobileMoveMessage = useMemo(() => (isMoveFile ? "Moving File..." : "Moving Folder..."), [isMoveFile]);
   const renderDektopMoveMessage = useMemo(() => (isDekstopMoveFile ? "Moving File..." : "Moving Folder..."), [isDekstopMoveFile]);
 
   const { isMobileDevice, isTabletDevice } = useGetClientScreenWidth();
 
-  return isMobileDevice || isTabletDevice ? (
-    <MobileMainLayoutWithOverlayLoading
-      loadingText={renderMobileMoveMessage}
-      opacity={0.7}
-      showLoading={isMobileMoveLoading}
-      zIndex={40}
-      showAddButton={showAddButton}
-      withBreadcrumb={withBreadcrumb}
-      withFooter={withFooter}
-      showPasteButton={showPasteButton}
-    >
-      <ModalFolderPermissionDenied />
-      {children}
-    </MobileMainLayoutWithOverlayLoading>
-  ) : (
-    <DektopMainLayoutWithOverlayLoading
-      loadingText={renderDektopMoveMessage}
-      opacity={0.7}
-      showLoading={isDektopMoveLoading}
-      zIndex={40}
-      withBreadcrumb={withBreadcrumb}
-      withFooter={withFooter}
-    >
-      <ModalFolderPermissionDenied />
-      {children}
-    </DektopMainLayoutWithOverlayLoading>
+  return (
+    <>
+      {isMobileDevice || isTabletDevice ? (
+        <MobileMainLayoutWithOverlayLoading
+          loadingText={renderMobileMoveMessage}
+          opacity={0.7}
+          showLoading={isMobileMoveLoading}
+          zIndex={40}
+          showAddButton={showAddButton}
+          withBreadcrumb={withBreadcrumb}
+          withFooter={withFooter}
+          showPasteButton={showPasteButton}
+        >
+          <ModalFolderPermissionDenied />
+          <FolderOrFileFindOverlay />
+          {children}
+        </MobileMainLayoutWithOverlayLoading>
+      ) : (
+        <DektopMainLayoutWithOverlayLoading
+          loadingText={renderDektopMoveMessage}
+          opacity={0.7}
+          showLoading={isDektopMoveLoading}
+          zIndex={40}
+          withBreadcrumb={withBreadcrumb}
+          withFooter={withFooter}
+        >
+          <ModalFolderPermissionDenied />
+          <FolderOrFileFindOverlay />
+          {children}
+        </DektopMainLayoutWithOverlayLoading>
+      )}
+    </>
   );
 };
 

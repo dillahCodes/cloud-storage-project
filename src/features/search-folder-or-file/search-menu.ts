@@ -1,3 +1,5 @@
+import { FileSearchResult, FolderResultSearch } from "./search";
+
 export const LOCATION_CATEGORY = [
   {
     name: "my-storage",
@@ -14,10 +16,6 @@ export const LOCATION_CATEGORY = [
   {
     name: "starred",
     label: "Starred",
-  },
-  {
-    name: "notifications",
-    label: "Notifications",
   },
 ] as const;
 export type LOCATION_NAME = (typeof LOCATION_CATEGORY)[number]["name"];
@@ -41,7 +39,6 @@ export const SEARCH_CATEGORY = {
   starred: {
     category: [{ name: "folder", label: "Folder" }],
   },
-  notifications: { category: null },
 } as const;
 type SearchCategoryType = typeof SEARCH_CATEGORY;
 type ExtractNames<T> = T extends { category: readonly { name: infer N }[] } ? N : never;
@@ -61,12 +58,15 @@ export const SORT_CATEGORY = {
       { name: "last-modified", label: "Last Modified" },
     ],
   },
-  notifications: {
-    category: [
-      { name: "notif-name", label: "by name" },
-      { name: "notif-email", label: "by email" },
-    ],
-  },
 } as const;
 type SortCategoryName = typeof SORT_CATEGORY;
 export type SORT_CATEGORY_NAME = ExtractNames<SortCategoryName[keyof SortCategoryName]>;
+
+/**
+ * Type Guard Functions
+ */
+const isFileResult = (item: any): item is FileSearchResult => item?.resultType === "file" && typeof item.file_id === "string";
+const isFolderResult = (item: any): item is FolderResultSearch =>
+  item?.resultType === "folder" && typeof item.folder_id === "string";
+
+export { isFileResult, isFolderResult };

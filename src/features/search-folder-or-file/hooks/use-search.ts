@@ -1,15 +1,19 @@
 import { debounce } from "lodash";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setSearchInputValue } from "../slice/search-bar-slice";
 
 const useSearch = () => {
   const dispatch = useDispatch();
+  const [inputValue, setInputValue] = useState<string>("");
 
   /**
    * handle input change and run debounced function
    */
-  const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => debouncedFn(event.target.value);
+  const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
+    debouncedFn(event.target.value);
+  };
 
   /**
    * debounced function for dispatch event in 300ms after user stop typing
@@ -27,7 +31,7 @@ const useSearch = () => {
     return () => debouncedFn.cancel();
   }, [debouncedFn]);
 
-  return { handleSearchInputChange };
+  return { handleSearchInputChange, inputValue, setInputValue };
 };
 
 export default useSearch;

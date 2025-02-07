@@ -44,9 +44,10 @@ const useSortCategoryFileFileName = () => {
     if (selectedSortCategoryName === "file-name") sortFilesByName();
   }, [selectedSortCategoryName, sortFilesByName]);
 
-  /** Effect to update ref when data changes */
+  /** Effect to update ref when data changes and reset ref if data is empty */
   useEffect(() => {
     if (data && data.length > 0) currentDataRef.current = data;
+    else currentDataRef.current = null;
   }, [data]);
 };
 

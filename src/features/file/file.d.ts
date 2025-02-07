@@ -1,8 +1,11 @@
+import { FieldValue } from "firebase/firestore/lite";
+
 interface FileInUploadProgress {
   progress: number;
   message: string;
 }
 
+type Timestamp = FieldValue | { seconds: number; nanoseconds: number };
 interface FileResponseStatus {
   status: "loading" | "succeeded" | "failed" | "idle";
   message: string;
@@ -71,4 +74,11 @@ type FileActionSelected = "delete" | "details" | "move" | "dowload" | "visit" | 
 interface FileOptionsState {
   activeFileData: RootFileGetData | SubFileGetData | null;
   activeAction: FileActionSelected;
+}
+
+interface RecentFile {
+  fileId: string;
+  userId: string;
+  createAt: Timestamp;
+  updateAt: null | Timestamp;
 }

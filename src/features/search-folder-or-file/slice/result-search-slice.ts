@@ -1,17 +1,9 @@
 import { RootState } from "@/store/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { FileSearchResult, FolderResultSearch, NotificationResultSearch, ResultSearchState } from "../search";
-
-/**
- * Type Guard Functions
- */
-const isFileResult = (item: any): item is FileSearchResult => item.resultType === "file";
-const isFolderResult = (item: any): item is FolderResultSearch => item.resultType === "folder";
-const isNotificationResult = (item: any): item is NotificationResultSearch => item.resultType === "notification";
-export { isFileResult, isFolderResult, isNotificationResult };
+import { ResultSearchState } from "../search";
 
 const initialState: ResultSearchState = {
-  data: [],
+  data: [] as ResultSearchState["data"],
   dataLength: 0,
   statusFetch: "idle",
 };
@@ -29,13 +21,10 @@ export const resultSearchSlice = createSlice({
     setDataLengthResultSearch: (state, action: PayloadAction<ResultSearchState["dataLength"]>) => {
       state.dataLength = action.payload;
     },
-    resetResultSearch: (state) => {
-      state.data = [];
-      state.dataLength = 0;
-      state.statusFetch = "idle";
-    },
+    resetResultSearch: () => initialState,
   },
 });
 
-export const { setDataResultSearch, setStatusFetchResultSearch, resetResultSearch, setDataLengthResultSearch } = resultSearchSlice.actions;
+export const { setDataResultSearch, setStatusFetchResultSearch, resetResultSearch, setDataLengthResultSearch } =
+  resultSearchSlice.actions;
 export const resultSearchSelector = (state: RootState) => state.resultSearch;

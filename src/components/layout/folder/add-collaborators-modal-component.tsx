@@ -1,5 +1,8 @@
 import useModalManageAccessContentSetState from "@/features/collaborator/hooks/use-modal-manage-access-content-setstate";
-import { modalAddSelectedCollaboratorsSelector, resetCollaboratorsState } from "@/features/collaborator/slice/modal-add-selected-collaborators";
+import {
+  modalAddSelectedCollaboratorsSelector,
+  resetCollaboratorsState,
+} from "@/features/collaborator/slice/modal-add-selected-collaborators";
 import { neoBrutalBorderVariants } from "@/theme/antd-theme";
 import Button from "@components/ui/button";
 import { Checkbox, CheckboxProps, Flex, message, Typography } from "antd";
@@ -93,7 +96,10 @@ const AddCollaboratorsModalComponent = () => {
         <AddCollaboratorsUserRoleDropDownWithDynamicFloatingElement
           selectedRole={selectedRole}
           wraperClassName="w-1/4 h-[35px] z-10"
-          floatingContent={<AddCollaboratorsUsersRoleList handleRoleCallback={setSelectedRole} selectedUsersRole={selectedRole} />}
+          floatingElClassName="w-full"
+          floatingContent={
+            <AddCollaboratorsUsersRoleList handleRoleCallback={setSelectedRole} selectedUsersRole={selectedRole} />
+          }
         />
       </Flex>
 

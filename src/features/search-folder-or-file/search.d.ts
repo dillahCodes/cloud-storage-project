@@ -1,5 +1,4 @@
 import { RootFolderGetData, SubFolderGetData } from "../folder/folder";
-import { UserMessage } from "../message/message";
 import { LOCATION_NAME, SEARCH_CATEGORY_NAME, SORT_CATEGORY_NAME } from "./search-menu";
 
 interface SearchState {
@@ -11,22 +10,25 @@ interface SearchState {
   sortBy: "asc" | "desc";
 }
 
-type SearchResultDataType = "folder" | "file" | "notification";
+type SearchResultDataType = "folder" | "file";
 
-type FolderResultSearch = (SubFolderGetData | RootFolderGetData) & {
-  resultType: "folder";
+type BaseResultSearch<T, U> = T & {
+  resultType: U;
 };
 
-type FileSearchResult = (RootFileGetData | SubFileGetData) & {
-  resultType: "file";
-};
-
-type NotificationResultSearch = UserMessage & {
-  resultType: "notification";
-};
+type FolderResultSearch = BaseResultSearch<SubFolderGetData | RootFolderGetData, "folder">;
+type FileSearchResult = BaseResultSearch<RootFileGetData | SubFileGetData, "file">;
 
 interface ResultSearchState {
-  data: (FolderResultSearch | FileSearchResult | NotificationResultSearch)[];
+  data: (FolderResultSearch | FileSearchResult)[];
   dataLength: number;
   statusFetch: "idle" | "loading" | "success" | "error";
+}
+
+interface SelectedSearchResultState {
+  selectedDataId: string | null;
+  selectedDataName: string | null;
+  selectedDataType: SearchResultDataType | null;
+  fromLocation: LOCATION_NAME | null;
+  startFinding: boolean;
 }

@@ -53,7 +53,7 @@ const NotificationDetailsPageComponent: React.FC = () => {
   const { currentMessage, fetchStatus: currMessageFetchStatus } = useSelector(currentMessageSelector);
 
   return (
-    <MainLayout showAddButton={false}>
+    <MainLayout showAddButton={false} showPasteButton={false}>
       <Flex className="max-w-screen-lg mx-auto p-3" vertical gap="middle">
         {currMessageFetchStatus === "loading" ? (
           <Spin />

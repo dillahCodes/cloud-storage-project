@@ -1,4 +1,5 @@
-import { isFileResult, isFolderResult, isNotificationResult, resultSearchSelector } from "@/features/search-folder-or-file/slice/result-search-slice";
+import { isFileResult, isFolderResult } from "@/features/search-folder-or-file/search-menu";
+import { resultSearchSelector } from "@/features/search-folder-or-file/slice/result-search-slice";
 import { Flex, Spin } from "antd";
 import { Fragment, useMemo } from "react";
 import { useSelector } from "react-redux";
@@ -9,9 +10,9 @@ const SearchbarResult = () => {
   /**
    * result state
    */
-  const { data, dataLength } = useSelector(resultSearchSelector);
+  const { data, dataLength, statusFetch } = useSelector(resultSearchSelector);
   const isHaveMoreData = data.length < dataLength;
-  const isBlurActive = dataLength > 5;
+  const isBlurActive = dataLength > 5 && statusFetch !== "loading";
 
   /**
    * render data and mapping by type
@@ -22,7 +23,6 @@ const SearchbarResult = () => {
         <Fragment key={index}>
           {isFileResult(item) && <SearchbarItemFile file={item} />}
           {isFolderResult(item) && <SearchbarItemFolder folder={item} />}
-          {isNotificationResult(item) && <div></div>}
         </Fragment>
       );
     });

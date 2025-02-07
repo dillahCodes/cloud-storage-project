@@ -2,12 +2,24 @@ import useUser from "@/features/auth/hooks/use-user";
 import { parentFolderSelector } from "@/features/folder/slice/parent-folder-slice";
 import { db } from "@/firebase/firebase-services";
 import useScrollEnd from "@/hooks/use-scroll-end";
-import { collection, DocumentData, getCountFromServer, getDocs, limit, orderBy, query, QueryConstraint, startAfter, where } from "firebase/firestore";
+import {
+  collection,
+  DocumentData,
+  getCountFromServer,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  QueryConstraint,
+  startAfter,
+  where,
+} from "firebase/firestore";
 import { debounce } from "lodash";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import handleCreateSearchResult from "../handle-create-file-search-result";
+import handleCreateFileSearchResult from "../handle-create-file-search-result";
 import handleCreateFolderSearchResult from "../handle-create-folder-search-result";
+import { ResultSearchState } from "../search";
 import {
   resetResultSearch,
   resultSearchSelector,
@@ -16,18 +28,32 @@ import {
   setStatusFetchResultSearch,
 } from "../slice/result-search-slice";
 import { searchBarSelector } from "../slice/search-bar-slice";
-import { ResultSearchState } from "../search";
+import useDetectLocation from "@/hooks/use-detect-location";
+
+/**
+ * There is a bug when searching for a root folder or file in the location "my storage" while in a sub-shared folder.
+ * If the user tries to search for a root folder or file, for example, "root",
+ * the results will incorrectly show files or folders relative to the folder with the ID "e06687f2-1188-45c1-9414-464153b8420c".
+ * This is incorrect. It should show the root folder or file in "my storage".
+ * Example URL: http://localhost:5173/storage/folders/e06687f2-1188-45c1-9414-464153b8420c?st=shared-with-me
+ */
 
 /**
  * Custom hook for searching files and folders in storage.
  */
-const useSearchMyStorageLocation = () => {
+interface SearchMyStorageLocationProps {
+  shouldFetch: boolean;
+}
+const useSearchMyStorageLocation = ({ shouldFetch }: SearchMyStorageLocationProps) => {
   const dispatch = useDispatch();
   const { user } = useUser();
 
+  // location hook
+  const { isSubMyStorageLocation } = useDetectLocation();
+
   // Redux state
   const { parentFolderData } = useSelector(parentFolderSelector);
-  const { searchInputValue, selectedLocationName, selectedSearchCategoryName } = useSelector(searchBarSelector);
+  const { searchInputValue, selectedSearchCategoryName } = useSelector(searchBarSelector);
   const { data, dataLength } = useSelector(resultSearchSelector);
 
   // Refs to prevent unnecessary re-renders
@@ -39,9 +65,15 @@ const useSearchMyStorageLocation = () => {
   const { isAtBottom } = useScrollEnd({ offset: 10, scrollableElement });
 
   // Search conditions
-  const isValidSearch = searchInputValue.trim().length >= 3;
-  const isFileSearch = selectedSearchCategoryName === "file";
-  const canLoadMore = lastVisibleDataRef.current !== null && data.length < dataLength && isAtBottom;
+  const isValidSearch = searchInputValue.trim().length >= 3 && shouldFetch;
+  const isFileSearch = selectedSearchCategoryName === "file" && shouldFetch;
+
+  // Load more conditions
+  const isHaveMoreData = data.length < dataLength && lastVisibleDataRef.current !== null;
+  const canLoadMore = isHaveMoreData && isAtBottom && isValidSearch && shouldFetch;
+
+  // location selected conditions
+  const isSubMyStorageLocationSearch = parentFolderData !== null && shouldFetch && isSubMyStorageLocation;
 
   /**
    * Reset search state.
@@ -51,20 +83,22 @@ const useSearchMyStorageLocation = () => {
     lastVisibleDataRef.current = null;
   }, [dispatch]);
 
+  const resetSearchStateInFetch = useCallback(() => {
+    dispatch(setStatusFetchResultSearch("success"));
+    dispatch(setDataResultSearch([]));
+    lastVisibleDataRef.current = null;
+  }, [dispatch]);
+
   /**
    * Get Firestore query filters based on selected location.
    */
   const getLocationQueryFilters = useCallback((): QueryConstraint[] => {
     if (!user?.uid) return [];
 
-    if (selectedLocationName === "my-storage") {
-      return parentFolderData
-        ? [where("parent_folder_id", "==", parentFolderData.folder_id)]
-        : [where("root_folder_user_id", "==", user.uid), where("owner_user_id", "==", user.uid)];
-    }
-
-    return [];
-  }, [selectedLocationName, parentFolderData, user?.uid]);
+    return isSubMyStorageLocationSearch && parentFolderData
+      ? [where("parent_folder_id", "==", parentFolderData.folder_id)]
+      : [where("root_folder_user_id", "==", user.uid), where("owner_user_id", "==", user.uid)];
+  }, [isSubMyStorageLocationSearch, user?.uid, parentFolderData]);
 
   /**
    * Build Firestore query based on search input and filters.
@@ -115,34 +149,30 @@ const useSearchMyStorageLocation = () => {
 
         // Build query
         const querySnapshot = buildQuery(loadMore ? lastVisibleDataRef.current : null);
-        if (!querySnapshot) {
-          resetSearchState();
-          return;
-        }
+        if (!querySnapshot) return resetSearchStateInFetch();
 
         // Get data snapshot
         const dataSnapshot = await getDocs(querySnapshot);
-        if (dataSnapshot.empty) {
-          dispatch(setStatusFetchResultSearch("success"));
-          dispatch(setDataResultSearch([]));
-          lastVisibleDataRef.current = null;
-          return;
-        }
+        if (dataSnapshot.empty) return resetSearchStateInFetch();
 
         // Update last visible document
         lastVisibleDataRef.current = dataSnapshot.docs[dataSnapshot.docs.length - 1];
 
         // Map data to create result objects
-        const mappedData = dataSnapshot.docs.map((doc) => (isFileSearch ? handleCreateSearchResult(doc) : handleCreateFolderSearchResult(doc)));
+        const mappedData = dataSnapshot.docs.map((doc) =>
+          isFileSearch ? handleCreateFileSearchResult(doc) : handleCreateFolderSearchResult(doc)
+        );
 
         // Update state with new data
         dispatch(setDataResultSearch(loadMore ? [...(currentDataRef.current ?? []), ...mappedData] : mappedData));
+        // loadMore && setIsAtBottom(false);
         dispatch(setStatusFetchResultSearch("success"));
       } catch (error) {
+        dispatch(setStatusFetchResultSearch("error"));
         console.error("Error fetching data:", error instanceof Error ? error.message : "An unknown error occurred");
       }
     },
-    [dispatch, buildQuery, resetSearchState, isFileSearch, fetchDataCount]
+    [dispatch, buildQuery, isFileSearch, fetchDataCount, resetSearchStateInFetch]
   );
 
   // Store current data in ref
@@ -162,12 +192,7 @@ const useSearchMyStorageLocation = () => {
     return () => debounceFetchMore.cancel();
   }, [debounceFetchMore, canLoadMore]);
 
-  // Reset state on search category or location change
-  useEffect(() => {
-    resetSearchState();
-  }, [selectedSearchCategoryName, selectedLocationName, resetSearchState]);
-
-  // Reset state if search input becomes invalid
+  // Reset state if search input becomes invalid or location is not "my-storage"
   useEffect(() => {
     if (!isValidSearch) resetSearchState();
   }, [isValidSearch, resetSearchState]);

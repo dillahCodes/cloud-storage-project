@@ -10,7 +10,8 @@ import { useDispatch } from "react-redux";
 
 const MobileSearchbarHeader = () => {
   const dispatch = useDispatch();
-  const { handleSearchInputChange } = useSearch();
+
+  const { handleSearchInputChange, inputValue } = useSearch();
 
   const handleCloseMobileSearchBar = () => {
     dispatch(resetResultSearch());
@@ -28,7 +29,7 @@ const MobileSearchbarHeader = () => {
         >
           <IoMdClose />
         </Button>
-        <Searchbar handleInputChange={handleSearchInputChange} />
+        <Searchbar inputValue={inputValue} handleInputChange={handleSearchInputChange} />
       </Flex>
     </Header>
   );

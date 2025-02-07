@@ -2,6 +2,7 @@ import useBreadcrumbState from "@/features/breadcrumb/hooks/use-breadcrumb-state
 import useFileUploading from "@/features/file/hooks/use-file-uploading";
 import useMoveMobileErroMessage from "@/features/move-folder-or-file/hooks/use-move-mobile-error-message";
 import { mobileMoveSelector } from "@/features/move-folder-or-file/slice/mobile-move-slice";
+import { searchBarSelector } from "@/features/search-folder-or-file/slice/search-bar-slice";
 import useDetectLocation from "@/hooks/use-detect-location";
 import { themeColors } from "@/theme/antd-theme";
 import withLoadingOverlay from "@components/hoc/with-loading-overlay";
@@ -19,10 +20,15 @@ import ButtonUploadStatusModal from "../button-upload-status/buttton-upload-stat
 import MobileDrawer from "../drawer/mobile-drawer";
 import MobileDrawerMenu from "../drawer/mobile-drawer-menu";
 import MobileHeder from "../header/mobile-header";
-import { searchBarSelector } from "@/features/search-folder-or-file/slice/search-bar-slice";
 import MobileSearchBar from "../searchbar/mobile-searchbar";
 
-const MobileMainLayout: React.FC<MainLayoutProps> = ({ children, showAddButton, withFooter = true, withBreadcrumb, showPasteButton }) => {
+const MobileMainLayout: React.FC<MainLayoutProps> = ({
+  children,
+  showAddButton,
+  withFooter = true,
+  withBreadcrumb,
+  showPasteButton,
+}) => {
   useMoveMobileErroMessage();
 
   const { fileUploadingState } = useFileUploading();
@@ -68,7 +74,6 @@ const MobileMainLayout: React.FC<MainLayoutProps> = ({ children, showAddButton, 
             <Breadcrumb items={items} />
           </div>
         )}
-
         <Content>{children}</Content>
       </Layout>
 

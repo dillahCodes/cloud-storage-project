@@ -15,9 +15,11 @@ interface WithFloatingElementProps {
   wraperClassName?: string;
   floatingElClassName?: string;
   neobrutalType?: NeoBrutalVariant;
+  callbackIsOpen?: (isOpen: boolean) => void;
 }
-
-export const withDynamicFloatingElement = <OriginalComponentProps extends object>(Component: React.ComponentType<OriginalComponentProps>) => {
+export const withDynamicFloatingElement = <OriginalComponentProps extends object>(
+  Component: React.ComponentType<OriginalComponentProps>
+) => {
   const WrappedComponent: React.FC<OriginalComponentProps & WithFloatingElementProps> = ({
     floatingContent,
     isFloatingOpen,
@@ -25,12 +27,13 @@ export const withDynamicFloatingElement = <OriginalComponentProps extends object
     wraperClassName,
     floatingElClassName,
     neobrutalType,
+    callbackIsOpen,
     ...originalProps
   }) => {
     const [isOpen, setIsOpen] = useState<boolean>(isFloatingOpen || false);
 
     /**
-     * ref to store elment without triger re-render
+     * ref to store element without trigger re-render
      */
     const refs = useRef<ElementRef>({
       floatingElementRef: null,
@@ -45,6 +48,15 @@ export const withDynamicFloatingElement = <OriginalComponentProps extends object
     }, [isFloatingOpen]);
 
     /**
+     * notify when isOpen changes
+     */
+    useEffect(() => {
+      if (callbackIsOpen) {
+        callbackIsOpen(isOpen);
+      }
+    }, [isOpen, callbackIsOpen]);
+
+    /**
      * logic click outside
      */
     useEffect(() => {
@@ -54,18 +66,28 @@ export const withDynamicFloatingElement = <OriginalComponentProps extends object
         const isTrigerElement = refs.current.trigerElement?.contains(target);
         const isClickOutside = !refs.current.floatingElementRef?.contains(target);
 
-        if (isTrigerElement && !isOriginalComponentExcluded) setIsOpen((prev) => !prev);
-        else if (isTrigerElement && isOriginalComponentExcluded) setIsOpen(true);
-        else if (isClickOutside && isOpen) setIsOpen(false);
+        if (isTrigerElement && !isOriginalComponentExcluded) {
+          setIsOpen((prev) => {
+            const newState = !prev;
+            callbackIsOpen?.(newState);
+            return newState;
+          });
+        } else if (isTrigerElement && isOriginalComponentExcluded) {
+          setIsOpen(true);
+          callbackIsOpen?.(true);
+        } else if (isClickOutside && isOpen) {
+          setIsOpen(false);
+          callbackIsOpen?.(false);
+        }
       };
 
       document.addEventListener("click", handleClickOutside);
       return () => document.removeEventListener("click", handleClickOutside);
-    }, [isOpen, isOriginalComponentExcluded, refs.current.floatingElementRef, refs.current.trigerElement]);
+    }, [isOpen, isOriginalComponentExcluded, refs.current.floatingElementRef, refs.current.trigerElement, callbackIsOpen]);
 
     return (
       <Flex className={classNames("relative cursor-pointer", wraperClassName)} vertical>
-        {/* triger element */}
+        {/* trigger element */}
         <Flex ref={(ref) => (refs.current.trigerElement = ref as HTMLDivElement)}>
           <Component {...(originalProps as OriginalComponentProps)} />
         </Flex>
@@ -75,7 +97,7 @@ export const withDynamicFloatingElement = <OriginalComponentProps extends object
           <Flex
             ref={(ref) => (refs.current.floatingElementRef = ref as HTMLDivElement)}
             className={classNames(
-              "absolute max-h-[130px] w-fit overflow-y-auto bg-white text-black left-0 right-0 border-2 border-black  bottom-0  translate-y-[calc(100%+0.5rem)]",
+              "absolute w-fit bg-white text-black left-0 right-0 border-2 border-black bottom-0 translate-y-[calc(100%+0.5rem)]",
               floatingElClassName
             )}
             style={neoBrutalBorderVariants[neobrutalType || "small"]}

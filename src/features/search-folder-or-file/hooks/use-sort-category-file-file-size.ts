@@ -42,6 +42,7 @@ const useSortCategoryFileFileSize = () => {
   /** Effect to update ref when data changes */
   useEffect(() => {
     if (data && data.length > 0) currentDataRef.current = data;
+    else currentDataRef.current = null;
   }, [data]);
 };
 

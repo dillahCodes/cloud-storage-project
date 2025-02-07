@@ -36,6 +36,6 @@ const useScrollEnd = ({ offset = 200, scrollableElement }: UseScrollEndProps) =>
     return () => scrollableElement.removeEventListener("scroll", handleScroll);
   }, [handleScroll, scrollableElement]);
 
-  return { isAtBottom };
+  return { isAtBottom, setIsAtBottom };
 };
 export default useScrollEnd;

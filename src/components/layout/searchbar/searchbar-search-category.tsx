@@ -18,24 +18,28 @@ interface SearchCategoryProps {
   handleSetSearchCategory: (categoryName: SEARCH_CATEGORY_NAME) => void;
 }
 
-export const SearchCategory: React.FC<SearchCategoryProps> = ({ selectedSearchCategoryName, searchCategoryMenuItems, handleSetSearchCategory }) => {
+export const SearchCategory: React.FC<SearchCategoryProps> = ({
+  selectedSearchCategoryName,
+  searchCategoryMenuItems,
+  handleSetSearchCategory,
+}) => {
   return (
     <Flex className="bg-[#FFB6C1] rounded-sm" style={neoBrutalBorderVariants.small}>
       <Text className="text-xl p-1 border-2 border-black border-r-0">
         <RenderSearchCategoryIcon name={selectedSearchCategoryName} />
       </Text>
       <SearchbarArrowWithFloatingElement
-        wraperClassName="z-20"
+        wraperClassName="z-20 h-fit"
         floatingElClassName="rounded-sm w-fit"
         floatingContent={
-          <Flex className="w-[170px] p-1 no-scrollbar overflow-y-auto rounded-sm" vertical>
+          <Flex className="w-[170px] p-1 no-scrollbar overflow-y-auto rounded-sm h-fit" vertical>
             {searchCategoryMenuItems.map((item) => (
               <Flex
                 key={item.name}
                 align="center"
                 gap="middle"
                 onClick={() => handleSetSearchCategory(item.name)}
-                className={classNames("p-1", { "bg-[#ff87a6]": item.name === selectedSearchCategoryName })}
+                className={classNames("p-1 hover:bg-[#FFB6C1]", { "bg-[#ff87a6]": item.name === selectedSearchCategoryName })}
               >
                 <Text className="text-base">
                   <RenderSearchCategoryIcon name={item.name} />

@@ -13,7 +13,10 @@ interface AddCollaboratorsUsersRoleListProps {
 }
 
 const { Text } = Typography;
-const AddCollaboratorsUsersRoleList: React.FC<AddCollaboratorsUsersRoleListProps> = ({ handleRoleCallback, selectedUsersRole }) => {
+const AddCollaboratorsUsersRoleList: React.FC<AddCollaboratorsUsersRoleListProps> = ({
+  handleRoleCallback,
+  selectedUsersRole,
+}) => {
   const [selectedRole, setSelectedRole] = useState<GeneralAccessRole>(selectedUsersRole || "viewer");
 
   const { user } = useUser();
@@ -42,7 +45,9 @@ const AddCollaboratorsUsersRoleList: React.FC<AddCollaboratorsUsersRoleListProps
           key={item.key}
           onClick={() => handleChange(item.label)}
         >
-          <Text className={classNames("text-sm font-archivo", { "text-[#fff1ff]": selectedRole === item.label.toLowerCase() })}>{item.label}</Text>
+          <Text className={classNames("text-sm font-archivo", { "text-[#fff1ff]": selectedRole === item.label.toLowerCase() })}>
+            {item.label}
+          </Text>
         </Flex>
       ))}
     </Flex>

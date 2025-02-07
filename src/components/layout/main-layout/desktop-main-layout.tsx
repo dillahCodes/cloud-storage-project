@@ -9,7 +9,6 @@ import { Footer } from "antd/es/layout/layout";
 import classNames from "classnames";
 import { MainLayoutProps } from ".";
 import Breadcrumb from "../breadcrumb/breadcrumb";
-import ButtonMoveWithModal from "../button-move/button-move-with-modal";
 import ButtonUploadStatusModal from "../button-upload-status/buttton-upload-status-modal";
 import DesktopDrawer from "../drawer/dekstop-drawer";
 import DesktopDrawerActivity from "../drawer/desktop-drawer-activity";
@@ -19,7 +18,11 @@ import DekstopHeader from "../header/desktop-header";
 import DektopMoveModal from "../modal/dektop-move-modal";
 import DesktopSider from "../sider/desktop-sider";
 
-const DesktopMainLayout: React.FC<Omit<MainLayoutProps, "showAddButton" | "showPasteButton">> = ({ children, withFooter = true, withBreadcrumb }) => {
+const DesktopMainLayout: React.FC<Omit<MainLayoutProps, "showAddButton" | "showPasteButton">> = ({
+  children,
+  withFooter = true,
+  withBreadcrumb,
+}) => {
   const { isTabletDevice, isDesktopDevice } = useGetClientScreenWidth();
   const { fileUploadingState } = useFileUploading();
   const { drawerState } = useDrawer();

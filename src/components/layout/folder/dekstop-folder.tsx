@@ -20,6 +20,7 @@ const DesktopFolder: React.FC<FolderProps> = ({ folderData }) => {
 
   return (
     <Flex
+      id={folderData.folder_id}
       className="border-2 border-black rounded-md cursor-pointer w-full p-3"
       gap="small"
       align="center"

@@ -6,6 +6,7 @@ import FileIconsVariant from "./file-icons-variant";
 import OptionsFileButtonWithDrawer from "./options-file-button-with-drawer";
 import OptionsFileButtonWithFloatingElement from "./options-file-button-with-floating-element";
 import RenderResponsiveFileName from "./responsive-file-name";
+import { RootFileGetData, SubFileGetData } from "@/features/file/file";
 
 interface VariantFileListItemParams {
   fileData: SubFileGetData | RootFileGetData;
@@ -19,6 +20,7 @@ const VariantFileListItem: React.FC<VariantFileListItemParams> = ({ fileData }) 
 
   return (
     <Flex
+      id={fileData.file_id}
       className="border-2 border-black rounded-md cursor-pointer w-full p-3"
       gap="small"
       align="center"
@@ -37,7 +39,11 @@ const VariantFileListItem: React.FC<VariantFileListItemParams> = ({ fileData }) 
 
       {/* file button options and drawer */}
       <div id="file-options">
-        {isDesktopDevice ? <OptionsFileButtonWithFloatingElement fileData={fileData} /> : <OptionsFileButtonWithDrawer fileData={fileData} />}
+        {isDesktopDevice ? (
+          <OptionsFileButtonWithFloatingElement fileData={fileData} />
+        ) : (
+          <OptionsFileButtonWithDrawer fileData={fileData} />
+        )}
       </div>
     </Flex>
   );
