@@ -1,6 +1,6 @@
-import { doc, DocumentData, DocumentReference, serverTimestamp, updateDoc } from "firebase/firestore";
-import { GeneralAccess } from "./folder-collaborator";
 import { db } from "@/firebase/firebase-services";
+import { doc, DocumentData, DocumentReference, serverTimestamp, updateDoc } from "firebase/firestore";
+import { GeneralAccess } from "./collaborator";
 
 interface HandleChangeGeneralAcesstype {
   folderId: string;

@@ -46,7 +46,7 @@ export function withFloatingElement<P extends object>(Component: React.Component
         {isOpen && floatingElement && (
           <div
             ref={floatingElementRef}
-            id={props.parentId}
+            id={parentId}
             className={classNames("absolute cursor-default", parentFloatingElementClassName)}
             style={{
               ...borderStyle,

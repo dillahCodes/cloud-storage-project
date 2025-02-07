@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import handleCollaboratorMenuAction from "../collaborator/collaborator-menu-action";
-import { RootFolderGetData, SubFolderGetData } from "./folder";
-import { CollaboratorRole, CollaboratorUserData } from "./folder-collaborator";
+import { CollaboratorRole, CollaboratorUserData } from "./collaborator";
+import { RootFolderGetData, SubFolderGetData } from "../folder/folder";
 
 const changeCollaboratorLabel = (item: string) => {
   switch (item) {

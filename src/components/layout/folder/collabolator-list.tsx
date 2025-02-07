@@ -1,5 +1,4 @@
 import useUser from "@/features/auth/hooks/use-user";
-import { CollaboratorMenuItem } from "@/features/folder/collaborator-menu";
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 import { withFloatingElement } from "@components/hoc/with-floating-element";
 import { Flex, Typography } from "antd";
@@ -8,6 +7,7 @@ import AvatarOnlyIcon from "../avatar/avatar-only-icon";
 import AvatarWithUserPhoto from "../avatar/avatar-with-user-photo";
 import CollabolatorRoleDropdown from "./collabolator-role-dropdown";
 import { CollaboratorUserData } from "@/features/collaborator/collaborator";
+import { CollaboratorMenuItem } from "@/features/collaborator/collaborator-menu";
 
 const { Text } = Typography;
 const FlexWithFloatingElement = withFloatingElement(Flex);
@@ -43,7 +43,9 @@ const CollabolatorList: React.FC<CollabolatorsListProps> = ({ data, roleList, fo
         rightPosition={5}
         parentFloatingElementClassName="rounded-sm z-10"
         floatingElement={
-          !isOwner ? <CollabolatorRoleDropdown folderData={folderData} roleData={data} roleList={roleList} roleSelected={data.role} /> : null
+          !isOwner ? (
+            <CollabolatorRoleDropdown folderData={folderData} roleData={data} roleList={roleList} roleSelected={data.role} />
+          ) : null
         }
       >
         <Text disabled={isOwner} className="text-sm ml-auto min-w-fit font-medium font-archivo capitalize">

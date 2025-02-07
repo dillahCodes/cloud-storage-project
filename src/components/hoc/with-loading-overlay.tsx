@@ -30,6 +30,8 @@ interface LoadingComponentProps {
   zIndex: number;
   loadingText: string;
 }
+
+// eslint-disable-next-line
 const LoadingComponent: React.FC<LoadingComponentProps> = ({ opacity, zIndex }) => {
   return (
     <Flex className="fixed top-0 left-0 right-0 bottom-0" style={{ zIndex }} vertical>

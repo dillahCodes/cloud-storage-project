@@ -15,6 +15,7 @@ interface NeoBrutalBorderVariants {
   leftLarge: BorderVariant;
 }
 
+// eslint-disable-next-line
 export const themeColors = {
   primary100: "#FF5277",
   primary200: "#ff87a6",
@@ -29,6 +30,7 @@ export const themeColors = {
 } as const;
 
 export type NeoBrutalVariant = "small" | "medium" | "large" | "leftSmall" | "leftMedium" | "leftLarge";
+// eslint-disable-next-line
 export const neoBrutalBorderVariants: NeoBrutalBorderVariants = {
   small: {
     border: `1px solid !important`,
