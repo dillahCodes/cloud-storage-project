@@ -4,6 +4,7 @@ import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, where } fr
 import { useCallback, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setFiles, setStatus } from "../slice/file-slice";
+import { RootFileGetData, SubFileGetData } from "../file";
 
 const handleGetRecentFilesData = async (userId: string) => {
   const recentFilesRef = collection(db, "recent-files");

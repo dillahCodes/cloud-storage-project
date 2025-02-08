@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { AuthResponse } from "../auth";
 import createAuthResponse from "../create-auth-res";
 import handleAuthError from "../handle-auth-error";
 import { auth } from "@/firebase/firebase-services";

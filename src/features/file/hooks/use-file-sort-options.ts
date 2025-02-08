@@ -12,6 +12,7 @@ import {
 import { useEffect, useMemo } from "react";
 import useFilesState from "./use-files-state";
 import { setFiles } from "../slice/file-slice";
+import { RootFileGetData, SubFileGetData } from "../file";
 
 const useFileSortOptions = () => {
   const dispatch = useDispatch();
@@ -35,10 +36,8 @@ const useFileSortOptions = () => {
         descending: () => [...files].sort((a, b) => parseInt(b.file_size) - parseInt(a.file_size)),
       },
       byUploadTime: {
-        ascending: () =>
-          [...files].sort((a, b) => (a.created_at?.seconds ?? 0) - (b.created_at?.seconds ?? 0)),
-        descending: () =>
-          [...files].sort((a, b) => (b.created_at?.seconds ?? 0) - (a.created_at?.seconds ?? 0)),
+        ascending: () => [...files].sort((a, b) => (a.created_at?.seconds ?? 0) - (b.created_at?.seconds ?? 0)),
+        descending: () => [...files].sort((a, b) => (b.created_at?.seconds ?? 0) - (a.created_at?.seconds ?? 0)),
       },
     };
   }, [files]);

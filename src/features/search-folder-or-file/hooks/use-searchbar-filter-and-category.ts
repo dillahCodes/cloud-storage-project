@@ -17,13 +17,8 @@ export const useSearchbarFilterAndCategory = () => {
 
   const searchCategoryMenuItems = useMemo(() => SEARCH_CATEGORY[selectedLocationName]?.category ?? [], [selectedLocationName]);
   const sortCategoryMenuItems = useMemo(() => {
-    return SORT_CATEGORY[selectedLocationName === "notifications" ? "notifications" : selectedSearchCategoryName]?.category ?? [];
-  }, [selectedSearchCategoryName, selectedLocationName]);
-
-  /**
-   * show search category when selected location is not notifications
-   */
-  const isShowSearchCategory: boolean = useMemo(() => selectedLocationName !== "notifications", [selectedLocationName]);
+    return SORT_CATEGORY[selectedSearchCategoryName]?.category ?? [];
+  }, [selectedSearchCategoryName]);
 
   /**
    * set search location first then search category
@@ -32,14 +27,10 @@ export const useSearchbarFilterAndCategory = () => {
     selectedLocationName !== locationName && dispatch(resetResultSearch());
     dispatch(setSelectedLocationName(locationName));
 
-    if (locationName === "notifications") {
-      dispatch(setSelectedSortCategoryName(SORT_CATEGORY["notifications"].category[0].name));
-    } else {
-      const searchCategoryName = SEARCH_CATEGORY[locationName]?.category?.[0]?.name || "file";
-      const sortCategoryName = SORT_CATEGORY[searchCategoryName]?.category?.[0]?.name || "file-name";
-      dispatch(setSelectedSearchCategoryName(searchCategoryName));
-      dispatch(setSelectedSortCategoryName(sortCategoryName));
-    }
+    const searchCategoryName = SEARCH_CATEGORY[locationName]?.category?.[0]?.name || "file";
+    const sortCategoryName = SORT_CATEGORY[searchCategoryName]?.category?.[0]?.name || "file-name";
+    dispatch(setSelectedSearchCategoryName(searchCategoryName));
+    dispatch(setSelectedSortCategoryName(sortCategoryName));
   };
 
   /**
@@ -66,7 +57,6 @@ export const useSearchbarFilterAndCategory = () => {
     sortBy,
     searchCategoryMenuItems,
     sortCategoryMenuItems,
-    isShowSearchCategory,
     handleSetSearchLocation,
     handleSetSearchCategory,
     handleSetSortCategory,

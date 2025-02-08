@@ -1,4 +1,3 @@
-import { FirebaseUserData } from "@/features/auth/auth";
 import useUser from "@/features/auth/hooks/use-user";
 import { auth, db } from "@/firebase/firebase-services";
 import useDetectLocation from "@/hooks/use-detect-location";
@@ -62,11 +61,17 @@ const buildQuery = (isRoot: boolean, parent_folder_id?: string): Query<DocumentD
 
   return isSubFolder
     ? query(foldersRef, where("parent_folder_id", "==", parent_folder_id), orderBy("created_at", "desc"))
-    : query(foldersRef, where("parent_folder_id", "==", null), where("owner_user_id", "==", currentUser?.uid), orderBy("created_at", "desc"));
+    : query(
+        foldersRef,
+        where("parent_folder_id", "==", null),
+        where("owner_user_id", "==", currentUser?.uid),
+        orderBy("created_at", "desc")
+      );
 };
 
 const validateSubFolder = (params: ValidationSubFolderParams) => {
-  const { isValidSearchParams, navigate, parentFolderData, user, isRoot, isSubMyStorageLocation, isSubSharedWithMeLocation } = params;
+  const { isValidSearchParams, navigate, parentFolderData, user, isRoot, isSubMyStorageLocation, isSubSharedWithMeLocation } =
+    params;
 
   const isMyRootFolder: boolean = parentFolderData!.root_folder_user_id === user!.uid;
   const isFromMyStorage: boolean = isValidSearchParams && isSubMyStorageLocation && isMyRootFolder;

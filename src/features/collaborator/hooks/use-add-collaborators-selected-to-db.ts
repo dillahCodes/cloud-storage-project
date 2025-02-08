@@ -1,10 +1,9 @@
-import { UserDataDb } from "@/features/auth/auth";
+import { GeneralAccessRole } from "@/features/collaborator/collaborator";
 import handleSendCollaborationInvitation from "@/features/message/send-collaboration-invitation";
 import { message } from "antd";
 import { serverTimestamp } from "firebase/firestore";
 import { useCallback } from "react";
 import handleAddCollabortaror from "../handle-add-collaborator";
-import { GeneralAccessRole } from "@/features/collaborator/collaborator";
 
 interface UseAddCollaboratorsSelectedToDbParams {
   role: GeneralAccessRole;
@@ -40,7 +39,11 @@ const useAddCollaboratorsSelectedToDb = ({
         message: "Message must be between 10 and 300 characters.",
         key: "collaborators-add-required-message",
       },
-      { condition: collaborators.length === 0, message: "Collaborators are required.", key: "collaborators-add-required-collaborators" },
+      {
+        condition: collaborators.length === 0,
+        message: "Collaborators are required.",
+        key: "collaborators-add-required-collaborators",
+      },
     ];
 
     return validations.find((validation) => validation.condition) || null;
@@ -90,7 +93,10 @@ const useAddCollaboratorsSelectedToDb = ({
       await handleAddCollaboratorsWithPromiseAll();
       afterAddCollaborator?.();
     } catch (error) {
-      console.error("error while adding collaborators to db: ", error instanceof Error ? error.message : "an unknown error occurred");
+      console.error(
+        "error while adding collaborators to db: ",
+        error instanceof Error ? error.message : "an unknown error occurred"
+      );
     }
   };
   return { handleAddCollaboratorToDb };

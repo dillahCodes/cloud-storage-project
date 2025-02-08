@@ -1,4 +1,3 @@
-import { UserDataDb } from "@/features/auth/auth";
 import { db } from "@/firebase/firebase-services";
 import { collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
 import { debounce } from "lodash";

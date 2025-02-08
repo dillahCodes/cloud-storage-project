@@ -7,6 +7,7 @@ import {
   updateFileUploadingStatus as updateFileUploadingStatusState,
   updateFileUploadingProgress as updateFileUploadingProgressState,
 } from "../slice/file-uploading-slice";
+import { FileUploadingList } from "../file";
 
 const useFileUploading = () => {
   const dispatch = useDispatch();
@@ -14,7 +15,8 @@ const useFileUploading = () => {
 
   const addFileUploading = (payload: FileUploadingList) => dispatch(addFileUploadingState(payload));
   const removeFileUploading = (payload: string) => dispatch(removeFileUploadingState({ fileId: payload }));
-  const updateFileUploadingStatus = (payload: Pick<FileUploadingList, "fileId" | "status">) => dispatch(updateFileUploadingStatusState(payload));
+  const updateFileUploadingStatus = (payload: Pick<FileUploadingList, "fileId" | "status">) =>
+    dispatch(updateFileUploadingStatusState(payload));
   const updateFileUploadingProgress = (payload: Pick<FileUploadingList, "fileId" | "progress">) =>
     dispatch(updateFileUploadingProgressState(payload));
 

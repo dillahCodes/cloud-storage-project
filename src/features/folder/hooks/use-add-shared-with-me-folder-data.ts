@@ -1,4 +1,3 @@
-import { FirebaseUserData } from "@/features/auth/auth";
 import useUser from "@/features/auth/hooks/use-user";
 import { db } from "@/firebase/firebase-services";
 import { collection, doc, getDocs, limit, query, serverTimestamp, setDoc, where } from "firebase/firestore";
@@ -28,7 +27,10 @@ const handleAddSharedWithMeFolderData = async ({ parentFolderData, userData }: H
   await setDoc(sharedWithMeFolderRef, sharedWithMeFolderData);
 };
 
-const handleCheckIsSharedWithMeFolderDataExist = async ({ parentFolderData, userData }: HandleAddSharedWithMeFolderData): Promise<boolean> => {
+const handleCheckIsSharedWithMeFolderDataExist = async ({
+  parentFolderData,
+  userData,
+}: HandleAddSharedWithMeFolderData): Promise<boolean> => {
   const sharedWithMeFolderCollection = collection(db, "sharedWithMeFolders");
 
   // Define query to find shared folder data matching rootFolderId and userId
@@ -67,7 +69,10 @@ const useAddSharedWithMeFolderData = ({ shouldAdd }: UseAddSharedWithMeFolderDat
        */
       await handleAddSharedWithMeFolderData({ parentFolderData, userData: user });
     } catch (error) {
-      console.error("Error adding shared with me folder data:", error instanceof Error ? error.message : "An unknown error occurred.");
+      console.error(
+        "Error adding shared with me folder data:",
+        error instanceof Error ? error.message : "An unknown error occurred."
+      );
     }
   }, [parentFolderData, status, user]);
 

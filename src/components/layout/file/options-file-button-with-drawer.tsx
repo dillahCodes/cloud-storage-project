@@ -9,6 +9,7 @@ import FileDrawerHeader from "./file-drawer-header";
 import { fileOptionsSelector, resetFileOptions } from "@/features/file/slice/file-options-slice";
 import MenuItemComponent from "../menu/menu-item";
 import { useMemo } from "react";
+import { RootFileGetData, SubFileGetData } from "@/features/file/file";
 
 interface OptionsFileButtonWithDrawerProps {
   fileData: SubFileGetData | RootFileGetData;
@@ -19,7 +20,10 @@ const ButtonWithDrawer = withDrawer(Button);
 const OptionsFileButtonWithDrawer: React.FC<OptionsFileButtonWithDrawerProps> = ({ fileData }) => {
   const dispatch = useDispatch();
   const { activeFileData } = useSelector(fileOptionsSelector);
-  const isDrawerOpen = useMemo(() => Boolean(activeFileData && activeFileData.file_id === fileData.file_id), [activeFileData, fileData]);
+  const isDrawerOpen = useMemo(
+    () => Boolean(activeFileData && activeFileData.file_id === fileData.file_id),
+    [activeFileData, fileData]
+  );
 
   const { fileMenuList } = useFileMenu();
   const { handleClickFileOptions } = useHandleClickFile();

@@ -1,6 +1,5 @@
 import { RootState } from "@/store/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { UserDataDb } from "@/features/auth/auth";
 import { ModalAddSelectedCollaboratorsState } from "../collaborator";
 
 const initialState: ModalAddSelectedCollaboratorsState = {
@@ -29,6 +28,7 @@ export const modalAddSelectedCollaboratorsSlice = createSlice({
   },
 });
 
-export const { addCollaborators, setMessage, removeSelectedUser, resetCollaboratorsState } = modalAddSelectedCollaboratorsSlice.actions;
+export const { addCollaborators, setMessage, removeSelectedUser, resetCollaboratorsState } =
+  modalAddSelectedCollaboratorsSlice.actions;
 export const modalAddSelectedCollaboratorsSelector = (state: RootState) => state.modalAddSelectedCollaborators;
 export default modalAddSelectedCollaboratorsSlice.reducer;

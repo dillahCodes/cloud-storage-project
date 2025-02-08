@@ -1,4 +1,3 @@
-import { AuthState } from "@/features/auth/auth";
 import useUser from "@/features/auth/hooks/use-user";
 import { useEffect, useMemo, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";

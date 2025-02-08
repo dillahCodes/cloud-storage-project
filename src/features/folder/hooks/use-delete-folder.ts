@@ -21,6 +21,7 @@ import { v4 as uuidv4 } from "uuid";
 import { RootFolderGetData, SubFolderGetData } from "../folder";
 import { DeleteFolderActivity } from "../folder-activity";
 import useAddActivityDeletedFolder from "./use-add-activity-deleted-folder";
+import { SubFileGetData } from "@/features/file/file";
 
 interface DeleteFolderParams {
   folderId: string;

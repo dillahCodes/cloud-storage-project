@@ -1,3 +1,4 @@
+import { RootFileGetData, SubFileGetData } from "@/features/file/file";
 import useGetFileLoaction from "@/features/file/hooks/use-get-file-location";
 import useGetFileOwner from "@/features/file/hooks/use-get-file-owner";
 import { fileOptionsSelector, resetFileOptions } from "@/features/file/slice/file-options-slice";
@@ -130,7 +131,12 @@ const ModalContentInfoFile = () => {
   );
 
   return (
-    <Flex className="w-full bg-white rounded-md p-4 border-2 border-black" vertical gap="middle" style={neoBrutalBorderVariants.small}>
+    <Flex
+      className="w-full bg-white rounded-md p-4 border-2 border-black"
+      vertical
+      gap="middle"
+      style={neoBrutalBorderVariants.small}
+    >
       {/* Header*/}
       <Flex align="center" gap="small">
         <Text className="text-xl font-bold text-blue-500">

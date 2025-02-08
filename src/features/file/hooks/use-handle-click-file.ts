@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setActiveFileData } from "../slice/file-options-slice";
 import { MappingFileType, mappingFileTypeSelector } from "../slice/mapping-file-type-slice";
+import { RootFileGetData, SubFileGetData } from "../file";
 
 interface HandleClickFileOptionsParams {
   e: React.MouseEvent<HTMLDivElement>;

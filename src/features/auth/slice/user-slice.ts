@@ -1,6 +1,5 @@
 import { RootState } from "@/store/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AuthState, FirebaseUserData } from "../auth";
 
 // Initial state with a proper type
 const initialState: AuthState = {

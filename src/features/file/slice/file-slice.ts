@@ -1,5 +1,6 @@
 import { RootState } from "@/store/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { FileState, RootFileGetData, SubFileGetData } from "../file";
 
 const initialState: FileState = {
   files: [],

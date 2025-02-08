@@ -1,5 +1,6 @@
 import { RootState } from "@/store/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { FileUploadingList, FileUploadingState } from "../file";
 
 const initialState: FileUploadingState = {
   fileUploadingList: [],
@@ -29,7 +30,12 @@ export const fileUploadingSlice = createSlice({
   },
 });
 
-export const { addFileUploading, clearFileUploading, removeFileUploading, updateFileUploadingProgress, updateFileUploadingStatus } =
-  fileUploadingSlice.actions;
+export const {
+  addFileUploading,
+  clearFileUploading,
+  removeFileUploading,
+  updateFileUploadingProgress,
+  updateFileUploadingStatus,
+} = fileUploadingSlice.actions;
 export const FileUploadingSelector = (state: RootState) => state.fileUploading;
 export default fileUploadingSlice.reducer;

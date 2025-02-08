@@ -1,4 +1,3 @@
-import { UserDataDb } from "@/features/auth/auth";
 import { db } from "@/firebase/firebase-services";
 import useDrawer from "@/hooks/use-drawer";
 import formatTimestamp from "@/util/format-timestamp";
@@ -7,7 +6,13 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { ActivityAndUserData, ActivityGrouping, BaseFolderActivity, FolderActivityType, TimestampValue } from "../folder-activity";
+import {
+  ActivityAndUserData,
+  ActivityGrouping,
+  BaseFolderActivity,
+  FolderActivityType,
+  TimestampValue,
+} from "../folder-activity";
 import { setActivity, setErrorMessage, setStatusActivity } from "../slice/folder-activity-slice";
 
 const useGetFolderActivity = () => {
@@ -15,7 +20,10 @@ const useGetFolderActivity = () => {
   const { folderId: paramFolderId } = useParams<{ folderId: string }>();
   const { drawerState } = useDrawer();
 
-  const selectedFolderId = useMemo(() => drawerState.desktopDrawerFolderId || paramFolderId, [drawerState.desktopDrawerFolderId, paramFolderId]);
+  const selectedFolderId = useMemo(
+    () => drawerState.desktopDrawerFolderId || paramFolderId,
+    [drawerState.desktopDrawerFolderId, paramFolderId]
+  );
   const isValidSelectedFolderId = useMemo(() => selectedFolderId && selectedFolderId.trim() !== "", [selectedFolderId]);
 
   const fetchFolderActivitiesCallback = useCallback(async () => {
@@ -270,7 +278,9 @@ const sortAndOrganizeGroups = (groups: ActivityGrouping[]): ActivityGrouping[] =
  * @returns A sorted array of activity groups.
  */
 const sortingGroupsActivities = (data: ActivityGrouping[]) => {
-  return data.sort((a, b) => ((b.groupTimeStamp as TimestampValue).seconds ?? 0) - ((a.groupTimeStamp as TimestampValue).seconds ?? 0));
+  return data.sort(
+    (a, b) => ((b.groupTimeStamp as TimestampValue).seconds ?? 0) - ((a.groupTimeStamp as TimestampValue).seconds ?? 0)
+  );
 };
 
 /**
@@ -280,7 +290,10 @@ const sortingGroupsActivities = (data: ActivityGrouping[]) => {
  * @returns A sorted array of activities.
  */
 const sortingActivities = (data: ActivityAndUserData[]) => {
-  return data.sort((a, b) => ((b.activity.activityDate as TimestampValue).seconds ?? 0) - ((a.activity.activityDate as TimestampValue).seconds ?? 0));
+  return data.sort(
+    (a, b) =>
+      ((b.activity.activityDate as TimestampValue).seconds ?? 0) - ((a.activity.activityDate as TimestampValue).seconds ?? 0)
+  );
 };
 
 /**

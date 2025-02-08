@@ -4,6 +4,7 @@ import { Button, Flex } from "antd";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import useFileMenu from "../menu/file-menu/hooks/use-file-menu";
 import MenuItemComponent from "../menu/menu-item";
+import { RootFileGetData, SubFileGetData } from "@/features/file/file";
 
 interface OptionsFileButtonWithFloatingElementProps {
   fileData: RootFileGetData | SubFileGetData;

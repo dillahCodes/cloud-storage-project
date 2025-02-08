@@ -1,6 +1,10 @@
 import { useDispatch, useSelector } from "react-redux";
-import { clearUser as clearUserAction, setStatus as setStatusAction, setUser as setUserAction, userSelector } from "../slice/user-slice";
-import { AuthState, FirebaseUserData } from "../auth";
+import {
+  clearUser as clearUserAction,
+  setStatus as setStatusAction,
+  setUser as setUserAction,
+  userSelector,
+} from "../slice/user-slice";
 import { useCallback } from "react";
 
 const useUser = () => {

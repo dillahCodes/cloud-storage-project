@@ -3,6 +3,7 @@ import { SubFolderGetData } from "@/features/folder/folder";
 import { db } from "@/firebase/firebase-services";
 import { doc, getDoc } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
+import { RootFileGetData, SubFileGetData } from "../file";
 
 interface FileLocationData {
   labelButton: "my storage" | string;
@@ -38,7 +39,9 @@ const useGetFileLoaction = ({ fileData }: UseGetFileLocation) => {
 
     const isRootFolderIsMine = fileData.root_folder_user_id === user.uid;
     const parentFolderData = await handleGetParentFolder();
-    const parentFolderDataSerialized = parentFolderData ? (JSON.parse(JSON.stringify(parentFolderData)) as SubFolderGetData) : null;
+    const parentFolderDataSerialized = parentFolderData
+      ? (JSON.parse(JSON.stringify(parentFolderData)) as SubFolderGetData)
+      : null;
     if (!parentFolderDataSerialized) return;
 
     setFileLocationData({

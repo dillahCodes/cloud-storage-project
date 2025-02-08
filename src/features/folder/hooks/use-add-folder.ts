@@ -1,4 +1,3 @@
-import { FirebaseUserData } from "@/features/auth/auth";
 import useUser from "@/features/auth/hooks/use-user";
 import { auth, db } from "@/firebase/firebase-services";
 import { collection, doc, getDocs, query, serverTimestamp, setDoc, where } from "firebase/firestore";
@@ -181,7 +180,10 @@ const createCollaboratorsData = (folderId: string, parentCollaboratorsData: Coll
  * @param {string} folderName - The name of the new folder.
  * @returns {SubFolderCreateData | RootFolderCreateData | null} A new folder data object, or null if the user is not authenticated.
  */
-const createFolderData = (parentFolderData: SubFolderGetData | null, folderName: string): SubFolderCreateData | RootFolderCreateData | null => {
+const createFolderData = (
+  parentFolderData: SubFolderGetData | null,
+  folderName: string
+): SubFolderCreateData | RootFolderCreateData | null => {
   const { currentUser } = auth;
   if (!currentUser) return null;
 

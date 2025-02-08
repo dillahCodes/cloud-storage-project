@@ -12,7 +12,6 @@ export const SearchbarFilterAndCategory = () => {
     selectedSortCategoryName,
     searchCategoryMenuItems,
     sortCategoryMenuItems,
-    isShowSearchCategory,
     handleSetSearchLocation,
     handleSetSearchCategory,
     handleSetSortCategory,
@@ -24,13 +23,12 @@ export const SearchbarFilterAndCategory = () => {
       {/* location and search for */}
       <Flex className="w-full" gap="small">
         <LocationFilter selectedLocationName={selectedLocationName} handleSetSearchLocation={handleSetSearchLocation} />
-        {isShowSearchCategory && (
-          <SearchCategory
-            selectedSearchCategoryName={selectedSearchCategoryName}
-            searchCategoryMenuItems={searchCategoryMenuItems}
-            handleSetSearchCategory={handleSetSearchCategory}
-          />
-        )}
+
+        <SearchCategory
+          selectedSearchCategoryName={selectedSearchCategoryName}
+          searchCategoryMenuItems={searchCategoryMenuItems}
+          handleSetSearchCategory={handleSetSearchCategory}
+        />
       </Flex>
 
       {/*  sort mode and category  */}

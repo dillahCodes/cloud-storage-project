@@ -6,6 +6,7 @@ import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setActiveAction } from "../slice/file-options-slice";
 import useSecuredFolderFileActions from "@/features/permissions/hooks/use-secured-folder-file-actions";
+import { RootFileGetData, SubFileGetData } from "../file";
 
 interface UseHandleDowloadFile {
   fileData: SubFileGetData | RootFileGetData | null;

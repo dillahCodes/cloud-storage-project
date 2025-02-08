@@ -8,6 +8,7 @@ import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fileOptionsSelector, setActiveAction } from "../slice/file-options-slice";
 import useSecuredFolderFileActions from "@/features/permissions/hooks/use-secured-folder-file-actions";
+import { RootFileGetData, SubFileGetData } from "../file";
 
 /**
  * Deletes a file from the Firestore database and the Firebase Storage bucket.
@@ -18,7 +19,10 @@ export const handleDeleteFile = async (activeFileData: RootFileGetData | SubFile
   const fileDocRef = doc(db, "files", activeFileData.file_id);
   const fileStorageRef = ref(storage, `user-files/${activeFileData.file_id}/${activeFileData.file_name}`);
 
-  const handleDecrementStorage = handleDecrementUserStorageUsage(activeFileData.root_folder_user_id, parseInt(activeFileData.file_size));
+  const handleDecrementStorage = handleDecrementUserStorageUsage(
+    activeFileData.root_folder_user_id,
+    parseInt(activeFileData.file_size)
+  );
   const handleDeleteFileMetadata = deleteDoc(fileDocRef);
   const handleDeleteFileObject = deleteObject(fileStorageRef);
 

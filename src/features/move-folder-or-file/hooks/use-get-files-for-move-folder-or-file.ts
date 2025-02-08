@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { setMoveFilesData, setMoveFileStatus } from "../slice/move-folders-and-files-data-slice";
+import { RootFileGetData, SubFileGetData } from "@/features/file/file";
 /**
  * Filters file data to ensure consistency between root and subfolder files.
  *
@@ -52,7 +53,9 @@ const buildQuery = (parentFolderId: string | null, userId: string): Query => {
 const handleGetFilesData = async (parentFolderId: string | null, userId: string) => {
   const q = buildQuery(parentFolderId, userId);
   const fileSnapshot = await getDocs(q);
-  return fileSnapshot.empty ? null : fileSnapshot.docs.map((doc) => handleFilteredDataFile(doc.data() as RootFileGetData | SubFileGetData));
+  return fileSnapshot.empty
+    ? null
+    : fileSnapshot.docs.map((doc) => handleFilteredDataFile(doc.data() as RootFileGetData | SubFileGetData));
 };
 
 interface UseGetFilesForMoveFolderOrFileProps {
@@ -79,7 +82,9 @@ const useGetFilesForMoveFolderOrFile = ({ shouldFetch }: UseGetFilesForMoveFolde
       dispatch(setMoveFileStatus("loading"));
 
       const filesData = await handleGetFilesData(parentId, user.uid);
-      parentId ? dispatch(setMoveFilesData(filesData as SubFileGetData[])) : dispatch(setMoveFilesData(filesData as RootFileGetData[]));
+      parentId
+        ? dispatch(setMoveFilesData(filesData as SubFileGetData[]))
+        : dispatch(setMoveFilesData(filesData as RootFileGetData[]));
 
       dispatch(setMoveFileStatus("succeeded"));
     } catch (error) {

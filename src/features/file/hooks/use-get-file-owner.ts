@@ -1,8 +1,8 @@
-import { UserDataDb } from "@/features/auth/auth";
 import useUser from "@/features/auth/hooks/use-user";
 import { db } from "@/firebase/firebase-services";
 import { doc, getDoc } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
+import { RootFileGetData, SubFileGetData } from "../file";
 
 interface UseGetFileOwnerParams {
   fileData: SubFileGetData | RootFileGetData;

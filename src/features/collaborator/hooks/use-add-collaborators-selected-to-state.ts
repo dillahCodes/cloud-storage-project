@@ -1,5 +1,4 @@
 import { useDispatch, useSelector } from "react-redux";
-import { UserDataDb } from "@/features/auth/auth";
 import {
   addCollaborators,
   modalAddSelectedCollaboratorsSelector,

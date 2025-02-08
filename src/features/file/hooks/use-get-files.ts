@@ -6,6 +6,7 @@ import { useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import useFilesSetState from "./use-files-setstate";
+import { RootFileGetData, SubFileGetData } from "../file";
 
 interface UseGetFilesProps {
   isRoot: boolean;
@@ -35,7 +36,12 @@ const useGetFiles = ({ isRoot, shouldFetchInMount }: UseGetFilesProps) => {
       return query(filesRef, where("parent_folder_id", "==", parent_folder_id), orderBy("created_at", "desc"));
     }
 
-    return query(filesRef, where("parent_folder_id", "==", null), where("owner_user_id", "==", currentUser?.uid), orderBy("created_at", "desc"));
+    return query(
+      filesRef,
+      where("parent_folder_id", "==", null),
+      where("owner_user_id", "==", currentUser?.uid),
+      orderBy("created_at", "desc")
+    );
   }, [isRoot, parent_folder_id]);
 
   /**

@@ -1,6 +1,16 @@
-import { UserDataDb } from "@/features/auth/auth";
 import { db } from "@/firebase/firebase-services";
-import { collection, doc, DocumentData, FirestoreError, getDoc, onSnapshot, Query, query, QuerySnapshot, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  DocumentData,
+  FirestoreError,
+  getDoc,
+  onSnapshot,
+  Query,
+  query,
+  QuerySnapshot,
+  where,
+} from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Collaborator, CollaboratorsStatus, CollaboratorUserData } from "../collaborator";
 

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { ChangeUserDataStatusProps } from "../auth";
 import { sendEmailVerification } from "firebase/auth";
 import { auth } from "@/firebase/firebase-services";
 

@@ -5,6 +5,7 @@ import { useCallback, useEffect } from "react";
 import { setMoveFilesData, setMoveFileStatus } from "../slice/move-folders-and-files-data-slice";
 import { collection, getDocs, orderBy, query, Query, where } from "firebase/firestore";
 import { db } from "@/firebase/firebase-services";
+import { RootFileGetData, SubFileGetData } from "@/features/file/file";
 
 const handleFilteredDataFile = (file: RootFileGetData | SubFileGetData): RootFileGetData | SubFileGetData => {
   if (file.parent_folder_id) {
@@ -35,7 +36,9 @@ const buildQuery = (parentFolderId: string | null, userId: string): Query => {
 const handleGetFilesData = async (parentFolderId: string | null, userId: string) => {
   const q = buildQuery(parentFolderId, userId);
   const fileSnapshot = await getDocs(q);
-  return fileSnapshot.empty ? null : fileSnapshot.docs.map((doc) => handleFilteredDataFile(doc.data() as RootFileGetData | SubFileGetData));
+  return fileSnapshot.empty
+    ? null
+    : fileSnapshot.docs.map((doc) => handleFilteredDataFile(doc.data() as RootFileGetData | SubFileGetData));
 };
 
 interface UseGetFilesDekstopMoveFolderOrFileParams {
@@ -53,7 +56,9 @@ const useGetFilesDekstopMoveFolderOrFile = ({ shouldFetch }: UseGetFilesDekstopM
       dispatch(setMoveFileStatus("loading"));
 
       const filesData = await handleGetFilesData(parentFolderId, user.uid);
-      parentFolderId ? dispatch(setMoveFilesData(filesData as SubFileGetData[])) : dispatch(setMoveFilesData(filesData as RootFileGetData[]));
+      parentFolderId
+        ? dispatch(setMoveFilesData(filesData as SubFileGetData[]))
+        : dispatch(setMoveFilesData(filesData as RootFileGetData[]));
 
       dispatch(setMoveFileStatus("succeeded"));
     } catch (error) {
