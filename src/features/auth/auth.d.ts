@@ -1,23 +1,25 @@
-import { User } from "firebase/auth";
-
-type AuthType = "login" | "register" | "forgot-password";
-
-interface AuthResponse {
-  isSuccess: boolean;
+type BaseAuthStatus = "idle" | "loading" | "succeeded" | "failed";
+type BaseAuthResponse = {
+  type: "error" | "success" | "warning";
   message: string;
-  data: User | null;
-  type: AuthType;
-}
+};
 
-interface FormAuthLogin {
-  email: string;
-  password: string;
-}
-
-interface FormAuthRegister {
+type BaseAuthForm = {
   username: string;
   email: string;
   password: string;
+};
+
+interface AuthRegisterState {
+  form: Pick<BaseAuthForm, "username" | "email" | "password">;
+  response: BaseAuthResponse | null;
+  status: BaseAuthStatus;
+}
+
+interface AuthLoginState {
+  form: Pick<BaseAuthForm, "email" | "password">;
+  response: BaseAuthResponse | null;
+  status: BaseAuthStatus;
 }
 
 interface FirebaseUserData {

@@ -1,106 +1,126 @@
+import handleCreateUserStorageQuota from "@/features/storage/handle-create-user-storage-quota";
 import { auth } from "@/firebase/firebase-services";
+import { Dispatch } from "@reduxjs/toolkit";
 import { createUserWithEmailAndPassword, updateProfile, UserCredential } from "firebase/auth";
-import { useState } from "react";
+import { useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { AuthResponse, FormAuthRegister } from "../auth";
-import createAuthResponse from "../create-auth-res";
 import googleRegister from "../google-register";
 import handleAuthError from "../handle-auth-error";
-import useUser from "./use-user";
-import handleCreateUserStorageQuota from "@/features/storage/handle-create-user-storage-quota";
+import { registerSelector, setRegisterResponse, setStatusRegister, updateRegisterForm } from "../slice/register-slice";
 
-interface UseFormAuthRegisterReturn {
-  formAuthRegister: FormAuthRegister;
-  isLoading: boolean;
-  handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleOnSubmit: (event: React.FormEvent) => Promise<AuthResponse>;
-  resultRegister: AuthResponse | null;
-  handleGoogleRegister: () => void;
+interface HandleValidateBeforeRegisterParams {
+  username: string;
+  email: string;
+  password: string;
+  dispatch: Dispatch;
 }
 
-const useFormRegister = (): UseFormAuthRegisterReturn => {
-  const { redirectUserTo } = useUser();
-  const [formAuthRegister, setFormAuthRegister] = useState<FormAuthRegister>({
-    username: "",
-    password: "",
-    email: "",
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [resultRegister, setResultRegister] = useState<AuthResponse | null>(null);
+const handleValidateBeforeRegister = ({ email, password, username, dispatch }: HandleValidateBeforeRegisterParams) => {
+  const conditions = [
+    {
+      condition: !username || username.trim() === "",
+      message: "Username cannot be empty.",
+    },
+    {
+      condition: !email || email.trim() === "",
+      message: "Email cannot be empty.",
+    },
+    {
+      condition: !password || password.trim() === "",
+      message: "Password cannot be empty.",
+    },
+    {
+      condition: password.length < 8,
+      message: "Password must be at least 8 characters long.",
+    },
+    {
+      condition: !email.includes("@"),
+      message: "Please enter a valid email address.",
+    },
+  ];
+
+  const firstValidation = conditions.find((condition) => condition.condition);
+  if (firstValidation) {
+    dispatch(setRegisterResponse({ message: firstValidation.message, type: "error" }));
+    return false;
+  }
+
+  return true;
+};
+
+const useFormRegister = () => {
+  const dispatch = useDispatch();
+  const { form, status, response } = useSelector(registerSelector);
+  const { email, password, username } = form;
+  // const { redirectUserTo } = useUser();
+
   const navigate = useNavigate();
 
+  // handle go to login page
+  const handleGoToLoginPage = useCallback(() => navigate("/login"), [navigate]);
+
   // Function to handle form input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormAuthRegister({ ...formAuthRegister, [e.target.name]: e.target.value });
-  };
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const nameField = e.target.name;
+      dispatch(updateRegisterForm({ [nameField]: e.target.value }));
+    },
+    [dispatch]
+  );
 
-  const handleGoogleRegister = async () => {
+  // Function to handle google register
+  const handleGoogleRegister = useCallback(async () => {
     const result = await googleRegister();
-
     if (result) {
-      const successResponse = createAuthResponse({
-        isSuccess: true,
-        message: "Register Success",
-        data: result.data,
-        type: "register",
-      });
-
-      setResultRegister(successResponse);
-      redirectUserTo ? navigate(redirectUserTo) : navigate("/storage/my-storage");
+      dispatch(
+        setRegisterResponse({
+          message: "register success",
+          type: "success",
+        })
+      );
     }
-  };
+  }, [dispatch]);
 
   // Function to handle form submission and user registration
-  const handleOnSubmit = async (e: React.FormEvent): Promise<AuthResponse> => {
-    e.preventDefault();
-    setIsLoading(true);
+  const handleOnSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      dispatch(setStatusRegister("loading"));
 
-    try {
-      const result: UserCredential = await createUserWithEmailAndPassword(auth, formAuthRegister.email, formAuthRegister.password);
+      try {
+        // Validate before register
+        const validateBeforeRegister = handleValidateBeforeRegister({ email, password, username, dispatch });
+        if (!validateBeforeRegister) return;
 
-      await handleCreateUserStorageQuota();
-      await updateProfile(result.user, {
-        displayName: formAuthRegister.username,
-      });
+        // Register user
+        const result: UserCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await handleCreateUserStorageQuota();
+        await updateProfile(result.user, { displayName: username });
 
-      const successResponse = createAuthResponse({
-        isSuccess: true,
-        message: "Register Success",
-        data: result.user,
-        type: "register",
-      });
-
-      setResultRegister(successResponse);
-      redirectUserTo ? navigate(redirectUserTo) : navigate("/storage/my-storage");
-
-      setTimeout(() => window.location.reload(), 1500);
-      return successResponse;
-    } catch (error) {
-      const errorMessage = handleAuthError(error);
-
-      const failureResponse = createAuthResponse({
-        isSuccess: false,
-        message: errorMessage,
-        type: "register",
-        data: null,
-      });
-
-      setResultRegister(failureResponse);
-      return failureResponse;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        // Success response and direct user
+        dispatch(setStatusRegister("succeeded"));
+        navigate("/storage/my-storage");
+        setTimeout(() => window.location.reload(), 1500);
+      } catch (error) {
+        const errorMessage = handleAuthError(error);
+        dispatch(setRegisterResponse({ message: errorMessage, type: "error" }));
+      } finally {
+        dispatch(setStatusRegister("idle"));
+        setTimeout(() => dispatch(setRegisterResponse(null)), 2000);
+      }
+    },
+    [dispatch, email, password, username, navigate]
+  );
 
   return {
-    formAuthRegister,
     handleChange,
     handleOnSubmit,
-    isLoading,
-    resultRegister,
-
-    // another register method
     handleGoogleRegister,
+    handleGoToLoginPage,
+    form,
+    status,
+    response,
   };
 };
 

@@ -1,26 +1,27 @@
-import { FormAuthRegister } from "@/features/auth/auth";
 import { neoBrutalBorderVariants, themeColors } from "@/theme/antd-theme";
 import Alert from "@components/ui/alert";
 import Button from "@components/ui/button";
-import { Flex, Input, message, Typography } from "antd";
+import { AlertProps, Flex, Input, message, Typography } from "antd";
 import React from "react";
 import { FaFacebookF, FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
+type RegisterAlert = {
+  message: string;
+  type: AlertProps["type"];
+};
+
 interface RegisterFormProps {
-  goToLogin?: () => void;
+  formValue: AuthRegisterState["form"];
+  alert: RegisterAlert | null;
+  isLoading: boolean;
+
+  goToLogin: () => void;
   handleUserNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleEmailChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handlePasswordChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleOnSubmit: (event: React.FormEvent) => void;
-  formValue: FormAuthRegister;
-  isLoading: boolean;
-  alert?: {
-    isShow?: boolean;
-    type?: "success" | "info" | "warning" | "error";
-    message?: string;
-  };
-  googleRegisterHandler?: () => void;
+  googleRegisterHandler: () => void;
 }
 
 const { Text } = Typography;
@@ -35,19 +36,18 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
   isLoading,
   alert,
 }) => {
-  const handleMessageComingSoon = () =>
+  const handleMessageComingSoon = () => {
     message.open({ type: "info", content: "coming soon", className: "font-archivo text-sm", key: "auth-coming-soon" });
+  };
 
   return (
     <Flex className="w-full p-5" vertical justify="space-evenly" gap="large">
       <Flex vertical gap="small">
         <Text className="text-2xl capitalize font-poppins font-bold">register</Text>
-        <Text className="text-sm capitalize font-archivo">
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Obcaecati, hic.
-        </Text>
+        <Text className="text-sm capitalize font-archivo">Sign up to store & access your files easily! 🚀📂</Text>
       </Flex>
 
-      {alert?.isShow && (
+      {alert && (
         <Alert
           message={alert?.message}
           className="rounded-sm font-archivo"

@@ -33,6 +33,7 @@ import { detailFolderPermissionSlice } from "@/features/permissions/slice/detail
 import { searchBarSlice } from "@/features/search-folder-or-file/slice/search-bar-slice";
 import { resultSearchSlice } from "@/features/search-folder-or-file/slice/result-search-slice";
 import { selectedSearchResultSlice } from "@/features/search-folder-or-file/slice/selected-search-result-selector";
+import { registerSlice } from "@/features/auth/slice/register-slice";
 
 const { createReduxHistory, routerMiddleware, routerReducer } = createReduxHistoryContext({
   history: createBrowserHistory(),
@@ -43,6 +44,8 @@ export const store = configureStore({
   reducer: {
     router: routerReducer,
 
+    // auth slices
+    register: registerSlice.reducer,
     auth: authSlice.reducer,
 
     // ui slices

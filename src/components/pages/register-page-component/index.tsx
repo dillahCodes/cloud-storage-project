@@ -5,12 +5,23 @@ import AuthCarousel from "@components/layout/carousel/auth-carousel";
 import RegisterForm from "@components/layout/form/register-form";
 import { Flex, Layout } from "antd";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+
+const RegisterCarousel = () => (
+  <div
+    className="w-full max-md:hidden  flex justify-center items-center border-r-2 border-black"
+    style={{ backgroundColor: themeColors.primary200 }}
+  >
+    <AuthCarousel />
+  </div>
+);
 
 const RegisterPageComponent: React.FC = () => {
+  const { handleChange, handleGoogleRegister, handleOnSubmit, handleGoToLoginPage, form, status, response } = useFormRegister();
   const { screenWidth } = useGetClientScreenWidth();
-  const { formAuthRegister, handleChange, handleOnSubmit, isLoading, resultRegister, handleGoogleRegister } = useFormRegister();
-  const navigate = useNavigate();
+
+  const isRegisterLoading: boolean = status === "loading";
+  const alert = response ? { message: response.message, type: response.type } : null;
+  const isShowRegisterCarousel = screenWidth >= 768;
 
   return (
     <Layout className="min-h-screen flex justify-center items-center p-5 min-w-[360px]">
@@ -18,27 +29,16 @@ const RegisterPageComponent: React.FC = () => {
         className="max-w-screen-lg w-full max-md:max-w-[400px]  rounded-sm border-2 border-black"
         style={neoBrutalBorderVariants.large}
       >
-        {screenWidth >= 768 && (
-          <div
-            className="w-full max-md:hidden  flex justify-center items-center border-r-2 border-black"
-            style={{ backgroundColor: themeColors.primary200 }}
-          >
-            <AuthCarousel />
-          </div>
-        )}
+        {isShowRegisterCarousel && <RegisterCarousel />}
         <RegisterForm
-          alert={{
-            isShow: resultRegister?.message !== undefined,
-            message: resultRegister?.message,
-            type: resultRegister?.isSuccess ? "success" : "error",
-          }}
-          isLoading={isLoading}
-          formValue={formAuthRegister}
+          alert={alert}
+          isLoading={isRegisterLoading}
+          formValue={form}
           handleOnSubmit={handleOnSubmit}
           handleEmailChange={handleChange}
           handlePasswordChange={handleChange}
           handleUserNameChange={handleChange}
-          goToLogin={() => navigate("/login")}
+          goToLogin={handleGoToLoginPage}
           googleRegisterHandler={handleGoogleRegister}
         />
       </Flex>
