@@ -18,20 +18,33 @@ const FodlerCardCollaborationInfo = () => {
 
   const handleNavigate = () => {
     if (items[1]) deleteByKey(items[1].key);
+    // if root folder is mine go to my storage else go to shared with me
     navigate(`/storage/folders/${currentMessage?.folderId}?st=shared-with-me`);
   };
 
   return (
-    <Flex className="max-w-sm p-3 w-full mx-auto border-2 border-black" vertical gap="small" style={{ ...neoBrutalBorderVariants.small }}>
+    <Flex
+      className="max-w-sm p-3 w-full mx-auto border-2 border-black"
+      vertical
+      gap="small"
+      style={{ ...neoBrutalBorderVariants.small }}
+    >
       <Text className="font-bold text-sm font-archivo mx-auto">Collaboration Invitation</Text>
       <Text className=" text-7xl font-archivo mx-auto">
         <BsPersonWorkspace />
       </Text>
       <Flex vertical>
         <Text className="text-sm font-archivo mx-auto line-clamp-2 text-center ">{senderUserData?.email}</Text>
-        <Text className="text-sm font-archivo mx-auto line-clamp-2 text-center ">has invited you to collaborate on a folder.</Text>
+        <Text className="text-sm font-archivo mx-auto line-clamp-2 text-center ">
+          has invited you to collaborate on a folder.
+        </Text>
       </Flex>
-      <Button type="primary" className="font-archivo text-black text-sm rounded-sm" onClick={handleNavigate} icon={<RiFolderFill />}>
+      <Button
+        type="primary"
+        className="font-archivo text-black text-sm rounded-sm"
+        onClick={handleNavigate}
+        icon={<RiFolderFill />}
+      >
         Go to folder
       </Button>
     </Flex>
