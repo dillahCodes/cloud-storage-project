@@ -1,4 +1,3 @@
-import { FirebaseUserData } from "@/features/auth/auth";
 import useUser from "@/features/auth/hooks/use-user";
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 import handleCheckIsStorageAvailable from "@/features/storage/handle-check-is-storage-available";
@@ -11,6 +10,7 @@ import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { closeModal, dekstopMoveSelector, resetDektopMoveState, setDekstopMoveStatus } from "../slice/dekstop-move-slice";
 import { moveFoldersAndFilesDataSelector } from "../slice/move-folders-and-files-data-slice";
+import { RootFileGetData, SubFileGetData } from "@/features/file/file";
 
 interface HandleUpdateFileMetadataInFireabseStorage {
   fileName: string;
@@ -66,7 +66,11 @@ const handleChangeUserStorageSize = async ({ mode, size, userId }: HandleChangeU
  * Updates the root-folder-owner custom metadata of the file in Firebase Storage to the given rootFolderOwner.
  * @param {HandleUpdateFileMetadataInFireabseStorage} params - An object containing the fileId and fileName of the file to update, and the rootFolderOwner to update the root-folder-owner custom metadata to.
  */
-const handleUpdateFileMetadataInFirebaseStorage = async ({ fileId, fileName, rootFolderOwner }: HandleUpdateFileMetadataInFireabseStorage) => {
+const handleUpdateFileMetadataInFirebaseStorage = async ({
+  fileId,
+  fileName,
+  rootFolderOwner,
+}: HandleUpdateFileMetadataInFireabseStorage) => {
   const fileRef = ref(storage, `user-files/${fileId}/${fileName}`);
   const newMetadata = {
     customMetadata: {
@@ -130,7 +134,11 @@ const handleChangeSubFileMetadata = async ({ fileId, parentFolderData, fileWillB
  *   - newRootFolderUserId: The new root folder user ID to assign to the file.
  */
 
-const handleChangeFileMetadataToRootFile = async ({ fileId, fileWillBeMoved, newRootFolderUserId }: HandleChangeFileMetadataToRootFile) => {
+const handleChangeFileMetadataToRootFile = async ({
+  fileId,
+  fileWillBeMoved,
+  newRootFolderUserId,
+}: HandleChangeFileMetadataToRootFile) => {
   const fileRef = doc(db, "files", fileId);
 
   const isDifferentRootFolderOwner = fileWillBeMoved.root_folder_user_id !== newRootFolderUserId;
@@ -172,13 +180,14 @@ const handleValidationMoveFile = (param: HandleValidationMoveFile): boolean => {
   const { user, fileId, fileWillBeMoved, parentFolderData, filesData, dispatch, isStorageAvailable } = param;
 
   const isInvalidFile = !fileWillBeMoved;
-  const isFileExist = !!filesData?.some((file) => file.file_id === fileId);
+  const isFileExist = filesData?.some(({ file_id }) => file_id === fileId) ?? false;
 
   const isNotFileOwner: boolean = user!.uid !== fileWillBeMoved!.owner_user_id;
 
   const isRootMoveFolderOrFileLocation: boolean = !parentFolderData;
   const isSubMoveFolderOrFileLocation: boolean = Boolean(parentFolderData) && !isRootMoveFolderOrFileLocation;
-  const isSubMoveSameRootFolder: boolean = isSubMoveFolderOrFileLocation && parentFolderData?.root_folder_id === fileWillBeMoved?.root_folder_id;
+  const isSubMoveSameRootFolder: boolean =
+    isSubMoveFolderOrFileLocation && parentFolderData?.root_folder_id === fileWillBeMoved?.root_folder_id;
 
   const isRootMoveNotOwner = isRootMoveFolderOrFileLocation && isNotFileOwner;
   const isSubMoveNotOwner = isSubMoveFolderOrFileLocation && isNotFileOwner && !isSubMoveSameRootFolder;
@@ -186,7 +195,10 @@ const handleValidationMoveFile = (param: HandleValidationMoveFile): boolean => {
   /**
    * storage not enough message
    */
-  const createStorageMessage: string = `${parentFolderData?.root_folder_user_id === user!.uid ? "Your" : "owner"} storage is full`;
+  const createStorageMessage =
+    (parentFolderData && parentFolderData.root_folder_user_id === user!.uid) || isRootMoveFolderOrFileLocation
+      ? "Your storage is full"
+      : "Owner's storage is full";
 
   // define conditions
   const conditions = [
@@ -249,7 +261,10 @@ const useConfirmDekstopMoveFile = () => {
       /**
        * check is storge enough
        */
-      const isStorageAvailable = await handleCheckIsStorageAvailable({ parentFolderData });
+      const isStorageAvailable = await handleCheckIsStorageAvailable({
+        parentFolderData,
+        oldRootFolderId: fileWillBeMoved?.root_folder_id || null,
+      });
 
       const validations: boolean = handleValidationMoveFile({
         fileWillBeMoved,
@@ -267,7 +282,11 @@ const useConfirmDekstopMoveFile = () => {
        */
       parentFolderData
         ? await handleChangeSubFileMetadata({ fileId: fileId!, parentFolderData, fileWillBeMoved: fileWillBeMoved! })
-        : await handleChangeFileMetadataToRootFile({ fileId: fileId!, fileWillBeMoved: fileWillBeMoved!, newRootFolderUserId: user!.uid });
+        : await handleChangeFileMetadataToRootFile({
+            fileId: fileId!,
+            fileWillBeMoved: fileWillBeMoved!,
+            newRootFolderUserId: user!.uid,
+          });
 
       /**
        * update file storage metadata

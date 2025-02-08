@@ -43,7 +43,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       <Flex vertical gap="small">
         <Text className="text-2xl capitalize font-poppins font-bold">login</Text>
         <Text className="text-sm capitalize font-archivo">
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Obcaecati, hic.
+          Welcome to Chery Storage! 🚀 Secure, simple, and always accessible!
         </Text>
       </Flex>
 

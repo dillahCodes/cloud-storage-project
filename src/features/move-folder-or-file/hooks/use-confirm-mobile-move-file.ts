@@ -1,4 +1,3 @@
-import { FirebaseUserData } from "@/features/auth/auth";
 import useUser from "@/features/auth/hooks/use-user";
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 import { db, storage } from "@/firebase/firebase-services";
@@ -246,9 +245,10 @@ const handleValidateBeforeMoveFile = async (params: HandleValidateBeforeMoveFile
   /**
    * storage not enough message
    */
-  const createStorageMessage: string = `${
-    parentFolderData?.root_folder_user_id === user!.uid ? "Your" : "owner"
-  } storage is full`;
+  const createStorageMessage =
+    (parentFolderData && parentFolderData.root_folder_user_id === user!.uid) || isRootMoveFolderOrFileLocation
+      ? "Your storage is full"
+      : "Owner's storage is full";
 
   const validations = [
     { condition: !fileId, message: "file not found, please try again" },
@@ -365,7 +365,10 @@ const useConfirmMobileMoveFile = () => {
        * fetch file to be moved and fetch data storage
        */
       const fileWillBeMoved = await handleGetFileById(fileId || "");
-      const isStorageAvailable = await handleCheckIsStorageAvailable({ parentFolderData });
+      const isStorageAvailable = await handleCheckIsStorageAvailable({
+        parentFolderData,
+        oldRootFolderId: fileWillBeMoved?.root_folder_id || null,
+      });
 
       const isValidationPass = await handleValidateBeforeMoveFile({
         fileWillBeMoved,

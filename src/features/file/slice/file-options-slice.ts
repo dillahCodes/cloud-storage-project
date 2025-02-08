@@ -1,5 +1,6 @@
 import { RootState } from "@/store/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { FileOptionsState } from "../file";
 
 const initialState: FileOptionsState = {
   activeAction: null,

@@ -56,7 +56,9 @@ const useHandleActionMoveFile = () => {
       },
       {
         condition: isMoveFromSubFolder,
-        url: parentFolderState.parentFolderData ? `/storage/folder/move?parentId=${parentFolderState.parentFolderData.folder_id}&st=my-storage` : "",
+        url: parentFolderState.parentFolderData
+          ? `/storage/folder/move?parentId=${parentFolderState.parentFolderData.folder_id}&st=my-storage`
+          : "",
         message: "move from sub folder",
       },
     ];

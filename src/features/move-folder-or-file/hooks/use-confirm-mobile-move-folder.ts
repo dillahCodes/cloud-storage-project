@@ -1,19 +1,35 @@
-import { FirebaseUserData } from "@/features/auth/auth";
 import useUser from "@/features/auth/hooks/use-user";
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 import { auth, db, storage } from "@/firebase/firebase-services";
 import { Dispatch } from "@reduxjs/toolkit";
-import { collection, doc, DocumentData, getDoc, getDocs, increment, query, QuerySnapshot, updateDoc, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  DocumentData,
+  getDoc,
+  getDocs,
+  increment,
+  query,
+  QuerySnapshot,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavigateFunction, useNavigate, useSearchParams } from "react-router-dom";
-import { mobileMoveSelector, resetMobileMoveState, setMobileMoveFolderMoveErrorMessage, setMobileMoveStatus } from "../slice/mobile-move-slice";
+import {
+  mobileMoveSelector,
+  resetMobileMoveState,
+  setMobileMoveFolderMoveErrorMessage,
+  setMobileMoveStatus,
+} from "../slice/mobile-move-slice";
 import { moveFoldersAndFilesDataSelector } from "../slice/move-folders-and-files-data-slice";
 import { message } from "antd";
 import useDetectLocation from "@/hooks/use-detect-location";
 import { resetFolderOptions } from "@/features/folder/slice/folder-options-slice";
 import { ref, updateMetadata } from "firebase/storage";
 import handleCheckIsStorageAvailable from "@/features/storage/handle-check-is-storage-available";
+import { SubFileGetData } from "@/features/file/file";
 
 interface MoveFolderParams {
   folderIdWillBeMoved: string;
@@ -151,6 +167,7 @@ const handleMoveFolderSecondValidation = (params: HandleMoveFolderSecondValidati
   /**
    * folder move validations
    */
+  const isRootMoveFolderOrFileLocation: boolean = !parentFolderData;
   const isNotOwnerMovingToRoot: boolean = isNotFolderOwner && !parentFolderData && isRootMovePage;
   const isMovingSharedFolderToMyFolder: boolean = isRootFolderMine && isRootMovePage;
   const isMovingSharedFolderNotOwnedByMe: boolean = (isMovingSharedFolderToMyFolder || isSubMovePage) && isNotFolderOwner;
@@ -158,7 +175,10 @@ const handleMoveFolderSecondValidation = (params: HandleMoveFolderSecondValidati
   /**
    * storage not enough message
    */
-  const createStorageMessage: string = `${parentFolderData?.root_folder_user_id === user!.uid ? "Your" : "owner"} storage is full`;
+  const createStorageMessage =
+    (parentFolderData && parentFolderData.root_folder_user_id === user!.uid) || isRootMoveFolderOrFileLocation
+      ? "Your storage is full"
+      : "Owner's storage is full";
 
   /**
    * validations list
@@ -169,7 +189,10 @@ const handleMoveFolderSecondValidation = (params: HandleMoveFolderSecondValidati
     { condition: isExistingFolder, message: "folder already exists." },
     { condition: isMoveToSelf, message: "You cannot move a folder to its own location." },
     { condition: isMoveToSelfSubFolder, message: "You cannot move a folder to its own subfolder." },
-    { condition: isNotOwnerMovingToRoot || isMovingSharedFolderNotOwnedByMe, message: "Only folder owner can move to this location." },
+    {
+      condition: isNotOwnerMovingToRoot || isMovingSharedFolderNotOwnedByMe,
+      message: "Only folder owner can move to this location.",
+    },
     { condition: !isStorageAvailable, message: createStorageMessage },
   ];
 
@@ -201,7 +224,9 @@ const handleMoveFolderSecondValidation = (params: HandleMoveFolderSecondValidati
 const handleGetFolderById = async (folderId: string) => {
   const folderDoc = doc(db, "folders", folderId);
   const folderSnapshot = await getDoc(folderDoc);
-  return folderSnapshot.exists() ? (JSON.parse(JSON.stringify(folderSnapshot.data())) as RootFolderGetData | SubFolderGetData) : null;
+  return folderSnapshot.exists()
+    ? (JSON.parse(JSON.stringify(folderSnapshot.data())) as RootFolderGetData | SubFolderGetData)
+    : null;
 };
 
 /**
@@ -243,7 +268,9 @@ const handleChangeUserStorageSize = async ({ mode, size, userId }: HandleChangeU
 const handleGetFilesByParentFolderId = async (folderId: string) => {
   const filesQuery = query(collection(db, "files"), where("parent_folder_id", "==", folderId));
   const filesSnapshot = await getDocs(filesQuery);
-  return filesSnapshot.empty ? null : (filesSnapshot.docs.map((doc) => JSON.parse(JSON.stringify(doc.data()))) as SubFileGetData[]);
+  return filesSnapshot.empty
+    ? null
+    : (filesSnapshot.docs.map((doc) => JSON.parse(JSON.stringify(doc.data()))) as SubFileGetData[]);
 };
 
 /**
@@ -301,7 +328,11 @@ const handleUpdateFilesPromises = async (params: HandleUpdateFilesPromises) => {
 const handleMoveFolder = async (params: MoveFolderParams) => {
   const { folderIdWillBeMoved, newParentFolderId, newRootFolderId, newRootFolderOwnerUserId } = params;
   const folderDoc = doc(db, "folders", folderIdWillBeMoved);
-  await updateDoc(folderDoc, { parent_folder_id: newParentFolderId, root_folder_id: newRootFolderId, root_folder_user_id: newRootFolderOwnerUserId });
+  await updateDoc(folderDoc, {
+    parent_folder_id: newParentFolderId,
+    root_folder_id: newRootFolderId,
+    root_folder_user_id: newRootFolderOwnerUserId,
+  });
 };
 
 /**
@@ -326,8 +357,10 @@ const navigateAfterMoveFolder = (parentFolderData: RootFolderGetData | SubFolder
   const isRootFolderMine = isUserMovedFolderToSubFolder && parentFolderData.root_folder_user_id === currentUser.uid;
 
   if (isUserMovedFolderToRoot) return navigate("/storage/my-storage");
-  if (isUserMovedFolderToSubFolder && isRootFolderMine) return navigate(`/storage/folders/${parentFolderData.folder_id}?st=my-storage`);
-  if (isUserMovedFolderToSubFolder && !isRootFolderMine) return navigate(`/storage/folders/${parentFolderData.folder_id}?st=shared-with-me`);
+  if (isUserMovedFolderToSubFolder && isRootFolderMine)
+    return navigate(`/storage/folders/${parentFolderData.folder_id}?st=my-storage`);
+  if (isUserMovedFolderToSubFolder && !isRootFolderMine)
+    return navigate(`/storage/folders/${parentFolderData.folder_id}?st=shared-with-me`);
 };
 
 /**
@@ -406,7 +439,10 @@ const useConfirmMobileMoveFolder = () => {
         newRootFolderOwnerUserId,
       });
     } catch (error) {
-      console.error("error while move folder recursively: ", error instanceof Error ? error.message : "an unknown error occurred");
+      console.error(
+        "error while move folder recursively: ",
+        error instanceof Error ? error.message : "an unknown error occurred"
+      );
     }
   }, []);
 
@@ -417,7 +453,13 @@ const useConfirmMobileMoveFolder = () => {
      * folderId, moveFromLocationPath, user. return
      * false if failed and return true if success
      */
-    const firstValidation = handleMoveFolderFirstValidation({ folderId, moveFrom: moveFromLocationPath, user, dispatch, navigate });
+    const firstValidation = handleMoveFolderFirstValidation({
+      folderId,
+      moveFrom: moveFromLocationPath,
+      user,
+      dispatch,
+      navigate,
+    });
     if (!firstValidation) return;
 
     try {
@@ -431,7 +473,10 @@ const useConfirmMobileMoveFolder = () => {
       /**
        * check is storage available or not
        */
-      const isStorageAvailable = await handleCheckIsStorageAvailable({ parentFolderData });
+      const isStorageAvailable = await handleCheckIsStorageAvailable({
+        parentFolderData,
+        oldRootFolderId: folderWillBeMoved?.root_folder_id || null,
+      });
 
       /**
        * second validation
@@ -492,7 +537,12 @@ const useConfirmMobileMoveFolder = () => {
       dispatch(resetMobileMoveState());
       dispatch(resetFolderOptions());
 
-      message.open({ type: "success", content: "Folder moved successfully.", className: "font-archivo text-sm", key: "folder-move-success-message" });
+      message.open({
+        type: "success",
+        content: "Folder moved successfully.",
+        className: "font-archivo text-sm",
+        key: "folder-move-success-message",
+      });
     } catch (error) {
       dispatch(setMobileMoveStatus("error"));
       console.error("error while move folder: ", error instanceof Error ? error.message : "an unknown error occurred");

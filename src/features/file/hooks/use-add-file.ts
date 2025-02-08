@@ -1,4 +1,3 @@
-import { FirebaseUserData } from "@/features/auth/auth";
 import useUser from "@/features/auth/hooks/use-user";
 import { SubFolderGetData } from "@/features/folder/folder";
 import useAddActivityCreatedFile from "@/features/folder/hooks/use-add-activity-created-file";

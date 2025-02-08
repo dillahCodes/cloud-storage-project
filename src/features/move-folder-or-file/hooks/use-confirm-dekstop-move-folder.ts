@@ -1,16 +1,27 @@
-import { FirebaseUserData } from "@/features/auth/auth";
 import useUser from "@/features/auth/hooks/use-user";
 import { RootFolderGetData, SubFolderGetData } from "@/features/folder/folder";
 import { db, storage } from "@/firebase/firebase-services";
 import { Dispatch } from "@reduxjs/toolkit";
 import { message } from "antd";
-import { collection, doc, DocumentData, getDoc, getDocs, increment, query, QuerySnapshot, updateDoc, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  DocumentData,
+  getDoc,
+  getDocs,
+  increment,
+  query,
+  QuerySnapshot,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { ref, updateMetadata } from "firebase/storage";
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { closeModal, dekstopMoveSelector, resetDektopMoveState, setDekstopMoveStatus } from "../slice/dekstop-move-slice";
 import { moveFoldersAndFilesDataSelector } from "../slice/move-folders-and-files-data-slice";
 import handleCheckIsStorageAvailable from "@/features/storage/handle-check-is-storage-available";
+import { SubFileGetData } from "@/features/file/file";
 
 interface MoveFolderParams {
   folderIdWillBeMoved: string;
@@ -85,7 +96,8 @@ const handleMoveFolderValidation = (params: ValidateMoveParams) => {
    */
   const isRootMoveFolderOrFileLocation: boolean = !parentFolderData;
   const isSubMoveFolderOrFileLocation: boolean = Boolean(parentFolderData) && !isRootMoveFolderOrFileLocation;
-  const isSubMoveSameRootFolder: boolean = isSubMoveFolderOrFileLocation && parentFolderData?.root_folder_id === folderWillBeMoved?.root_folder_id;
+  const isSubMoveSameRootFolder: boolean =
+    isSubMoveFolderOrFileLocation && parentFolderData?.root_folder_id === folderWillBeMoved?.root_folder_id;
 
   const isRootMoveNotOwner = isRootMoveFolderOrFileLocation && isNotFolderOwner;
   const isSubMoveNotOwner = isSubMoveFolderOrFileLocation && isNotFolderOwner && !isSubMoveSameRootFolder;
@@ -93,7 +105,10 @@ const handleMoveFolderValidation = (params: ValidateMoveParams) => {
   /**
    * storage not enough message
    */
-  const createStorageMessage: string = `${parentFolderData?.root_folder_user_id === user!.uid ? "Your" : "owner"} storage is full`;
+  const createStorageMessage =
+    (parentFolderData && parentFolderData.root_folder_user_id === user!.uid) || isRootMoveFolderOrFileLocation
+      ? "Your storage is full"
+      : "Owner's storage is full";
 
   const validation = [
     {
@@ -145,7 +160,9 @@ const handleMoveFolderValidation = (params: ValidateMoveParams) => {
 const handleGetFolderById = async (folderId: string) => {
   const folderDoc = doc(db, "folders", folderId);
   const folderSnapshot = await getDoc(folderDoc);
-  return folderSnapshot.exists() ? (JSON.parse(JSON.stringify(folderSnapshot.data())) as RootFolderGetData | SubFolderGetData) : null;
+  return folderSnapshot.exists()
+    ? (JSON.parse(JSON.stringify(folderSnapshot.data())) as RootFolderGetData | SubFolderGetData)
+    : null;
 };
 
 /**
@@ -202,7 +219,11 @@ const moveSubfoldersRecursively = async (params: MoveSubFoldersRecursivelyParams
 const handleMoveFolder = async (params: MoveFolderParams) => {
   const { folderIdWillBeMoved, newParentFolderId, newRootFolderId, newRootFolderOwnerUserId } = params;
   const folderDoc = doc(db, "folders", folderIdWillBeMoved);
-  await updateDoc(folderDoc, { parent_folder_id: newParentFolderId, root_folder_id: newRootFolderId, root_folder_user_id: newRootFolderOwnerUserId });
+  await updateDoc(folderDoc, {
+    parent_folder_id: newParentFolderId,
+    root_folder_id: newRootFolderId,
+    root_folder_user_id: newRootFolderOwnerUserId,
+  });
 };
 
 /**
@@ -215,7 +236,9 @@ const handleMoveFolder = async (params: MoveFolderParams) => {
 const handleGetFilesByParentFolderId = async (folderId: string) => {
   const filesQuery = query(collection(db, "files"), where("parent_folder_id", "==", folderId));
   const filesSnapshot = await getDocs(filesQuery);
-  return filesSnapshot.empty ? null : (filesSnapshot.docs.map((doc) => JSON.parse(JSON.stringify(doc.data()))) as SubFileGetData[]);
+  return filesSnapshot.empty
+    ? null
+    : (filesSnapshot.docs.map((doc) => JSON.parse(JSON.stringify(doc.data()))) as SubFileGetData[]);
 };
 
 const handleUpdateFileMetadataInFirebaseStorage = async (params: HandleUpdateFileMetadataInFireabseStorage) => {
@@ -302,7 +325,10 @@ const useConfirmDekstopMoveFolder = () => {
         newRootFolderOwnerUserId,
       });
     } catch (error) {
-      console.error("error while move folder recursively: ", error instanceof Error ? error.message : "an unknown error occurred");
+      console.error(
+        "error while move folder recursively: ",
+        error instanceof Error ? error.message : "an unknown error occurred"
+      );
     }
   }, []);
 
@@ -319,7 +345,10 @@ const useConfirmDekstopMoveFolder = () => {
       /**
        * fetch is storage available
        */
-      const isStorageAvailable = await handleCheckIsStorageAvailable({ parentFolderData });
+      const isStorageAvailable = await handleCheckIsStorageAvailable({
+        parentFolderData,
+        oldRootFolderId: folderWillBeMoved?.root_folder_id || null,
+      });
 
       /**
        * validate before move folder
@@ -368,7 +397,12 @@ const useConfirmDekstopMoveFolder = () => {
        */
       dispatch(setDekstopMoveStatus("success"));
       dispatch(resetDektopMoveState());
-      message.open({ type: "success", content: "Folder moved successfully.", className: "font-archivo text-sm", key: "folder-move-success-message" });
+      message.open({
+        type: "success",
+        content: "Folder moved successfully.",
+        className: "font-archivo text-sm",
+        key: "folder-move-success-message",
+      });
     } catch (error) {
       dispatch(setDekstopMoveStatus("error"));
       console.error("error while move folder: ", error instanceof Error ? error.message : "an unknown error occurred");
