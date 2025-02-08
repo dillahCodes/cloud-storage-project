@@ -4,12 +4,10 @@ import { neoBrutalBorderVariants, themeColors } from "@/theme/antd-theme";
 import AuthCarousel from "@components/layout/carousel/auth-carousel";
 import FrogotPasswordForm from "@components/layout/form/forgot-password-form";
 import { Flex, Layout } from "antd";
-import { useNavigate } from "react-router-dom";
 
 const ForgotPasswordPageComponent: React.FC = () => {
-  const navigate = useNavigate();
   const { screenWidth } = useGetClientScreenWidth();
-  const { email, forgotPasswordResult, handleChange, handleOnSubmit, isLoading } = useFormForgotPassword();
+  const { alert, email, handleChange, handleGoToLogin, handleOnSubmit, isLoading } = useFormForgotPassword();
 
   return (
     <Layout className="min-h-screen flex justify-center items-center p-5 min-w-[360px]">
@@ -27,18 +25,12 @@ const ForgotPasswordPageComponent: React.FC = () => {
         )}
 
         <FrogotPasswordForm
-          alert={{
-            isShow: forgotPasswordResult?.message !== undefined,
-            message: forgotPasswordResult?.message || "",
-            type: forgotPasswordResult?.isSuccess ? "success" : "error",
-          }}
-          formValue={{
-            email: email,
-          }}
-          isLoading={isLoading}
-          handleOnSubmit={handleOnSubmit}
+          alert={alert}
+          email={email}
           handleEmailChange={handleChange}
-          handleGotoLogin={() => navigate("/login")}
+          handleGotoLogin={handleGoToLogin}
+          handleOnSubmit={handleOnSubmit}
+          isLoading={isLoading}
         />
       </Flex>
     </Layout>

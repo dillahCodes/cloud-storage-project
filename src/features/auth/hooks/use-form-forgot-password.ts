@@ -1,14 +1,20 @@
-import { useState } from "react";
-import createAuthResponse from "../create-auth-res";
-import handleAuthError from "../handle-auth-error";
 import { auth } from "@/firebase/firebase-services";
 import { sendPasswordResetEmail } from "firebase/auth";
+import { useReducer } from "react";
+import handleAuthError from "../handle-auth-error";
+import { useNavigate } from "react-router-dom";
 
-interface ForgotPassword extends AuthResponse {
-  check: boolean;
+interface ForgotPassword {
+  condition: boolean;
+  message: string;
 }
 
-const validateForgotPassword = (email: string, setForgotPasswordResult: (response: AuthResponse) => void): boolean => {
+interface HandleValidateForgotPasswordParams {
+  email: string;
+  dispatch: React.Dispatch<ForgotPasswordAction>;
+}
+
+const handleValidateForgotPassword = ({ dispatch, email }: HandleValidateForgotPasswordParams): boolean => {
   const hasValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -16,86 +22,88 @@ const validateForgotPassword = (email: string, setForgotPasswordResult: (respons
 
   const validations: ForgotPassword[] = [
     {
-      check: email.trim() === "",
-      message: "Please fill out all fields.",
-      data: null,
-      isSuccess: false,
-      type: "forgot-password",
+      condition: email.trim() === "",
+      message: "Email cannot be empty.",
     },
     {
-      check: !hasValidEmail(email),
+      condition: !hasValidEmail(email),
       message: "Please enter a valid email address.",
-      data: null,
-      isSuccess: false,
-      type: "forgot-password",
     },
   ];
 
-  for (const validation of validations) {
-    if (validation.check) {
-      setForgotPasswordResult({
-        isSuccess: validation.isSuccess,
-        message: validation.message,
-        data: validation.data,
-        type: validation.type,
-      });
-      return false;
-    }
+  const firstValidation = validations.find((validation) => validation.condition);
+  if (firstValidation) {
+    dispatch({ type: "SET_RESPONSE", payload: { message: firstValidation.message, type: "error" } });
+    return false;
   }
 
-  return true; // if all validations pass
+  return true;
+};
+
+const initialState: ForgotPasswordState = {
+  form: { email: "" },
+  response: null,
+  status: "idle",
+};
+
+const reducer = (state: ForgotPasswordState, action: ForgotPasswordAction): ForgotPasswordState => {
+  switch (action.type) {
+    case "SET_EMAIL":
+      return { ...state, form: { ...state.form, email: action.payload } };
+    case "SET_RESPONSE":
+      return { ...state, response: action.payload };
+    case "SET_STATUS":
+      return { ...state, status: action.payload };
+    case "RESET":
+      return initialState;
+    default:
+      console.warn(`Unknown action type: ${(action as ForgotPasswordAction).type}`);
+      return state;
+  }
 };
 
 const useFormForgotPassword = () => {
-  const [email, setEmail] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [forgotPasswordResult, setForgotPasswordResult] = useState<AuthResponse | null>(null);
+  const navigate = useNavigate();
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value);
+  // handle go to login
+  const handleGoToLogin = () => navigate("/login");
+
+  // handle input change
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type: "SET_EMAIL", payload: event.target.value });
+  };
 
   const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
-      if (!validateForgotPassword(email, setForgotPasswordResult)) {
-        setIsLoading(false);
-        return;
-      }
+      dispatch({ type: "SET_STATUS", payload: "loading" });
 
-      await sendPasswordResetEmail(auth, email);
+      // validate input before sending password reset email
+      const validateInput = handleValidateForgotPassword({ dispatch, email: state.form.email });
+      if (!validateInput) return;
 
-      const successResponse = createAuthResponse({
-        isSuccess: true,
-        message: "Password reset email sent successfully.",
-        data: null,
-        type: "forgot-password",
-      });
+      // send password reset email
+      await sendPasswordResetEmail(auth, state.form.email);
 
-      setForgotPasswordResult(successResponse);
-      return successResponse;
+      // success and reset form
+      dispatch({ type: "SET_RESPONSE", payload: { message: "Password reset email sent successfully.", type: "success" } });
     } catch (error) {
       const errorMessage = handleAuthError(error);
-      const failureResponse = createAuthResponse({
-        isSuccess: false,
-        message: errorMessage,
-        type: "forgot-password",
-        data: null,
-      });
-
-      setForgotPasswordResult(failureResponse);
-      return failureResponse;
+      dispatch({ type: "SET_RESPONSE", payload: { message: errorMessage, type: "error" } });
     } finally {
-      setIsLoading(false);
+      setTimeout(() => dispatch({ type: "RESET" }), 3000);
     }
   };
 
   return {
-    email,
-    isLoading,
-    forgotPasswordResult,
+    alert: state.response ? { message: state.response.message, type: state.response.type } : null,
+    email: state.form.email,
+    isLoading: state.status === "loading",
     handleChange,
     handleOnSubmit,
+    handleGoToLogin,
   };
 };
 

@@ -22,6 +22,18 @@ interface AuthLoginState {
   status: BaseAuthStatus;
 }
 
+interface ForgotPasswordState {
+  form: Pick<BaseAuthForm, "email">;
+  response: BaseAuthResponse | null;
+  status: BaseAuthStatus;
+}
+
+type ForgotPasswordAction =
+  | { type: "SET_EMAIL"; payload: string }
+  | { type: "SET_RESPONSE"; payload: BaseAuthResponse | null }
+  | { type: "SET_STATUS"; payload: BaseAuthStatus }
+  | { type: "RESET" };
+
 interface FirebaseUserData {
   displayName: string | null;
   email: string | null;

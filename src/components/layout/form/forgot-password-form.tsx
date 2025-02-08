@@ -1,17 +1,16 @@
 import { neoBrutalBorderVariants, themeColors } from "@/theme/antd-theme";
 import Alert from "@components/ui/alert";
 import Button from "@components/ui/button";
-import { Flex, Input, Typography } from "antd";
+import { AlertProps, Flex, Input, Typography } from "antd";
+
+type ForgotPasswordAlert = {
+  message: string;
+  type: AlertProps["type"];
+};
 
 interface ForgotPasswordProps {
-  alert?: {
-    isShow: boolean;
-    message: string;
-    type: "success" | "error";
-  };
-  formValue: {
-    email: string;
-  };
+  alert: ForgotPasswordAlert | null;
+  email: string;
   isLoading: boolean;
   handleOnSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   handleEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -21,7 +20,7 @@ interface ForgotPasswordProps {
 const { Text } = Typography;
 const FrogotPasswordForm: React.FC<ForgotPasswordProps> = ({
   alert,
-  formValue,
+  email,
   isLoading,
   handleOnSubmit,
   handleEmailChange,
@@ -34,7 +33,7 @@ const FrogotPasswordForm: React.FC<ForgotPasswordProps> = ({
         <Text className="text-sm capitalize font-archivo">Lorem ipsum dolor, sit amet consectetur adipisicing.</Text>
       </Flex>
 
-      {alert?.isShow && (
+      {alert && (
         <Alert
           message={alert?.message}
           className="rounded-sm font-archivo"
@@ -47,7 +46,7 @@ const FrogotPasswordForm: React.FC<ForgotPasswordProps> = ({
       <form onSubmit={handleOnSubmit}>
         <Flex vertical gap="middle">
           <Input
-            value={formValue?.email}
+            value={email}
             onChange={handleEmailChange}
             className="w-full border-2 border-black"
             name="email"
