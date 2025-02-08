@@ -34,7 +34,7 @@ const StarredPageComponent: React.FC = () => {
   const { status: fetchStatus } = useCurrentFolderState();
 
   return (
-    <MainLayout showAddButton>
+    <MainLayout showAddButton showPasteButton={false}>
       <Flex className="max-w-screen-lg mx-auto px-3 my-5" vertical gap="middle">
         {fetchStatus === "loading" && <Spin />}
         <StarredMappingFolders />

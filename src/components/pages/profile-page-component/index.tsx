@@ -38,7 +38,7 @@ const ProfilePageComponent: React.FC = () => {
   }, [screenWidth]);
 
   return (
-    <MainLayout showAddButton={false}>
+    <MainLayout showAddButton={false} showPasteButton={false}>
       <Layout
         className={classNames("w-full p-3  ", {
           "max-w-screen-lg mx-auto": !isWrap,

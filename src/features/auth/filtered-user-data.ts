@@ -1,5 +1,4 @@
 import { User } from "firebase/auth";
-import { FirebaseUserData } from "./auth";
 
 const filteredUserData = (currentUser: User | null): FirebaseUserData | null => {
   if (currentUser) {

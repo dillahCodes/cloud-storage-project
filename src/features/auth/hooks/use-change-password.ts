@@ -1,11 +1,14 @@
 import { auth } from "@/firebase/firebase-services";
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
 import { useState } from "react";
-import { ChangeUserDataStatusProps } from "../auth";
 import handleAuthError from "../handle-auth-error";
 
 const hasEmptyField = (passwordState: ChangePasswordState): boolean => {
-  return passwordState.currentPassword.trim() === "" || passwordState.newPassword.trim() === "" || passwordState.confirmPassword.trim() === "";
+  return (
+    passwordState.currentPassword.trim() === "" ||
+    passwordState.newPassword.trim() === "" ||
+    passwordState.confirmPassword.trim() === ""
+  );
 };
 
 interface ValidationPassword extends Pick<ChangeUserDataStatusProps, "type"> {
@@ -13,7 +16,10 @@ interface ValidationPassword extends Pick<ChangeUserDataStatusProps, "type"> {
   message: string;
 }
 
-const validatePasswordChange = (passwordState: ChangePasswordState, statusState: (props: ChangeUserDataStatusProps) => void): boolean => {
+const validatePasswordChange = (
+  passwordState: ChangePasswordState,
+  statusState: (props: ChangeUserDataStatusProps) => void
+): boolean => {
   const validations: ValidationPassword[] = [
     {
       check: hasEmptyField(passwordState),

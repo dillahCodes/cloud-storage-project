@@ -1,6 +1,5 @@
 import { Flex, Typography } from "antd";
 import AvatarWithUserPhoto, { WithFloatingElementAvatarUserPhoto } from "../avatar/avatar-with-user-photo";
-import { AuthState } from "@/features/auth/auth";
 import { LuUserCog } from "react-icons/lu";
 import Button from "@components/ui/button";
 import { BiLogOut } from "react-icons/bi";
@@ -56,7 +55,12 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
           <Text className=" text-xs  font-archivo">{user?.email}</Text>
         </Flex>
         <Flex gap="small">
-          <Button type="primary" className="rounded-none" neoBrutalType="medium" onClick={() => navigate("/storage/profile", { replace: true })}>
+          <Button
+            type="primary"
+            className="rounded-none"
+            neoBrutalType="medium"
+            onClick={() => navigate("/storage/profile", { replace: true })}
+          >
             <Flex align="center" gap="middle" className=" rounded-md w-full">
               <Text className="text-lg">
                 <LuUserCog />

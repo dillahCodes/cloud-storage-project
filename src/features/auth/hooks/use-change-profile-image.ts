@@ -3,7 +3,6 @@ import Compressor from "compressorjs";
 import { updateProfile } from "firebase/auth";
 import { getDownloadURL, ref, StorageReference, uploadBytes } from "firebase/storage";
 import { useState } from "react";
-import { ChangeUserDataStatusProps } from "../auth";
 
 const compressAndUploadImage = (file: File, storageRef: StorageReference): Promise<string> => {
   return new Promise((resolve, reject) => {

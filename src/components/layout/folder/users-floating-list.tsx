@@ -1,4 +1,3 @@
-import { UserDataDb } from "@/features/auth/auth";
 import { neoBrutalBorderVariants } from "@/theme/antd-theme";
 import { Flex, Typography } from "antd";
 import AvatarWithUserPhoto from "../avatar/avatar-with-user-photo";

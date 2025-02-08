@@ -1,4 +1,3 @@
-import { AuthState } from "@/features/auth/auth";
 import useUser from "@/features/auth/hooks/use-user";
 import logOut from "@/features/auth/logout";
 import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
@@ -59,7 +58,11 @@ const UserInfo: React.FC = () => {
       </div>
 
       <Flex vertical justify="space-around" align="center" className="h-full" gap="middle">
-        {user?.photoURL ? <AvatarWithUserPhoto size={100} src={user?.photoURL} /> : <AvatarOnlyIcon iconClassname="text-5xl" size={100} />}
+        {user?.photoURL ? (
+          <AvatarWithUserPhoto size={100} src={user?.photoURL} />
+        ) : (
+          <AvatarOnlyIcon iconClassname="text-5xl" size={100} />
+        )}
 
         <Flex
           className="w-full border-2 border-black p-2 rounded-sm"

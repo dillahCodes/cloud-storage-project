@@ -5,7 +5,6 @@ import filteredUserData from "../filtered-user-data";
 import getUserDataInDb from "../get-user-data-in-db";
 import createUserDataDb from "../create-user-data-db";
 import { auth } from "@/firebase/firebase-services";
-import { FirebaseUserData, UserDataDb } from "../auth";
 
 interface HasUserDataChangedProps {
   userData: Partial<Pick<FirebaseUserData, "displayName" | "email" | "photoURL">> | null;

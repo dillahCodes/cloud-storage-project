@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { ChangeUserDataStatusProps } from "../auth";
 import handleAuthError from "../handle-auth-error";
 import { EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification, updateEmail } from "firebase/auth";
 import { auth } from "@/firebase/firebase-services";
@@ -9,7 +8,10 @@ interface ValidationEmail extends Pick<ChangeUserDataStatusProps, "type"> {
   message: string;
 }
 
-const validateEmailChange = (emailState: ChangeEmailState, setEmailChangeStatus: (props: ChangeUserDataStatusProps) => void): boolean => {
+const validateEmailChange = (
+  emailState: ChangeEmailState,
+  setEmailChangeStatus: (props: ChangeUserDataStatusProps) => void
+): boolean => {
   const { currentUser } = auth;
   const hasEmptyField = (emailState: ChangeEmailState): boolean => {
     return emailState.newEmail.trim() === "" || emailState.currentPassword.trim() === "";
