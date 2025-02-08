@@ -23,6 +23,10 @@ const handleValidateBeforeRegister = ({ email, password, username, dispatch }: H
       message: "Username cannot be empty.",
     },
     {
+      condition: username.length < 5,
+      message: "Username must be at least 5 characters long.",
+    },
+    {
       condition: !email || email.trim() === "",
       message: "Email cannot be empty.",
     },
@@ -43,6 +47,7 @@ const handleValidateBeforeRegister = ({ email, password, username, dispatch }: H
   const firstValidation = conditions.find((condition) => condition.condition);
   if (firstValidation) {
     dispatch(setRegisterResponse({ message: firstValidation.message, type: "error" }));
+    dispatch(setStatusRegister("failed"));
     return false;
   }
 
@@ -73,14 +78,13 @@ const useFormRegister = () => {
   const handleGoogleRegister = useCallback(async () => {
     const result = await googleRegister();
     if (result) {
-      dispatch(
-        setRegisterResponse({
-          message: "register success",
-          type: "success",
-        })
-      );
+      dispatch(setRegisterResponse({ message: "register success, redirecting...", type: "success" }));
+      setTimeout(() => {
+        navigate("/storage/my-storage");
+        dispatch(setRegisterResponse(null));
+      }, 2000);
     }
-  }, [dispatch]);
+  }, [dispatch, navigate]);
 
   // Function to handle form submission and user registration
   const handleOnSubmit = useCallback(
@@ -98,29 +102,40 @@ const useFormRegister = () => {
         await handleCreateUserStorageQuota();
         await updateProfile(result.user, { displayName: username });
 
-        // Success response and direct user
+        // Success and reset form
+        dispatch(setRegisterResponse({ message: "Register Success, redirecting...", type: "success" }));
         dispatch(setStatusRegister("succeeded"));
-        navigate("/storage/my-storage");
-        setTimeout(() => window.location.reload(), 1500);
+        dispatch(updateRegisterForm({ username: "", email: "", password: "" }));
+
+        // redirect user to home
+        setTimeout(() => {
+          navigate("/storage/my-storage");
+          window.location.reload();
+        }, 1500);
       } catch (error) {
         const errorMessage = handleAuthError(error);
         dispatch(setRegisterResponse({ message: errorMessage, type: "error" }));
       } finally {
-        dispatch(setStatusRegister("idle"));
-        setTimeout(() => dispatch(setRegisterResponse(null)), 2000);
+        // reset status and response after 2 seconds
+        setTimeout(() => {
+          dispatch(setRegisterResponse(null));
+          dispatch(setStatusRegister("idle"));
+        }, 2000);
       }
     },
     [dispatch, email, password, username, navigate]
   );
 
   return {
-    handleChange,
-    handleOnSubmit,
+    formValue: form,
+    isLoading: status === "loading",
+    alert: response ? { message: response.message, type: response.type } : null,
+    handleEmailChange: handleChange,
+    handlePasswordChange: handleChange,
+    handleUserNameChange: handleChange,
     handleGoogleRegister,
     handleGoToLoginPage,
-    form,
-    status,
-    response,
+    handleOnSubmit,
   };
 };
 

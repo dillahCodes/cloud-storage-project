@@ -16,11 +16,19 @@ const RegisterCarousel = () => (
 );
 
 const RegisterPageComponent: React.FC = () => {
-  const { handleChange, handleGoogleRegister, handleOnSubmit, handleGoToLoginPage, form, status, response } = useFormRegister();
+  const {
+    alert,
+    formValue,
+    handleEmailChange,
+    handleOnSubmit,
+    handlePasswordChange,
+    handleUserNameChange,
+    isLoading,
+    handleGoToLoginPage,
+    handleGoogleRegister,
+  } = useFormRegister();
   const { screenWidth } = useGetClientScreenWidth();
 
-  const isRegisterLoading: boolean = status === "loading";
-  const alert = response ? { message: response.message, type: response.type } : null;
   const isShowRegisterCarousel = screenWidth >= 768;
 
   return (
@@ -32,12 +40,12 @@ const RegisterPageComponent: React.FC = () => {
         {isShowRegisterCarousel && <RegisterCarousel />}
         <RegisterForm
           alert={alert}
-          isLoading={isRegisterLoading}
-          formValue={form}
+          isLoading={isLoading}
+          formValue={formValue}
           handleOnSubmit={handleOnSubmit}
-          handleEmailChange={handleChange}
-          handlePasswordChange={handleChange}
-          handleUserNameChange={handleChange}
+          handleEmailChange={handleEmailChange}
+          handlePasswordChange={handlePasswordChange}
+          handleUserNameChange={handleUserNameChange}
           goToLogin={handleGoToLoginPage}
           googleRegisterHandler={handleGoogleRegister}
         />

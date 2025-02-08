@@ -1,26 +1,26 @@
-import { FormAuthLogin } from "@/features/auth/auth";
 import { neoBrutalBorderVariants, themeColors } from "@/theme/antd-theme";
 import Alert from "@components/ui/alert";
 import Button from "@components/ui/button";
-import { Flex, Input, message, Typography } from "antd";
+import { AlertProps, Flex, Input, message, Typography } from "antd";
 import React from "react";
 import { FaFacebookF, FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
+type LoginAlert = {
+  message: string;
+  type: AlertProps["type"];
+};
+
 interface LoginFormProps {
-  goToRegister?: () => void;
-  gotoForgotPassword?: () => void;
+  formValue: AuthLoginState["form"];
+  isLoading: boolean;
+  alert: LoginAlert | null;
+  goToRegister: () => void;
+  gotoForgotPassword: () => void;
   handleEmailChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handlePasswordChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleOnSubmit: (event: React.FormEvent) => void;
-  formValue: FormAuthLogin;
-  isLoading: boolean;
-  alert?: {
-    isShow?: boolean;
-    type?: "success" | "info" | "warning" | "error";
-    message?: string;
-  };
-  googleLoginHandler?: () => void;
+  googleLoginHandler: () => void;
 }
 
 const { Text } = Typography;
@@ -47,11 +47,11 @@ const LoginForm: React.FC<LoginFormProps> = ({
         </Text>
       </Flex>
 
-      {alert?.isShow && (
+      {alert && (
         <Alert
-          message={alert?.message}
+          message={alert.message}
           className="rounded-sm font-archivo"
-          type={alert?.type}
+          type={alert.type}
           showIcon
           neoBrutalVariants="medium"
         />

@@ -1,75 +1,125 @@
 import { auth } from "@/firebase/firebase-services";
-import { signInWithEmailAndPassword, UserCredential } from "firebase/auth";
-import { useState } from "react";
-import createAuthResponse from "../create-auth-res";
-import handleAuthError from "../handle-auth-error";
-import { AuthResponse, FormAuthLogin } from "../auth";
-import useUser from "./use-user";
+import { Dispatch } from "@reduxjs/toolkit";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import handleAuthError from "../handle-auth-error";
+import { loginSelector, setLoginResponse, setStatusLogin, updateLoginForm } from "../slice/login-slice";
+import googleRegister from "../google-register";
 
-interface UseFormAuthRegisterReturn {
-  formAuthLogin: FormAuthLogin;
-  isLoading: boolean;
-  handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleOnSubmit: (event: React.FormEvent) => Promise<AuthResponse>;
-  resultLogin: AuthResponse | null;
+interface HandleValidateBeforeLoginParams {
+  email: string;
+  password: string;
+  dispatch: Dispatch;
 }
-const useFormLoginAuth = (): UseFormAuthRegisterReturn => {
-  const { redirectUserTo } = useUser();
-  const [formAuthLogin, setFormAuthLogin] = useState<FormAuthLogin>({
-    password: "",
-    email: "",
-  });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [resultLogin, setResultLogin] = useState<AuthResponse | null>(null);
+
+const handleValidateBeforeLogin = ({ email, password, dispatch }: HandleValidateBeforeLoginParams) => {
+  const conditions = [
+    {
+      condition: !email || email.trim() === "",
+      message: "Email cannot be empty.",
+    },
+    {
+      condition: !password || password.trim() === "",
+      message: "Password cannot be empty.",
+    },
+    {
+      condition: !email.includes("@"),
+      message: "Please enter a valid email address.",
+    },
+    {
+      condition: password.length < 8,
+      message: "Password must be at least 8 characters long.",
+    },
+  ];
+
+  const firstValidation = conditions.find((condition) => condition.condition);
+  if (firstValidation) {
+    dispatch(setLoginResponse({ message: firstValidation.message, type: "error" }));
+    dispatch(setStatusLogin("failed"));
+    return false;
+  }
+
+  return true;
+};
+
+const useFormLoginAuth = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // form state
+  const { form, response, status } = useSelector(loginSelector);
+  const { email, password } = form;
 
   // Function to handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormAuthLogin({ ...formAuthLogin, [e.target.name]: e.target.value });
+    const fieldName = e.target.name;
+    dispatch(updateLoginForm({ [fieldName]: e.target.value }));
+  };
+
+  // Function to handle go to register
+  const handleGoToRegister = () => navigate("/register");
+
+  // function to handle go to forgot password
+  const handleGoToForgotPassword = () => navigate("/forgot-password");
+
+  const handleGoogleRegister = async () => {
+    const result = await googleRegister();
+    if (result) {
+      dispatch(setLoginResponse({ message: "login success, redirecting...", type: "success" }));
+      setTimeout(() => {
+        navigate("/storage/my-storage");
+        dispatch(setLoginResponse(null));
+      }, 2000);
+    }
   };
 
   // Function to handle form submission and user registration
-  const handleOnSubmit = async (e: React.FormEvent): Promise<AuthResponse> => {
+  const handleOnSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
-      const result: UserCredential = await signInWithEmailAndPassword(auth, formAuthLogin.email, formAuthLogin.password);
-      const successResponse = createAuthResponse({
-        isSuccess: true,
-        message: "Register Success",
-        data: result.user,
-        type: "login",
-      });
+      dispatch(setStatusLogin("loading"));
 
-      setResultLogin(successResponse);
-      redirectUserTo ? navigate(redirectUserTo) : navigate("/storage/my-storage");
-      return successResponse;
+      // validate email and password before login
+      const validateBeforeLogin = handleValidateBeforeLogin({ email, password, dispatch });
+      if (!validateBeforeLogin) return;
+
+      // login user
+      await signInWithEmailAndPassword(auth, email, password);
+
+      // success and reset form
+      dispatch(setLoginResponse({ message: "Login Success, redirecting...", type: "success" }));
+      dispatch(updateLoginForm({ email: "", password: "" }));
+      dispatch(setStatusLogin("succeeded"));
+
+      // redirect user to home
+      setTimeout(() => navigate("/storage/my-storage"), 1500);
     } catch (error) {
-      setIsLoading(false);
+      dispatch(setStatusLogin("failed"));
 
+      // set error message
       const errorMessage = handleAuthError(error);
-      const failureResponse = createAuthResponse({
-        isSuccess: false,
-        message: errorMessage,
-        type: "register",
-        data: null,
-      });
-
-      setResultLogin(failureResponse);
-      return failureResponse;
+      dispatch(setLoginResponse({ message: errorMessage, type: "error" }));
     } finally {
-      setIsLoading(false);
+      // reset status and response after 2 seconds
+      setTimeout(() => {
+        dispatch(setLoginResponse(null));
+        dispatch(setStatusLogin("idle"));
+      }, 2000);
     }
   };
 
   return {
-    formAuthLogin,
-    isLoading,
-    handleChange,
+    formValue: form,
+    isLoading: status === "loading",
+    alert: response ? { message: response.message, type: response.type } : null,
+    handleEmailChange: handleChange,
+    handlePasswordChange: handleChange,
+    googleLoginHandler: handleGoogleRegister,
+    handleGoToRegister,
+    handleGoToForgotPassword,
     handleOnSubmit,
-    resultLogin,
   };
 };
 

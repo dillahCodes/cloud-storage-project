@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useUploadTaskManager } from "../slice/upload-task-manager";
 import useFileUploading from "./use-file-uploading";
 import { CreateFolderActivity } from "@/features/folder/folder-activity";
+import { FileUploadingList, RootFileCreateData, SubFileCreateData } from "../file";
 
 /** Props required for handleUploadProgress function */
 interface HandleUploadProgressProps {

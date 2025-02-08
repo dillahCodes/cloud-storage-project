@@ -57,7 +57,8 @@ const useAddFileSizeToStorage = () => {
        * storage condition
        */
       const userStorageData = await handleGetUserStorageData(userId);
-      const isNotEnoughStorage: boolean = userStorageData!.storageUsed + fileSize > parseInt(import.meta.env.VITE_USE_STORAGE_CAPACITY);
+      const isNotEnoughStorage: boolean =
+        userStorageData!.storageUsed + fileSize > parseInt(import.meta.env.VITE_USE_STORAGE_CAPACITY);
 
       /**
        * location condition
@@ -78,7 +79,7 @@ const useAddFileSizeToStorage = () => {
         },
         {
           condition: isMyRootNotEnoughStorage || isMySubFolderNotEnoughStorage,
-          message: "Your storage is full",
+          message: "Not enough storage",
         },
         {
           condition: isSharedFolderNotEnoughStorage,
