@@ -1,7 +1,7 @@
 import useIsLocationActive from "@/hooks/use-is-location-active";
 import { themeColors } from "@/theme/antd-theme";
 import Button from "@components/ui/button";
-import { Flex, Progress, Typography } from "antd";
+import { Flex, message, Progress, Typography } from "antd";
 import classNames from "classnames";
 import { BsDatabaseAdd } from "react-icons/bs";
 import { GrStorage } from "react-icons/gr";
@@ -13,7 +13,6 @@ import { useSelector } from "react-redux";
 import { useMemo } from "react";
 import createPercentStorageUsed from "@/util/create-percent-storage-used";
 import formatBytes from "@/util/format-bytes";
-// import ButtonAddDesktop from "../button-add-folder-and-file/button-add-desktop";
 
 interface SiderMenuProps {
   showText: boolean;
@@ -62,7 +61,13 @@ const DesktopSiderMenu: React.FC<SiderMenuProps> = ({ showText }) => {
   const { data } = useSelector(userStorageSelector);
 
   const userStoragePercentUsed = useMemo(() => data && createPercentStorageUsed(data.storageUsed, data.storageCapacity), [data]);
-  const userStorageUsedInfo = useMemo(() => `${formatBytes(data?.storageUsed || 0)} of ${formatBytes(data?.storageCapacity || 0)}  used`, [data]);
+  const userStorageUsedInfo = useMemo(
+    () => `${formatBytes(data?.storageUsed || 0)} of ${formatBytes(data?.storageCapacity || 0)}  used`,
+    [data]
+  );
+
+  const handleMessageComingSoon = () =>
+    message.open({ type: "info", content: "coming soon", className: "font-archivo text-sm", key: "storage-coming-soon" });
 
   return (
     <Flex vertical>
@@ -80,7 +85,7 @@ const DesktopSiderMenu: React.FC<SiderMenuProps> = ({ showText }) => {
           {showText && <Text className=" text-base font-archivo">{userStorageUsedInfo}</Text>}
         </Flex>
 
-        <Button type="primary" neoBrutalType="medium" size="large" className="h-[50px]">
+        <Button type="primary" neoBrutalType="medium" size="large" className="h-[50px]" onClick={handleMessageComingSoon}>
           <Flex align="center" gap="middle" className=" rounded-md w-full">
             <Text className="text-lg">
               <BsDatabaseAdd />

@@ -19,15 +19,11 @@ import Error404Page from "./error404-page";
 import ActivityFolderPage from "@/pages/activity-folder-page";
 import MoveFolderOrFilePage from "@/pages/move-folder-or-file-page";
 
-const ErrorBoundary: React.FC = () => {
-  return <div>Something went wrong. Please try again later.</div>;
-};
-
 const Routers: React.FC = () => {
   return (
     <Router history={history}>
       <Routes>
-        <Route path="*" element={<ErrorBoundary />} />
+        <Route path="*" element={<Error404Page />} />
 
         <Route element={<ProtectedRouter />} path="/storage">
           <Route path="my-storage" element={<MystoragePage />} />

@@ -8,18 +8,18 @@ import fileIlustration3 from "@assets/File-bundle-cuate.svg";
 const carouselMenu = [
   {
     image: fileIlustration1,
-    title: "Lorem ipsum dolor sit amet.",
-    description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem, omnis?",
+    title: "Store Files & Folders Easily!",
+    description: "Keep your files and folders safe in one place, accessible anytime.",
   },
   {
     image: fileIlustration2,
-    title: "Lorem ipsum dolor sit amet.",
-    description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem, omnis?",
+    title: "Smart File Management!",
+    description: "Organize, rename, and sort your files effortlessly.",
   },
   {
     image: fileIlustration3,
-    title: "Lorem ipsum dolor sit amet.",
-    description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem, omnis?",
+    title: "Share with Ease!",
+    description: "Send files and collaborate seamlessly with just a few clicks.",
   },
 ];
 

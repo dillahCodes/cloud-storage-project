@@ -16,6 +16,7 @@ function App() {
    * listen to auth state
    */
   const { status, user } = useUser();
+  const isUserLoading = status === "loading";
   useAuthStateChanged();
 
   /**
@@ -26,7 +27,7 @@ function App() {
     shouldFetch: shouldFetchMessage,
   });
 
-  if (status === "loading") {
+  if (isUserLoading) {
     return (
       <Layout className="h-screen w-full flex justify-center items-center">
         <Spin size="large" />

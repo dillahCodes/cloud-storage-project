@@ -2,7 +2,7 @@ import { FormAuthLogin } from "@/features/auth/auth";
 import { neoBrutalBorderVariants, themeColors } from "@/theme/antd-theme";
 import Alert from "@components/ui/alert";
 import Button from "@components/ui/button";
-import { Flex, Input, Typography } from "antd";
+import { Flex, Input, message, Typography } from "antd";
 import React from "react";
 import { FaFacebookF, FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
@@ -35,6 +35,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
   handlePasswordChange,
   googleLoginHandler,
 }) => {
+  const handleMessageComingSoon = () =>
+    message.open({ type: "info", content: "coming soon", className: "font-archivo text-sm", key: "auth-coming-soon" });
+
   return (
     <Flex className="w-full p-5" vertical justify="space-evenly" gap="large">
       <Flex vertical gap="small">
@@ -113,6 +116,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             className="capitalize text-black font-archivo border-2"
             neoBrutalType="medium"
             icon={<FaGithub />}
+            onClick={handleMessageComingSoon}
           />
           <Button
             type="primary"
@@ -120,6 +124,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             neoBrutalType="medium"
             className="capitalize text-black font-archivo border-2"
             icon={<FaFacebookF className="text-blue-700" />}
+            onClick={handleMessageComingSoon}
           />
         </Flex>
 

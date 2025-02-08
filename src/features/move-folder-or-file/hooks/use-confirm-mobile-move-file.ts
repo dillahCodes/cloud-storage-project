@@ -11,10 +11,16 @@ import { ref, updateMetadata } from "firebase/storage";
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavigateFunction, useNavigate } from "react-router-dom";
-import { mobileMoveSelector, resetMobileMoveState, setMobileMoveFolderMoveErrorMessage, setMobileMoveStatus } from "../slice/mobile-move-slice";
+import {
+  mobileMoveSelector,
+  resetMobileMoveState,
+  setMobileMoveFolderMoveErrorMessage,
+  setMobileMoveStatus,
+} from "../slice/mobile-move-slice";
 import { moveFoldersAndFilesDataSelector, resetMoveDataState } from "../slice/move-folders-and-files-data-slice";
 import { resetFileOptions } from "@/features/file/slice/file-options-slice";
 import handleCheckIsStorageAvailable from "@/features/storage/handle-check-is-storage-available";
+import { RootFileGetData, SubFileGetData } from "@/features/file/file";
 
 interface HandleValidateBeforeMoveFile {
   fileWillBeMoved: RootFileGetData | SubFileGetData | null;
@@ -127,7 +133,11 @@ const handleChangeSubFileMetadata = async ({ fileId, parentFolderData, fileWillB
  * If the root_folder_user_id of the file is different from the given newRootFolderUserId, it will also decrement the storageUsed of the old root folder user and increment the storageUsed of the new root folder user by the size of the file.
  * @param {HandleChangeFileMetadataToRootFile} params - An object containing the fileId of the file to update, the newRootFolderUserId to update the root_folder_user_id to, and the fileWillBeMoved which contains the file data to update.
  */
-const handleChangeFileMetadataToRootFile = async ({ fileId, newRootFolderUserId, fileWillBeMoved }: HandleChangeFileMetadataToRootFile) => {
+const handleChangeFileMetadataToRootFile = async ({
+  fileId,
+  newRootFolderUserId,
+  fileWillBeMoved,
+}: HandleChangeFileMetadataToRootFile) => {
   const fileRef = doc(db, "files", fileId);
 
   const isDifferentRootFolderOwner = fileWillBeMoved.root_folder_user_id !== newRootFolderUserId;
@@ -169,7 +179,11 @@ const handleNavigateAfterMovedToSubFolder = ({ parentFolderData, user, navigate 
  * Updates the root-folder-owner custom metadata of the file in Firebase Storage to the given rootFolderOwner.
  * @param {HandleUpdateFileMetadataInFireabseStorage} params - An object containing the fileId and fileName of the file to update, and the rootFolderOwner to update the root-folder-owner custom metadata to.
  */
-const handleUpdateFileMetadataInFirebaseStorage = async ({ fileId, fileName, rootFolderOwner }: HandleUpdateFileMetadataInFireabseStorage) => {
+const handleUpdateFileMetadataInFirebaseStorage = async ({
+  fileId,
+  fileName,
+  rootFolderOwner,
+}: HandleUpdateFileMetadataInFireabseStorage) => {
   const fileRef = ref(storage, `user-files/${fileId}/${fileName}`);
   const newMetadata = {
     customMetadata: {
@@ -223,7 +237,8 @@ const handleValidateBeforeMoveFile = async (params: HandleValidateBeforeMoveFile
 
   const isRootMoveFolderOrFileLocation: boolean = !parentFolderData;
   const isSubMoveFolderOrFileLocation: boolean = Boolean(parentFolderData) && !isRootMoveFolderOrFileLocation;
-  const isSubMoveSameRootFolder: boolean = isSubMoveFolderOrFileLocation && parentFolderData?.root_folder_id === fileWillBeMoved?.root_folder_id;
+  const isSubMoveSameRootFolder: boolean =
+    isSubMoveFolderOrFileLocation && parentFolderData?.root_folder_id === fileWillBeMoved?.root_folder_id;
 
   const isRootMoveNotOwner = isRootMoveFolderOrFileLocation && isNotFileOwner;
   const isSubMoveNotOwner = isSubMoveFolderOrFileLocation && isNotFileOwner && !isSubMoveSameRootFolder;
@@ -231,7 +246,9 @@ const handleValidateBeforeMoveFile = async (params: HandleValidateBeforeMoveFile
   /**
    * storage not enough message
    */
-  const createStorageMessage: string = `${parentFolderData?.root_folder_user_id === user!.uid ? "Your" : "owner"} storage is full`;
+  const createStorageMessage: string = `${
+    parentFolderData?.root_folder_user_id === user!.uid ? "Your" : "owner"
+  } storage is full`;
 
   const validations = [
     { condition: !fileId, message: "file not found, please try again" },
