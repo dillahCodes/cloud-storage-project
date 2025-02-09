@@ -23,17 +23,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   withBreadcrumb = true,
   showPasteButton,
 }) => {
-  const moveMobileSelector = useSelector(mobileMoveSelector);
-  const isMoveFile = useMemo(() => !!moveMobileSelector.fileId, [moveMobileSelector.fileId]);
-  const isMobileMoveLoading = useMemo(() => moveMobileSelector.moveStatus === "loading", [moveMobileSelector.moveStatus]);
+  const { fileId: mobileMoveFileId, moveStatus: mobileMoveStatus } = useSelector(mobileMoveSelector);
+  const isMoveFile = useMemo(() => mobileMoveFileId !== null, [mobileMoveFileId]);
+  const isMobileMoveLoading = useMemo(() => mobileMoveStatus === "loading", [mobileMoveStatus]);
 
-  const moveDektopSelector = useSelector(dekstopMoveSelector);
-  const isDekstopMoveFile = useMemo(() => !!moveDektopSelector.fileId, [moveDektopSelector.fileId]);
-  const isDektopMoveLoading = useMemo(
-    () => moveDektopSelector.dekstopMoveStatus === "loading",
-    [moveDektopSelector.dekstopMoveStatus]
-  );
+  const { fileId: dekstopMoveFileId, dekstopMoveStatus } = useSelector(dekstopMoveSelector);
+  const isDekstopMoveFile = useMemo(() => dekstopMoveFileId !== null, [dekstopMoveFileId]);
+  const isDektopMoveLoading = useMemo(() => dekstopMoveStatus === "loading", [dekstopMoveStatus]);
 
+  // move message
   const renderMobileMoveMessage = useMemo(() => (isMoveFile ? "Moving File..." : "Moving Folder..."), [isMoveFile]);
   const renderDektopMoveMessage = useMemo(() => (isDekstopMoveFile ? "Moving File..." : "Moving Folder..."), [isDekstopMoveFile]);
 

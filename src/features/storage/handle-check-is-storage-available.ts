@@ -29,7 +29,6 @@ const handleCheckIsStorageAvailable = async ({
     // calculate full condition
     const { storageCapacity, storageUsed } = userStorageSnap.data() as StorageData;
     const isNotEnoughSpace = storageUsed >= storageCapacity;
-
     if (isNotEnoughSpace) return false;
 
     return true;
