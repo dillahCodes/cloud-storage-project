@@ -7,12 +7,12 @@ import {
   GeneralAccessData,
   GeneralAccessRole,
 } from "@/features/collaborator/collaborator";
+import { parentFolderSelector } from "@/features/folder/slice/parent-folder-slice";
+import useDetectLocation from "@/hooks/use-detect-location";
+import { history } from "@/store/store";
 import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import useDetectLocation from "@/hooks/use-detect-location";
-import { parentFolderSelector } from "@/features/folder/slice/parent-folder-slice";
-import { resetStateParentFolderPermission, setParentFolderPermissions } from "../slice/parent-folder-permissions";
-import { history } from "@/store/store";
+import { resetFullStateParentFolderPermission, setParentFolderPermissions } from "../slice/parent-folder-permissions";
 
 interface UseCreateParentFolderPermissionsParams {
   isParentSecuredFolderActive: boolean;
@@ -88,13 +88,15 @@ const useCreateParentFolderPermissions = ({
   const isRootFolderMine = parentFolderData?.root_folder_user_id === user?.uid;
 
   const isEditor = useMemo(() => {
-    const isEditorWhenSecuredFolderNotActive = isCollaboratorCanEdit || isGeneralAccessPublicEditor || isRootFolderMine || isOwner;
+    const isEditorWhenSecuredFolderNotActive =
+      isCollaboratorCanEdit || isGeneralAccessPublicEditor || isRootFolderMine || isOwner;
     const isEditorWhenSecuredFolderActive = isCollaboratorCanEdit || isRootFolderMine || isOwner;
 
     return isParentSecuredFolderActive ? isEditorWhenSecuredFolderActive : isEditorWhenSecuredFolderNotActive;
   }, [isCollaboratorCanEdit, isGeneralAccessPublicEditor, isOwner, isParentSecuredFolderActive, isRootFolderMine]);
 
-  const isViewer = isCollaboratorOnlyViewer || isGeneralAccessPublicViewer || isGeneralAccessPublicEditor || isGeneralAccessPublic;
+  const isViewer =
+    isCollaboratorOnlyViewer || isGeneralAccessPublicViewer || isGeneralAccessPublicEditor || isGeneralAccessPublic;
 
   /**
    * Determines user actions based on their permissions
@@ -139,14 +141,18 @@ const useCreateParentFolderPermissions = ({
    * set value to global state
    */
   useEffect(() => {
-    if (isFetchPermissionSuccess) dispatch(setParentFolderPermissions(parentFolderPermission));
+    const timeOutId = setTimeout(() => {
+      if (isFetchPermissionSuccess) dispatch(setParentFolderPermissions(parentFolderPermission));
+    }, 100);
+
+    return () => clearTimeout(timeOutId);
   }, [isFetchPermissionSuccess, parentFolderPermission, dispatch]);
 
   /**
    * listen location change and reset state
    */
   useEffect(() => {
-    const nextLocation = history.listen(() => dispatch(resetStateParentFolderPermission()));
+    const nextLocation = history.listen(() => dispatch(resetFullStateParentFolderPermission()));
     return () => nextLocation();
   }, [dispatch]);
 

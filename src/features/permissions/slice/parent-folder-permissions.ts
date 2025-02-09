@@ -36,8 +36,10 @@ export const parentFolderPermissionSlice = createSlice({
         isSubFolderLocation: false,
       };
     },
+    resetFullStateParentFolderPermission: () => initialState,
   },
 });
 
-export const { setParentFolderPermissions, resetStateParentFolderPermission } = parentFolderPermissionSlice.actions;
+export const { setParentFolderPermissions, resetStateParentFolderPermission, resetFullStateParentFolderPermission } =
+  parentFolderPermissionSlice.actions;
 export const parentFolderPermissionSelector = (state: RootState) => state.parentFolderPermission;

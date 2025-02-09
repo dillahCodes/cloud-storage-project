@@ -95,6 +95,7 @@ const NestedFolderPageComponent: React.FC = () => {
    * parent folder permission state
    */
   const { actionPermissions, isFetchPermissionSuccess, permissionsDetails } = useSelector(parentFolderPermissionSelector);
+  // console.log({ isFetchPermissionSuccess });
 
   /**
    * delete shared folder if user can't view
@@ -126,7 +127,10 @@ const NestedFolderPageComponent: React.FC = () => {
       isFetchPermissionSuccess,
     ];
   }, [isSubSharedWithMeLocation, permissionsDetails, parentFolderState, actionPermissions.canView, isFetchPermissionSuccess]);
-  const shouldSaveSharedFolder = useMemo(() => saveSharedFolderConditions.every((condition) => condition), [saveSharedFolderConditions]);
+  const shouldSaveSharedFolder = useMemo(
+    () => saveSharedFolderConditions.every((condition) => condition),
+    [saveSharedFolderConditions]
+  );
 
   /**
    * save shared folder if conditions are met
@@ -154,7 +158,10 @@ const NestedFolderPageComponent: React.FC = () => {
 
   // get breadcrumb state
   const breadcrumbState = useBreadcrumbState();
-  const isBreadcrumbExist = useMemo(() => breadcrumbState.items.some((item) => item.key === folderId), [breadcrumbState.items, folderId]);
+  const isBreadcrumbExist = useMemo(
+    () => breadcrumbState.items.some((item) => item.key === folderId),
+    [breadcrumbState.items, folderId]
+  );
 
   const shouldFetchBreadcrumb = Boolean(folderId && !isBreadcrumbExist);
 
@@ -224,7 +231,12 @@ const NestedFolderPageComponent: React.FC = () => {
   const isAllDataEmpty = useMemo(() => {
     const isEmpty = (length: number, status: string) => length === 0 && status !== "loading" && status !== "idle";
 
-    return isParentFolderFetchSuccess && isFetchPermissionSuccess && isEmpty(files.length, fileStatus) && isEmpty(folders.length, folderStatus);
+    return (
+      isParentFolderFetchSuccess &&
+      isFetchPermissionSuccess &&
+      isEmpty(files.length, fileStatus) &&
+      isEmpty(folders.length, folderStatus)
+    );
   }, [files.length, fileStatus, folders.length, folderStatus, isFetchPermissionSuccess, isParentFolderFetchSuccess]);
 
   /**
