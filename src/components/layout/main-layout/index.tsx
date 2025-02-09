@@ -7,6 +7,7 @@ import ModalFolderPermissionDenied from "../modal/modal-folder-permission-denied
 import { DektopMainLayoutWithOverlayLoading } from "./desktop-main-layout";
 import { MobileMainLayoutWithOverlayLoading } from "./mobile-main-layout";
 import FolderOrFileFindOverlay from "../folder-or-file-overlay/folder-or-file-find-overlay";
+import { Analytics } from "@vercel/analytics/react";
 
 export interface MainLayoutProps {
   children: React.ReactNode;
@@ -53,6 +54,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           <ModalFolderPermissionDenied />
           <FolderOrFileFindOverlay />
           {children}
+          <Analytics />
         </MobileMainLayoutWithOverlayLoading>
       ) : (
         <DektopMainLayoutWithOverlayLoading
@@ -66,6 +68,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           <ModalFolderPermissionDenied />
           <FolderOrFileFindOverlay />
           {children}
+          <Analytics />
         </DektopMainLayoutWithOverlayLoading>
       )}
     </>
