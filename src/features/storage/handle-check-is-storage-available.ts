@@ -12,7 +12,7 @@ const handleCheckIsStorageAvailable = async ({
   oldRootFolderId,
 }: HandleCheckIsStorageAvailable): Promise<boolean> => {
   const { currentUser } = auth;
-  if (!currentUser || !oldRootFolderId) return false;
+  if (!currentUser) return false;
 
   try {
     // check is same root folder

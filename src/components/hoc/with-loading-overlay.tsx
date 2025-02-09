@@ -32,7 +32,7 @@ interface LoadingComponentProps {
 }
 
 // eslint-disable-next-line
-const LoadingComponent: React.FC<LoadingComponentProps> = ({ opacity, zIndex }) => {
+const LoadingComponent: React.FC<LoadingComponentProps> = ({ opacity, zIndex, loadingText }) => {
   return (
     <Flex className="fixed top-0 left-0 right-0 bottom-0" style={{ zIndex }} vertical>
       {/* overlay */}
@@ -47,7 +47,7 @@ const LoadingComponent: React.FC<LoadingComponentProps> = ({ opacity, zIndex }) 
         className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-3 rounded-md border-2 border-black bg-[#fff1ff]"
       >
         <Spin size="default" />
-        <Text className="font-archivo">Moving Folder...</Text>
+        <Text className="font-archivo">{loadingText}</Text>
       </Flex>
     </Flex>
   );
