@@ -55,7 +55,7 @@ const useSearchbarResultFind = () => {
     const timeout = setTimeout(() => {
       const element = document.getElementById(selectedDataId) as HTMLElement | null;
       setSelectedElement(element);
-    }, 300);
+    }, 1000);
 
     return () => clearTimeout(timeout);
   }, [selectedDataId, shouldSearchElement]);
