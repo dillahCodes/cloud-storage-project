@@ -6,7 +6,7 @@ import { searchBarSelector } from "@/features/search-folder-or-file/slice/search
 import useDetectLocation from "@/hooks/use-detect-location";
 import { themeColors } from "@/theme/antd-theme";
 import withLoadingOverlay from "@components/hoc/with-loading-overlay";
-import { Flex, Layout } from "antd";
+import { Flex, Layout, Typography } from "antd";
 import { Content, Footer } from "antd/es/layout/layout";
 import classNames from "classnames";
 import React, { useMemo } from "react";
@@ -21,7 +21,9 @@ import MobileDrawer from "../drawer/mobile-drawer";
 import MobileDrawerMenu from "../drawer/mobile-drawer-menu";
 import MobileHeder from "../header/mobile-header";
 import MobileSearchBar from "../searchbar/mobile-searchbar";
+import { FaInstagram, FaLinkedin } from "react-icons/fa";
 
+const { Text, Link } = Typography;
 const MobileMainLayout: React.FC<MainLayoutProps> = ({
   children,
   showAddButton,
@@ -32,6 +34,13 @@ const MobileMainLayout: React.FC<MainLayoutProps> = ({
   useMoveMobileErroMessage();
 
   const { fileUploadingState } = useFileUploading();
+  const isFileUploadingButtonOpen = useMemo(() => {
+    return (
+      fileUploadingState.fileUploadingList.length > 0 &&
+      fileUploadingState.fileUploadingList.some((file) => ["uploading"].includes(file.status))
+    );
+  }, [fileUploadingState]);
+
   const { items } = useBreadcrumbState();
 
   const { isMoveFolderOrFileLocation } = useDetectLocation();
@@ -59,7 +68,7 @@ const MobileMainLayout: React.FC<MainLayoutProps> = ({
       {isSearchbarOpen && <MobileSearchBar />}
 
       <Flex vertical gap="middle" className={classNames("fixed  z-10 bottom-5 right-5")}>
-        {fileUploadingState.fileUploadingList.length > 0 && <ButtonUploadStatusModal />}
+        {isFileUploadingButtonOpen && <ButtonUploadStatusModal />}
         {isPasteButtonVisible && (
           <Flex vertical gap="middle">
             <ButtonMoveWithModal />
@@ -79,7 +88,17 @@ const MobileMainLayout: React.FC<MainLayoutProps> = ({
 
       {withFooter && (
         <Footer className="border-black border-t-2" style={{ backgroundColor: themeColors.primary200 }}>
-          <div className="w-full h-full p-3">footer</div>
+          <Flex className="w-full p-3" align="center" justify="space-between" gap="middle">
+            <Text className="text-sm font-archivo text-[#fff1ff]">Created with ❤️ by DillahCodes</Text>
+            <Flex align="center" gap="small">
+              <Link className="text-[#fff1ff] text-2xl">
+                <FaInstagram />
+              </Link>
+              <Link className="text-[#fff1ff] text-2xl">
+                <FaLinkedin />
+              </Link>
+            </Flex>
+          </Flex>
         </Footer>
       )}
     </Layout>

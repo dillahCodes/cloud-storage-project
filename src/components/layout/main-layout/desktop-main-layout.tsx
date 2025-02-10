@@ -4,7 +4,7 @@ import useDrawer from "@/hooks/use-drawer";
 import useGetClientScreenWidth from "@/hooks/use-get-client-screen-width";
 import { themeColors } from "@/theme/antd-theme";
 import withLoadingOverlay from "@components/hoc/with-loading-overlay";
-import { Flex, Layout } from "antd";
+import { Flex, Layout, Typography } from "antd";
 import { Footer } from "antd/es/layout/layout";
 import classNames from "classnames";
 import { MainLayoutProps } from ".";
@@ -17,7 +17,10 @@ import FolderDetails from "../folder/folder-details";
 import DekstopHeader from "../header/desktop-header";
 import DektopMoveModal from "../modal/dektop-move-modal";
 import DesktopSider from "../sider/desktop-sider";
+import { FaInstagram, FaLinkedin } from "react-icons/fa";
+import { useMemo } from "react";
 
+const { Text, Link } = Typography;
 const DesktopMainLayout: React.FC<Omit<MainLayoutProps, "showAddButton" | "showPasteButton">> = ({
   children,
   withFooter = true,
@@ -27,6 +30,13 @@ const DesktopMainLayout: React.FC<Omit<MainLayoutProps, "showAddButton" | "showP
   const { fileUploadingState } = useFileUploading();
   const { drawerState } = useDrawer();
   const { items } = useBreadcrumbState();
+
+  const isFileUploadingButtonOpen = useMemo(() => {
+    return (
+      fileUploadingState.fileUploadingList.length > 0 &&
+      fileUploadingState.fileUploadingList.some((file) => ["uploading"].includes(file.status))
+    );
+  }, [fileUploadingState]);
 
   return (
     <Layout className="max-h-screen">
@@ -55,14 +65,24 @@ const DesktopMainLayout: React.FC<Omit<MainLayoutProps, "showAddButton" | "showP
                   "bottom-10 right-10": isDesktopDevice,
                 })}
               >
-                {fileUploadingState.fileUploadingList.length > 0 && <ButtonUploadStatusModal />}
+                {isFileUploadingButtonOpen && <ButtonUploadStatusModal />}
               </Flex>
               {children}
             </div>
           </main>
           {withFooter && (
             <Footer className="border-black border-t-2" style={{ backgroundColor: themeColors.primary200 }}>
-              <div className="w-full h-full p-3 bold">footer</div>
+              <Flex className="w-full p-3" align="center" justify="space-between" gap="middle">
+                <Text className="text-sm font-archivo text-[#fff1ff]">Created with ❤️ by DillahCodes</Text>
+                <Flex align="center" gap="small">
+                  <Link className="text-[#fff1ff] text-2xl">
+                    <FaInstagram />
+                  </Link>
+                  <Link className="text-[#fff1ff] text-2xl">
+                    <FaLinkedin />
+                  </Link>
+                </Flex>
+              </Flex>
             </Footer>
           )}
         </Layout>
