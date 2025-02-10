@@ -97,7 +97,11 @@ const useSearchMyStorageLocation = ({ shouldFetch }: SearchMyStorageLocationProp
 
     return isSubMyStorageLocationSearch && parentFolderData
       ? [where("parent_folder_id", "==", parentFolderData.folder_id)]
-      : [where("root_folder_user_id", "==", user.uid), where("owner_user_id", "==", user.uid)];
+      : [
+          where("root_folder_user_id", "==", user.uid),
+          where("owner_user_id", "==", user.uid),
+          where("parent_folder_id", "==", null),
+        ];
   }, [isSubMyStorageLocationSearch, user?.uid, parentFolderData]);
 
   /**
