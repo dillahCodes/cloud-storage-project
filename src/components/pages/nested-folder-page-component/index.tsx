@@ -37,7 +37,7 @@ const NestedFolderPageComponent: React.FC = () => {
   /**
    * hooks get parent folder
    */
-  useGetParentFolder({ shouldFetch: Boolean(folderId), folderId });
+  useGetParentFolder({ shouldFetch: true, folderId });
 
   /**
    * parent folder state

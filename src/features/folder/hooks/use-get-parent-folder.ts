@@ -61,7 +61,10 @@ const useGetParentFolder = ({ shouldFetch, folderId }: UseGetParentFolderProps) 
       const parentFolderData = await handleGetParentFolderData(folderId!);
       parentFolderData ? handleParentFolderExists(parentFolderData) : handleParentFolderNotExists();
     } catch (error) {
-      console.error("Error processing parent folder data:", error instanceof Error ? error.message : "An unknown error occurred.");
+      console.error(
+        "Error processing parent folder data:",
+        error instanceof Error ? error.message : "An unknown error occurred."
+      );
     }
   }, [folderId, isValidFolderId, handleParentFolderExists, handleParentFolderNotExists]);
 

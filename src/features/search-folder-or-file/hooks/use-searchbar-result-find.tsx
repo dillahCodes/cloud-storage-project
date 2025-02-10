@@ -19,10 +19,10 @@ const useSearchbarResultFind = () => {
   const isFromMyStorage = fromLocation === "my-storage";
   const isFromSharedWithMe = fromLocation === "shared-with-me";
 
-  const isInRootMyStorageLocation = !isParentFolderExists && isFromMyStorage && isMystorageLocation;
-  const isInSubMyStorageLocation = isParentFolderExists && isFromMyStorage && isSubMyStorageLocation;
-  const isInRootSharedWithMeLocation = !isParentFolderExists && isFromSharedWithMe && isSharedWithMeLocation;
-  const isInSubSharedWithMeLocation = isParentFolderExists && isFromSharedWithMe && isSubSharedWithMeLocation;
+  const isInRootMyStorageLocation = isFromMyStorage && isMystorageLocation;
+  const isInSubMyStorageLocation = isFromMyStorage && isSubMyStorageLocation;
+  const isInRootSharedWithMeLocation = isFromSharedWithMe && isSharedWithMeLocation;
+  const isInSubSharedWithMeLocation = isFromSharedWithMe && isSubSharedWithMeLocation;
   const isInStarredLocation = !isParentFolderExists && fromLocation === "starred";
   const isInRecentlyViewedLocation = !isParentFolderExists && fromLocation === "recent";
 
@@ -37,9 +37,7 @@ const useSearchbarResultFind = () => {
       isInRecentlyViewedLocation,
     ];
 
-    if (conditions.some(Boolean) && startFinding) {
-      setShouldSearchElement(true);
-    } else setShouldSearchElement(false);
+    if (conditions.some(Boolean) && startFinding) setShouldSearchElement(true);
   }, [
     isInRecentlyViewedLocation,
     isInRootMyStorageLocation,
