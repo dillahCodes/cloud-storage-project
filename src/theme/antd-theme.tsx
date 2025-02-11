@@ -6,6 +6,9 @@ interface BorderVariant {
   boxShadow: string;
 }
 
+// FF5277;
+// FFD3E0;
+
 interface NeoBrutalBorderVariants {
   small: BorderVariant;
   medium: BorderVariant;

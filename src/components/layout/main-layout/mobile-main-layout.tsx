@@ -21,7 +21,7 @@ import MobileDrawer from "../drawer/mobile-drawer";
 import MobileDrawerMenu from "../drawer/mobile-drawer-menu";
 import MobileHeder from "../header/mobile-header";
 import MobileSearchBar from "../searchbar/mobile-searchbar";
-import { FaInstagram, FaLinkedin } from "react-icons/fa";
+import { FaInstagram, FaLinkedin, FaTiktok } from "react-icons/fa";
 
 const { Text, Link } = Typography;
 const MobileMainLayout: React.FC<MainLayoutProps> = ({
@@ -91,11 +91,14 @@ const MobileMainLayout: React.FC<MainLayoutProps> = ({
           <Flex className="w-full p-3" align="center" justify="space-between" gap="middle">
             <Text className="text-sm font-archivo text-[#fff1ff]">Created with ❤️ by DillahCodes</Text>
             <Flex align="center" gap="small">
-              <Link className="text-[#fff1ff] text-2xl">
+              <Link className="text-[#fff1ff] text-2xl" href="https://www.instagram.com/dillah.codes" target="_blank">
                 <FaInstagram />
               </Link>
-              <Link className="text-[#fff1ff] text-2xl">
+              <Link className="text-[#fff1ff] text-2xl" href="https://www.linkedin.com/in/abdillahjuniansyah" target="_blank">
                 <FaLinkedin />
+              </Link>
+              <Link className="text-[#fff1ff] text-2xl" href="https://www.tiktok.com/@dillah.codes" target="_blank">
+                <FaTiktok />
               </Link>
             </Flex>
           </Flex>

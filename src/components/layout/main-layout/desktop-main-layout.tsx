@@ -17,7 +17,7 @@ import FolderDetails from "../folder/folder-details";
 import DekstopHeader from "../header/desktop-header";
 import DektopMoveModal from "../modal/dektop-move-modal";
 import DesktopSider from "../sider/desktop-sider";
-import { FaInstagram, FaLinkedin } from "react-icons/fa";
+import { FaInstagram, FaLinkedin, FaTiktok } from "react-icons/fa";
 import { useMemo } from "react";
 
 const { Text, Link } = Typography;
@@ -75,11 +75,14 @@ const DesktopMainLayout: React.FC<Omit<MainLayoutProps, "showAddButton" | "showP
               <Flex className="w-full p-3" align="center" justify="space-between" gap="middle">
                 <Text className="text-sm font-archivo text-[#fff1ff]">Created with ❤️ by DillahCodes</Text>
                 <Flex align="center" gap="small">
-                  <Link className="text-[#fff1ff] text-2xl">
+                  <Link className="text-[#fff1ff] text-2xl" href="https://www.instagram.com/dillah.codes" target="_blank">
                     <FaInstagram />
                   </Link>
-                  <Link className="text-[#fff1ff] text-2xl">
+                  <Link className="text-[#fff1ff] text-2xl" href="https://www.linkedin.com/in/abdillahjuniansyah" target="_blank">
                     <FaLinkedin />
+                  </Link>
+                  <Link className="text-[#fff1ff] text-2xl" href="https://www.tiktok.com/@dillah.codes" target="_blank">
+                    <FaTiktok />
                   </Link>
                 </Flex>
               </Flex>

@@ -58,7 +58,6 @@ const useFormRegister = () => {
   const dispatch = useDispatch();
   const { form, status, response } = useSelector(registerSelector);
   const { email, password, username } = form;
-  // const { redirectUserTo } = useUser();
 
   const navigate = useNavigate();
 
